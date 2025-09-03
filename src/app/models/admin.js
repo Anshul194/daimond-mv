@@ -7,7 +7,6 @@ const AdminSchema = new mongoose.Schema({
         trim: true,
         minlength: 3,
         maxlength: 50,
-      
     },
     password: {
         type: String,
@@ -21,6 +20,28 @@ const AdminSchema = new mongoose.Schema({
         trim: true,
         lowercase: true,
         index: true 
+    },
+    role: {
+        type: String,
+        enum: ['vendor', 'superadmin'],
+        default: 'vendor'
+    },
+    storeName: {
+        type: String,
+        trim: true,
+        required: function() { return this.role === 'vendor'; },
+    },
+    contactNumber: {
+        type: String,
+        trim: true,
+    },
+    address: {
+        type: String,
+        trim: true,
+    },
+    isActive: {
+        type: Boolean,
+        default: true,
     }
 }, {
     timestamps: true 

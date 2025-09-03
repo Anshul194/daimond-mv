@@ -16,14 +16,14 @@ export async function registerAdmin(data) {
       return NextResponse.json(errorResponse('Validation error', 400, error.details), { status: 400 });
     }
 
-    const { email, password, username } = value;
+    const { email, password, username, role, storeName, contactNumber, address } = value;
 
     const existing = await adminService.getUserByEmail(email);
     if (existing) {
       return NextResponse.json(errorResponse('User already exists', 400), { status: 400 });
     }
 
-    const user = await adminService.signup({ email, password, username });
+    const user = await adminService.signup({ email, password, username, role, storeName, contactNumber, address });
     const { accessToken, refreshToken, accessTokenExp, refreshTokenExp } = Token.generateTokens(user);
     
     const redis = initRedis();

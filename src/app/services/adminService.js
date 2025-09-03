@@ -10,9 +10,17 @@ class AdminService {
     return this.adminRepo.findByEmail(email);
   }
 
-  async signup({ email, password, username }) {
+  async signup({ email, password, username, role, storeName, contactNumber, address }) {
     const hashedPassword = await bcrypt.hash(password, 10);
-    return this.adminRepo.create({ email, password: hashedPassword, username });
+    return this.adminRepo.create({
+      email,
+      password: hashedPassword,
+      username,
+      role,
+      storeName,
+      contactNumber,
+      address
+    });
   }
 
   async validateCredentials(email, password) {

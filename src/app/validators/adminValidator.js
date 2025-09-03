@@ -1,5 +1,6 @@
 import Joi from 'joi';
 
+
 export const adminRegisterSchema = Joi.object({
     email: Joi.string()
         .email({ tlds: { allow: false } })
@@ -27,6 +28,17 @@ export const adminRegisterSchema = Joi.object({
             'string.max': 'Username must be at most 30 characters long.',
             'any.required': 'Username is required.',
         }),
+    role: Joi.string().valid('vendor', 'superadmin').default('vendor'),
+    storeName: Joi.when('role', {
+        is: 'vendor',
+        then: Joi.string().min(2).max(100).required().messages({
+            'string.empty': 'Store name is required for vendors.',
+            'any.required': 'Store name is required for vendors.'
+        }),
+        otherwise: Joi.string().allow('', null)
+    }),
+    contactNumber: Joi.string().allow('', null),
+    address: Joi.string().allow('', null),
 });
 
 

@@ -31,7 +31,17 @@ const categorySchema = new Schema({
     enum: ['active', 'inactive'],
     default: 'active',
   },
- 
+  createdBy: {
+    type: {
+      id: {
+        type: Schema.Types.ObjectId,
+        ref: 'Admin',
+      },
+      email: String,
+      name: String,
+      timestamp: Date,
+    },
+  },
   lastModifiedBy: {
     id: {
       type: Schema.Types.ObjectId,
