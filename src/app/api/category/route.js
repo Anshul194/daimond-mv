@@ -1,3 +1,4 @@
+
 import dbConnect from '../../lib/mongodb.js';
 import {
   createCategory,
@@ -5,18 +6,23 @@ import {
   getCategoryById
 } from '../../controllers/categoryController.js';
 import { NextResponse } from 'next/server';
-import { verifyAdminAccess } from '../../middlewares/commonAuth.js';
+import { verifyTokenAndUser } from '../../middlewares/commonAuth.js';
 
+// Create Category (Vendor: only for self, Superadmin: can specify or leave global)
 export async function POST(request) {
   try {
     await dbConnect();
-
-    const authResult = await verifyAdminAccess(request);
+    const authResult = await verifyTokenAndUser(request, 'admin');
     if (authResult.error) return authResult.error;
+    const admin = authResult.user;
 
-    const form = await request.formData(); 
-    const result = await createCategory(form); 
-
+    const form = await request.formData();
+    // Vendors: force vendor field to their own ID
+    if (admin.role === 'vendor') {
+      form.set('vendor', admin._id.toString());
+    }
+    // Superadmins: allow vendor to be set, or leave null for global
+    const result = await createCategory(form);
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
     console.error('POST /category error:', err);
@@ -24,19 +30,24 @@ export async function POST(request) {
   }
 }
 
+// Get Categories (Vendor: only own, Superadmin: all)
 export async function GET(request) {
   try {
     await dbConnect();
+    const authResult = await verifyTokenAndUser(request, 'admin');
+    if (authResult.error) return authResult.error;
+    const admin = authResult.user;
 
-    // ✅ Extract query params from NextRequest
     const { searchParams } = new URL(request.url);
-
     const query = Object.fromEntries(searchParams.entries());
 
-    // ✅ Fix: Pass query to service
+    // Vendors: only see their own categories
+    if (admin.role === 'vendor') {
+      query.vendor = admin._id.toString();
+    }
+    // Superadmins: can filter by vendor if desired
     const result = await getCategories(query);
     return NextResponse.json(result.body, { status: result.status });
-
   } catch (err) {
     console.error('GET /category error:', err);
     return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
