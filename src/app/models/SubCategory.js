@@ -35,6 +35,11 @@ const subCategorySchema = new Schema({
     enum: ['active', 'inactive'],
     default: 'active',
   },
+  vendor: {
+    type: Schema.Types.ObjectId,
+    ref: 'Admin',
+    default: null,
+  },
   deletedAt: {
     type: Date,
     default: null,

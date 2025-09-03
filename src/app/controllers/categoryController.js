@@ -9,15 +9,13 @@ import { successResponse, errorResponse } from '../utils/response.js';
 const categoryService = new CategoryService();
 const redis = initRedis(); 
 
-export async function createCategory(form) {
+// Accepts a second argument: admin (from token)
+export async function createCategory(form, admin = null) {
   try {
     let imageUrl = '';
-
-     console.log('Create Category form:', form);
     const name = form.get('name');
     const description = form.get('description');
-    const image = form.get('image'); // File object
-    console.log('Image:', image);
+    const image = form.get('image');
 
     const existing = await categoryService.findByName(name);
     if (existing) {
@@ -26,15 +24,11 @@ export async function createCategory(form) {
         body: errorResponse('Category with this name already exists', 400),
       };
     }
-    console.log('Category name:', image);
-    console.log('Category description:', image instanceof File);
-    
+
     if (image && image instanceof File) {
       try {
         validateImageFile(image);
-        console.log('Validating image file:', image);
         imageUrl = await saveFile(image, 'category-images');
-        console.log('Image saved at:', imageUrl);
       } catch (fileError) {
         return {
           status: 400,
@@ -43,10 +37,22 @@ export async function createCategory(form) {
       }
     }
 
+    // Always set vendor field from admin if vendor, or allow superadmin to set or leave null
+    let vendorId = null;
+
+    console?.log("aDMIN", admin)
+
+    if (admin && admin.role == 'vendor') {
+      vendorId = admin?._id.toString();
+    } else if (form.has('vendor')) {
+      vendorId = form.get('vendor');
+    }
+
     const { error, value } = categoryCreateValidator.validate({
       name,
       description,
       image: imageUrl,
+      vendor: vendorId,
     });
 
     if (error) {
@@ -58,8 +64,6 @@ export async function createCategory(form) {
 
     const newCategory = await categoryService.createCategory(value);
     await redis.del('allCategories');
-    console.log('New Category created:', newCategory);
-
     return {
       status: 201,
       body: successResponse(newCategory, 'Category created'),
@@ -76,11 +80,23 @@ export async function createCategory(form) {
 
 
 
-export async function getCategories(query) {
+// Accepts a second argument: admin (from token)
+export async function getCategories(query, admin = null) {
   try {
-    console.log('Get Categories query:', query);
+    // Enforce vendor filter for vendors
+    if (admin && admin.role === 'vendor') {
+      const vendorId = (admin._id || admin.id).toString();
+      console.log('[DEBUG] Authenticated as vendor:', vendorId);
+      query = { ...query, vendor: vendorId };
+    } else if (admin) {
+      const superId = (admin._id || admin.id) ? (admin._id || admin.id).toString() : undefined;
+      console.log('[DEBUG] Authenticated as superadmin:', superId);
+    } else {
+      console.log('[DEBUG] No admin info provided');
+    }
+    console.log('[DEBUG] Final query to service:', query);
     const result = await categoryService.getAllCategories(query);
-
+    console.log('[DEBUG] Categories returned:', Array.isArray(result) ? result.length : result);
     return {
       status: 200,
       body: successResponse(result, 'Categories fetched successfully'),

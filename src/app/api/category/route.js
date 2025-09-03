@@ -22,7 +22,7 @@ export async function POST(request) {
       form.set('vendor', admin._id.toString());
     }
     // Superadmins: allow vendor to be set, or leave null for global
-    const result = await createCategory(form);
+  const result = await createCategory(form, admin);
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
     console.error('POST /category error:', err);
@@ -34,19 +34,26 @@ export async function POST(request) {
 export async function GET(request) {
   try {
     await dbConnect();
-    const authResult = await verifyTokenAndUser(request, 'admin');
-    if (authResult.error) return authResult.error;
-    const admin = authResult.user;
+    let admin = null;
+    let authResult = null;
+    // Try to get token, but don't require it
+    try {
+      authResult = await verifyTokenAndUser(request, 'admin');
+      if (!authResult.error) admin = authResult.user;
+    } catch (e) {
+      // Ignore auth errors for public access
+      admin = null;
+    }
 
     const { searchParams } = new URL(request.url);
     const query = Object.fromEntries(searchParams.entries());
 
     // Vendors: only see their own categories
-    if (admin.role === 'vendor') {
-      query.vendor = admin._id.toString();
+    if (admin && admin.role === 'vendor') {
+      query.vendor = (admin._id || admin.id).toString();
     }
     // Superadmins: can filter by vendor if desired
-    const result = await getCategories(query);
+    const result = await getCategories(query, admin);
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
     console.error('GET /category error:', err);

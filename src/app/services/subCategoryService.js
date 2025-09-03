@@ -25,12 +25,22 @@ class SubCategoryService {
     const parsedSearchFields = JSON.parse(searchFields);
     const parsedSort = JSON.parse(sort);
 
+
+
     const filterConditions = { deletedAt: null };
+
+    // Always apply vendor filter if present in query
+    if (query.vendor) {
+      filterConditions.vendor = query.vendor;
+      console.log('[DEBUG] Filtering subcategories for vendor:', query.vendor);
+    }
 
     // Add filters
     for (const [key, value] of Object.entries(parsedFilters)) {
       filterConditions[key] = value;
     }
+
+    console.log('[DEBUG] Final filterConditions for subcategory query:', filterConditions);
 
     // Add search with $regex
     const searchConditions = [];

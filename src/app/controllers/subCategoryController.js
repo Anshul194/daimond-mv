@@ -11,7 +11,8 @@ const redis = initRedis();
 
 
 
-export async function createSubCategory(form) {
+// Accepts a second argument: admin (from token)
+export async function createSubCategory(form, admin = null) {
   try {
     console.log('➡️ Starting subcategory creation process');
 
@@ -56,13 +57,22 @@ export async function createSubCategory(form) {
       console.log('✅ Image saved:', imageUrl);
     }
 
+    // Always set vendor field from admin if vendor, or allow superadmin to set or leave null
+    let vendorId = null;
+    if (admin && admin.role === 'vendor') {
+      vendorId = (admin._id || admin.id).toString();
+    } else if (form.has('vendor')) {
+      vendorId = form.get('vendor');
+    }
+
     const payload = {
       name,
       // category: category._id,
       category: category._id.toString(),
 
       description,
-      image: imageUrl
+      image: imageUrl,
+      vendor: vendorId,
     };
 
     console.log('🧪 Validating subcategory payload:', payload);
@@ -96,10 +106,15 @@ export async function createSubCategory(form) {
     };
   }
 }
-
+// Accepts a second argument: admin (from token)
 // Get All SubCategories
-export async function getSubCategories(query) {
+export async function getSubCategories(query, admin = null) {
   try {
+    // Enforce vendor filter for vendors
+    if (admin && admin.role === 'vendor') {
+      const vendorId = (admin._id || admin.id).toString();
+      query = { ...query, vendor: vendorId };
+    }
     const result = await subCategoryService.getAllSubCategories(query);
     return {
       status: 200,

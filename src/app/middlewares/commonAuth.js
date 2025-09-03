@@ -126,27 +126,33 @@ export async function verifyTokenAndUser(request, userType = 'admin') {
       };
     }
 
-    // Return user information
-     console.log('final [Auth] Authentication success for user:', {
-      id: user._id,
-      email: user.email,
-      name: user.name,
-      userType,
-      createdAt: user.createdAt,
-      lastLogin: user.lastLogin,
-      status: user.status
-    });
-    return {
-      user: {
+    // Return full admin document for admin users
+    if (userType === 'admin') {
+      console.log('final [Auth] Authentication success for admin:', user);
+      return { user: user.toObject ? user.toObject() : user };
+    } else {
+      // For userType === 'user', keep previous structure
+      console.log('final [Auth] Authentication success for user:', {
         id: user._id,
         email: user.email,
         name: user.name,
-        userType: userType,
+        userType,
         createdAt: user.createdAt,
         lastLogin: user.lastLogin,
         status: user.status
-      }
-    };
+      });
+      return {
+        user: {
+          id: user._id,
+          email: user.email,
+          name: user.name,
+          userType: userType,
+          createdAt: user.createdAt,
+          lastLogin: user.lastLogin,
+          status: user.status
+        }
+      };
+    }
 
   } catch (error) {
     console.error('Authentication error:', error);

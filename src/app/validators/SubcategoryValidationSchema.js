@@ -55,14 +55,17 @@ const baseSchema = {
   })
 };
 
+
 export const subCategoryCreateValidator = Joi.object({
   name: baseSchema.name.required(),
   category: baseSchema.category.required(),
   slug: baseSchema.slug.optional(),
   description: baseSchema.description.optional(),
   image: baseSchema.image.optional(),
-  status: baseSchema.status.optional()
+  status: baseSchema.status.optional(),
+  vendor: Joi.string().optional().allow(null, ''),
 });
+
 
 export const subCategoryUpdateValidator = Joi.object({
   name: baseSchema.name.optional(),
@@ -70,5 +73,6 @@ export const subCategoryUpdateValidator = Joi.object({
   slug: baseSchema.slug.optional(),
   description: baseSchema.description.optional(),
   image: baseSchema.image.optional(),
-  status: baseSchema.status.optional()
+  status: baseSchema.status.optional(),
+  vendor: Joi.string().optional().allow(null, ''),
 });

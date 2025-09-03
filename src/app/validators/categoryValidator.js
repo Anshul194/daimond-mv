@@ -22,19 +22,23 @@ const baseCategorySchema = {
 };
 
 // ✅ Create Validator
+
 export const categoryCreateValidator = Joi.object({
   name: baseCategorySchema.name.required(),
   slug: baseCategorySchema.slug.optional(),
   description: baseCategorySchema.description.optional(),
   image: baseCategorySchema.image.optional(),
-  status: baseCategorySchema.status.optional()
+  status: baseCategorySchema.status.optional(),
+  vendor: Joi.string().optional().allow(null, ''),
 });
 
 // ✅ Update Validator
+
 export const categoryUpdateValidator = Joi.object({
   name: baseCategorySchema.name.optional(),
   slug: baseCategorySchema.slug.optional(),
   description: baseCategorySchema.description.optional(),
   image: baseCategorySchema.image.optional(),
-  status: baseCategorySchema.status.optional()
+  status: baseCategorySchema.status.optional(),
+  vendor: Joi.string().optional().allow(null, ''),
 });
