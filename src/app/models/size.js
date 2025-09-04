@@ -22,6 +22,12 @@ const sizeSchema = new mongoose.Schema({
     lowercase: true, 
     trim: true 
   },
+  vendor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Admin',
+    default: null,
+    index: true
+  },
   deleted: { 
     type: Boolean, 
     default: false 

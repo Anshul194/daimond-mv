@@ -6,29 +6,29 @@ import { successResponse, errorResponse } from '../utils/response.js';
 const sizeService = new SizeService();
 const redis = initRedis();
 
-export async function createSize(data) {
+export async function createSize(data, user = null) {
   try {
     console.log('Create Size data:', data);
-    
     const { name, size_code } = data;
-
-    // Check if size with same name or size_code already exists
-    const existingByName = await sizeService.findByName(name);
+    let vendorId = null;
+    if (user && user.role === 'vendor') {
+      vendorId = (user._id || user.id).toString();
+    }
+    // Check if size with same name or size_code already exists for this vendor
+    const existingByName = await sizeService.findByName(name, vendorId);
     if (existingByName) {
       return {
         status: 400,
         body: errorResponse('Size with this name already exists', 400),
       };
     }
-
-    const existingByCode = await sizeService.findBySizeCode(size_code);
+    const existingByCode = await sizeService.findBySizeCode(size_code, vendorId);
     if (existingByCode) {
       return {
         status: 400,
         body: errorResponse('Size with this code already exists', 400),
       };
     }
-
     const { error, value } = sizeCreateValidator.validate(data);
     if (error) {
       return {
@@ -36,11 +36,10 @@ export async function createSize(data) {
         body: errorResponse('Validation error', 400, error.details),
       };
     }
-
+    if (vendorId) value.vendor = vendorId;
     const newSize = await sizeService.createSize(value);
     await redis.del('allSizes');
     console.log('New Size created:', newSize);
-
     return {
       status: 201,
       body: successResponse(newSize, 'Size created'),
@@ -54,11 +53,14 @@ export async function createSize(data) {
   }
 }
 
-export async function getSizes(query) {
+export async function getSizes(query, user = null) {
   try {
     console.log('Get Sizes query:', query);
-    const result = await sizeService.getAllSizes(query);
-
+    let vendorId = null;
+    if (user && user.role === 'vendor') {
+      vendorId = (user._id || user.id).toString();
+    }
+    const result = await sizeService.getAllSizes(query, vendorId);
     return {
       status: 200,
       body: successResponse(result, 'Sizes fetched successfully'),

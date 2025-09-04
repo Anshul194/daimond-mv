@@ -39,18 +39,22 @@ class SizeRepository extends CrudRepository {
     }
   }
 
-  async findByName(name) {
+  async findByName(name, vendor = null) {
     try {
-      return await Size.findOne({ name, deletedAt: null });
+      const filter = { name, deletedAt: null };
+      if (vendor) filter.vendor = vendor;
+      return await Size.findOne(filter);
     } catch (error) {
       console.error('Repo findByName error:', error);
       throw error;
     }
   }
 
-  async findBySizeCode(size_code) {
+  async findBySizeCode(size_code, vendor = null) {
     try {
-      return await Size.findOne({ size_code, deletedAt: null });
+      const filter = { size_code, deletedAt: null };
+      if (vendor) filter.vendor = vendor;
+      return await Size.findOne(filter);
     } catch (error) {
       console.error('Repo findBySizeCode error:', error);
       throw error;

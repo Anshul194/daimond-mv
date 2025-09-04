@@ -7,7 +7,7 @@ class SizeService {
     this.sizeRepo = new SizeRepository();
   }
 
-  async getAllSizes(query) {
+  async getAllSizes(query, vendorId = null) {
     try {
       console.log("Query Parameters:", query);
       const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
@@ -25,7 +25,9 @@ class SizeService {
 
       // Build filter conditions for multiple fields
       const filterConditions = { deletedAt: null };
-
+      if (vendorId) {
+        filterConditions.vendor = vendorId;
+      }
       for (const [key, value] of Object.entries(parsedFilters)) {
         filterConditions[key] = value;
       }
@@ -74,18 +76,18 @@ class SizeService {
     }
   }
 
-  async findByName(name) {
+  async findByName(name, vendorId = null) {
     try {
-      return await this.sizeRepo.findByName(name);
+      return await this.sizeRepo.findByName(name, vendorId);
     } catch (error) {
       console.error('Error in findByName:', error);
       throw error;
     }
   }
 
-  async findBySizeCode(size_code) {
+  async findBySizeCode(size_code, vendorId = null) {
     try {
-      return await this.sizeRepo.findBySizeCode(size_code);
+      return await this.sizeRepo.findBySizeCode(size_code, vendorId);
     } catch (error) {
       console.error('Error in findBySizeCode:', error);
       throw error;
