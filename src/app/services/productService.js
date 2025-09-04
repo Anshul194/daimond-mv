@@ -538,7 +538,7 @@ async updateInventoryDetailsWithAttributes(productId, itemVariants) {
     }
   }
 
-async getAllProducts(query) {
+async getAllProducts(query, user = null) {
   try {
     await this.ensureMongooseConnection();
 
@@ -559,9 +559,9 @@ async getAllProducts(query) {
 
     // Handle string-based sort (e.g., "asc" or "desc")
     if (sort === "asc" || sort === "desc") {
-      parsedSort = { createdAt: sort === "asc" ? 1 : -1 }; // Default to sorting by createdAt
+      parsedSort = { createdAt: sort === "asc" ? 1 : -1 };
     } else {
-      parsedSort = JSON.parse(sort); // Existing JSON parsing for {"field":1} format
+      parsedSort = JSON.parse(sort);
     }
 
     const parsedAttributeFilters = JSON.parse(attributeFilters);
@@ -577,9 +577,26 @@ async getAllProducts(query) {
       }
     }
 
-    let filterConditions = { ...parsedFilters };
+    // Build filter conditions for multiple fields
+    const filterConditions = { deletedAt: null };
+    // Role-based filtering
+    if (user && user.role === 'vendor') {
+      // Always use ObjectId for vendor filter
+      const vendorId = user._id || user.id;
+      filterConditions.vendor = mongoose.Types.ObjectId.isValid(vendorId)
+        ? new mongoose.Types.ObjectId(vendorId)
+        : vendorId;
+    } else if (user && user.role === 'admin') {
+      // Admin sees all, no vendor filter
+    } else if (user && user.role === 'user') {
+      // User: only active products, not deleted, and not vendor-specific (global/admin products)
+      filterConditions.status = 'active';
+      filterConditions.vendor = null;
+    }
+    // Merge in any additional filters
+    Object.assign(filterConditions, parsedFilters);
 
-    // Apply text search filters
+    // Build search conditions for multiple fields with partial matching
     for (const [field, value] of Object.entries(parsedSearchFields)) {
       filterConditions[field] = { $regex: value, $options: "i" };
     }
@@ -599,8 +616,6 @@ async getAllProducts(query) {
         ...new Set(matchingAttributes.map((item) => item.product_id.toString())),
       ];
 
-      console.log("📦 Matching product IDs from attribute values:", productIds);
-
       if (productIds.length === 0) {
         return {
           docs: [],
@@ -615,8 +630,6 @@ async getAllProducts(query) {
     }
 
     const skip = (pageNum - 1) * limitNum;
-
-    console.log("📦 FINAL FILTER CONDITIONS:", filterConditions);
 
     const products = await this.productRepo.findAll(
       filterConditions,

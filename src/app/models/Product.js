@@ -105,13 +105,11 @@ const productSchema = new Schema(
       type: Boolean,
       default: null,
     },
-    admin: {
-      type: Number,
-      default: null,
-    },
     vendor: {
-      type: Number,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Admin',
       default: null,
+      index: true,
     },
     isTaxable: {
       type: Boolean,

@@ -13,7 +13,7 @@ import Product from "../models/Product.js";
 const productService = new ProductService();
 const redis = initRedis();
 
-export async function createProduct(formData) {
+export async function createProduct(formData, user = null) {
   const startTime = Date.now();
   let product = null;
   const createdResources = [];
@@ -128,8 +128,13 @@ export async function createProduct(formData) {
 
     console.log("All images processed successfully:", value);
 
-    // Step 5: Create product
 
+    // Set vendor if user is a vendor
+    if (user && user.role === 'vendor') {
+      value.vendor = user._id;
+    }
+
+    // Step 5: Create product
     console.log("Product data to be stored, including is_diamond:", value);
     product = await productService.createProduct(value);
     createdResources.push({ type: "product", id: product._id });
@@ -944,19 +949,18 @@ export async function getProductsByAttribute(query) {
   }
 }
 
-export async function getProducts(query) {
+export async function getProducts(query, user = null) {
   try {
-    const products = await productService.getAllProducts(query);
-
+    const result = await productService.getAllProducts(query, user);
     return {
       status: 200,
-      body: successResponse(products, "Products fetched"),
+      body: { success: true, message: 'Products fetched successfully', data: result }
     };
   } catch (err) {
-    console.error("Get Products error:", err.message);
+    console.error('Get Products error:', err.message);
     return {
-      status: err.statusCode || 500,
-      body: errorResponse(err.message || "Server error"),
+      status: 500,
+      body: { success: false, message: 'Server error' }
     };
   }
 }
