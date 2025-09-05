@@ -1,14 +1,11 @@
-import TaxClass from '../models/TaxClass.js';
-import TaxClassOption from '../models/TaxClassOption.js';
-import Country from '../models/country.js';
-import State from '../models/state.js';
-import City from '../models/city.js';
-
+import TaxClassOptionService from '../services/taxClassOptionService.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 import mongoose from 'mongoose';
 
+const taxClassOptionService = new TaxClassOptionService();
+
 // Create Tax Class Option
-export async function createTaxClassOption(data) {
+export async function createTaxClassOption(data, user = null) {
   try {
     // Validate required fields
     const requiredFields = ['class_id', 'tax_name', 'priority', 'rate'];
@@ -36,31 +33,17 @@ export async function createTaxClassOption(data) {
       };
     }
 
-    // Validate if tax class exists
-    const taxClass = await TaxClass.findOne({ _id: data.class_id, deleted_at: null });
-    if (!taxClass) {
-      return {
-        status: 400,
-        body: errorResponse('Tax class not found or has been deleted', 400).body
-      };
+    let vendorId = null;
+    if (user && user.role === 'vendor') {
+      vendorId = (user._id || user.id).toString();
     }
 
-    const taxClassOption = new TaxClassOption({
-      class_id: data.class_id,
-      tax_name: data.tax_name,
-      country_id: data.country_id || null,
-      state_id: data.state_id || null,
-      city_id: data.city_id || null,
-      postal_code: data.postal_code || null,
-      priority: data.priority,
-      is_compound: data.is_compound || false,
-      is_shipping: data.is_shipping || false,
-      rate: data.rate,
-      created_at: new Date(),
-      updated_at: new Date()
-    });
+    // Add vendor to data if vendorId exists
+    if (vendorId) {
+      data.vendor = vendorId;
+    }
 
-    const savedOption = await taxClassOption.save();
+    const savedOption = await taxClassOptionService.createTaxClassOption(data);
 
     return {
       status: 201,
@@ -69,81 +52,39 @@ export async function createTaxClassOption(data) {
   } catch (error) {
     console.error('Create tax class option error:', error);
     return {
-      status: 500,
-      body: errorResponse('Failed to create tax class option', 500).body
+      status: error.statusCode || 500,
+      body: errorResponse(error.message || 'Failed to create tax class option', error.statusCode || 500).body
     };
   }
 }
 
 // Get All Tax Class Options
-export async function getTaxClassOptions(query) {
+export async function getTaxClassOptions(query, user = null) {
   try {
-    const page = parseInt(query.page) || 1;
-    const limit = parseInt(query.limit) || 10;
-    const skip = (page - 1) * limit;
-
-    const filter = {};
-
-    // Basic filters
-    if (query.class_id && mongoose.Types.ObjectId.isValid(query.class_id)) {
-      filter.class_id = query.class_id;
-    }
-    if (query.country_id && mongoose.Types.ObjectId.isValid(query.country_id)) {
-      filter.country_id = query.country_id;
-    }
-    if (query.state_id && mongoose.Types.ObjectId.isValid(query.state_id)) {
-      filter.state_id = query.state_id;
-    }
-    if (query.city_id && mongoose.Types.ObjectId.isValid(query.city_id)) {
-      filter.city_id = query.city_id;
+    let vendorId = null;
+    if (user && user.role === 'vendor') {
+      vendorId = (user._id || user.id).toString();
     }
 
-    if (query.is_shipping !== undefined) {
-      filter.is_shipping = query.is_shipping === 'true';
-    }
-
-    if (query.is_compound !== undefined) {
-      filter.is_compound = query.is_compound === 'true';
-    }
-
-    // Search (by tax_name or postal_code)
-    if (query.search) {
-      const searchRegex = new RegExp(query.search, 'i');
-      filter.$or = [
-        { tax_name: { $regex: searchRegex } },
-        { postal_code: { $regex: searchRegex } }
-      ];
-    }
-
-    const [taxClassOptions, total] = await Promise.all([
-      TaxClassOption.find(filter)
-        .populate('class_id', 'name')
-        .populate('country_id', 'name')
-        .populate('state_id', 'name')
-        .populate('city_id', 'name')
-        .skip(skip)
-        .limit(limit)
-        .sort({ priority: 1, created_at: -1 }),
-      TaxClassOption.countDocuments(filter),
-    ]);
+    const result = await taxClassOptionService.getAllTaxClassOptions(query, vendorId);
 
     return {
       status: 200,
       body: successResponse({
-        data: taxClassOptions,
+        data: result.result,
         pagination: {
-          currentPage: page,
-          totalPages: Math.ceil(total / limit),
-          totalItems: total,
-          itemsPerPage: limit,
+          currentPage: result.currentPage,
+          totalPages: result.totalPages,
+          totalItems: result.totalDocuments,
+          itemsPerPage: parseInt(query.limit) || 10,
         },
       }, 'Tax class options retrieved successfully', 200).body
     };
   } catch (error) {
     console.error('Get tax class options error:', error);
     return {
-      status: 500,
-      body: errorResponse('Failed to fetch tax class options', 500).body
+      status: error.statusCode || 500,
+      body: errorResponse(error.message || 'Failed to fetch tax class options', error.statusCode || 500).body
     };
   }
 }
@@ -159,18 +100,7 @@ export async function getTaxClassOptionById(id) {
       };
     }
 
-    const taxClassOption = await TaxClassOption.findById(id)
-      .populate('class_id', 'name')
-      .populate('country_id', 'name')
-      .populate('state_id', 'name')
-      .populate('city_id', 'name');
-    
-    if (!taxClassOption) {
-      return {
-        status: 404,
-        body: errorResponse('Tax class option not found', 404).body
-      };
-    }
+    const taxClassOption = await taxClassOptionService.getTaxClassOptionById(id);
 
     return {
       status: 200,
@@ -179,14 +109,14 @@ export async function getTaxClassOptionById(id) {
   } catch (error) {
     console.error('Get tax class option by ID error:', error);
     return {
-      status: 500,
-      body: errorResponse('Failed to fetch tax class option', 500).body
+      status: error.statusCode || 500,
+      body: errorResponse(error.message || 'Failed to fetch tax class option', error.statusCode || 500).body
     };
   }
 }
 
 // Update Tax Class Option
-export async function updateTaxClassOption(id, data) {
+export async function updateTaxClassOption(id, data, user = null) {
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return {
@@ -210,37 +140,27 @@ export async function updateTaxClassOption(id, data) {
       };
     }
 
-    // If class_id is being updated, validate it exists
-    if (data.class_id) {
-      const taxClass = await TaxClass.findOne({ _id: data.class_id, deleted_at: null });
-      if (!taxClass) {
-        return {
-          status: 400,
-          body: errorResponse('Tax class not found or has been deleted', 400).body
-        };
-      }
-    }
-
-    const updateData = {
-      ...data,
-      updated_at: new Date()
-    };
-
-    const taxClassOption = await TaxClassOption.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true, runValidators: true }
-    ).populate('class_id', 'name')
-      .populate('country_id', 'name')
-      .populate('state_id', 'name')
-      .populate('city_id', 'name');
-
-    if (!taxClassOption) {
+    // Check if tax class option exists and belongs to vendor (if user is vendor)
+    const existingOption = await taxClassOptionService.getTaxClassOptionById(id);
+    if (!existingOption) {
       return {
         status: 404,
         body: errorResponse('Tax class option not found', 404).body
       };
     }
+
+    // If user is a vendor, check if tax class option belongs to them
+    if (user && user.role === 'vendor') {
+      const vendorId = (user._id || user.id).toString();
+      if (existingOption.vendor && existingOption.vendor.toString() !== vendorId) {
+        return {
+          status: 403,
+          body: errorResponse('Unauthorized access', 403).body
+        };
+      }
+    }
+
+    const taxClassOption = await taxClassOptionService.updateTaxClassOption(id, data);
 
     return {
       status: 200,
@@ -249,14 +169,14 @@ export async function updateTaxClassOption(id, data) {
   } catch (error) {
     console.error('Update tax class option error:', error);
     return {
-      status: 500,
-      body: errorResponse('Failed to update tax class option', 500).body
+      status: error.statusCode || 500,
+      body: errorResponse(error.message || 'Failed to update tax class option', error.statusCode || 500).body
     };
   }
 }
 
 // Delete Tax Class Option
-export async function deleteTaxClassOption(id) {
+export async function deleteTaxClassOption(id, user = null) {
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return {
@@ -265,14 +185,27 @@ export async function deleteTaxClassOption(id) {
       };
     }
 
-    const taxClassOption = await TaxClassOption.findByIdAndDelete(id);
-
-    if (!taxClassOption) {
+    // Check if tax class option exists and belongs to vendor (if user is vendor)
+    const existingOption = await taxClassOptionService.getTaxClassOptionById(id);
+    if (!existingOption) {
       return {
         status: 404,
         body: errorResponse('Tax class option not found', 404).body
       };
     }
+
+    // If user is a vendor, check if tax class option belongs to them
+    if (user && user.role === 'vendor') {
+      const vendorId = (user._id || user.id).toString();
+      if (existingOption.vendor && existingOption.vendor.toString() !== vendorId) {
+        return {
+          status: 403,
+          body: errorResponse('Unauthorized access', 403).body
+        };
+      }
+    }
+
+    await taxClassOptionService.deleteTaxClassOption(id);
 
     return {
       status: 200,
@@ -281,14 +214,14 @@ export async function deleteTaxClassOption(id) {
   } catch (error) {
     console.error('Delete tax class option error:', error);
     return {
-      status: 500,
-      body: errorResponse('Failed to delete tax class option', 500).body
+      status: error.statusCode || 500,
+      body: errorResponse(error.message || 'Failed to delete tax class option', error.statusCode || 500).body
     };
   }
 }
 
 // Get Tax Class Options by Class ID
-export async function getTaxClassOptionsByClassId(classId) {
+export async function getTaxClassOptionsByClassId(classId, user = null) {
   try {
     if (!mongoose.Types.ObjectId.isValid(classId)) {
       return {
@@ -297,33 +230,22 @@ export async function getTaxClassOptionsByClassId(classId) {
       };
     }
 
-    // Validate if tax class exists
-    const taxClass = await TaxClass.findOne({ _id: classId, deleted_at: null });
-    if (!taxClass) {
-      return {
-        status: 404,
-        body: errorResponse('Tax class not found', 404).body
-      };
+    let vendorId = null;
+    if (user && user.role === 'vendor') {
+      vendorId = (user._id || user.id).toString();
     }
 
-    const options = await TaxClassOption.find({ class_id: classId })
-      .populate('country_id', 'name')
-      .populate('state_id', 'name')
-      .populate('city_id', 'name')
-      .sort({ priority: 1, created_at: -1 });
+    const result = await taxClassOptionService.getTaxClassOptionsByClassId(classId, vendorId);
 
     return {
       status: 200,
-      body: successResponse({
-        tax_class: taxClass,
-        options: options
-      }, 'Tax class options retrieved successfully', 200).body
+      body: successResponse(result, 'Tax class options retrieved successfully', 200).body
     };
   } catch (error) {
     console.error('Get tax class options by class ID error:', error);
     return {
-      status: 500,
-      body: errorResponse('Failed to fetch tax class options', 500).body
+      status: error.statusCode || 500,
+      body: errorResponse(error.message || 'Failed to fetch tax class options', error.statusCode || 500).body
     };
   }
 }

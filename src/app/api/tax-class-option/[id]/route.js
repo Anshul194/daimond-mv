@@ -5,7 +5,7 @@ import {
   deleteTaxClassOption,
 } from '../../../controllers/taxClassOptionController.js';
 import { NextResponse } from 'next/server';
-import { verifyAdminAccess } from '../../../middlewares/commonAuth.js';
+import { withUser } from '../../../middleware/withUser.js';
 
 export async function GET(request, context) {
   try {
@@ -23,13 +23,13 @@ export async function GET(request, context) {
 export async function PUT(request, context) {
   try {
     await dbConnect();
-    const authResult = await verifyAdminAccess(request);
-    if (authResult.error) return authResult.error;
+    const { user, error } = await withUser(request, 'admin');
+    if (error) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
     const { id } = await context.params;
     const data = await request.json();
     
-    const result = await updateTaxClassOption(id, data);
+    const result = await updateTaxClassOption(id, data, user);
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
     console.error('PUT /tax-class-option/[id] error:', err);
@@ -40,11 +40,11 @@ export async function PUT(request, context) {
 export async function DELETE(request, context) {
   try {
     await dbConnect();
-    const authResult = await verifyAdminAccess(request);
-    if (authResult.error) return authResult.error;
+    const { user, error } = await withUser(request, 'admin');
+    if (error) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
     const { id } = await context.params;
-    const result = await deleteTaxClassOption(id);
+    const result = await deleteTaxClassOption(id, user);
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
     console.error('DELETE /tax-class-option/[id] error:', err);

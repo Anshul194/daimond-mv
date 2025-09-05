@@ -1,34 +1,40 @@
 import dbConnect from '../../../lib/mongodb.js';
 import { getCouponById, updateCoupon, deleteCoupon } from '../../../controllers/couponController.js';
-import { verifyAdminAccess } from '../../../middlewares/commonAuth.js';
+import { NextResponse } from 'next/server';
+import { withUser } from '../../../middleware/withUser.js';
 
 export async function GET(request, context) {
   try {
     await dbConnect();
     return await getCouponById(request, context);
   } catch (err) {
-    return Response.json({ success: false, message: err.message }, { status: 500 });
+    console.error('GET /coupon/[id] error:', err);
+    return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
   }
 }
 
 export async function PUT(request, context) {
   try {
     await dbConnect();
-    const authResult = await verifyAdminAccess(request);
-    if (authResult?.error) return authResult.error;
-    return await updateCoupon(request, context);
+    const { user, error } = await withUser(request, 'admin');
+    if (error) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    
+    return await updateCoupon(request, context, user);
   } catch (err) {
-    return Response.json({ success: false, message: err.message }, { status: 500 });
+    console.error('PUT /coupon/[id] error:', err);
+    return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
   }
 }
 
 export async function DELETE(request, context) {
   try {
     await dbConnect();
-    const authResult = await verifyAdminAccess(request);
-    if (authResult?.error) return authResult.error;
-    return await deleteCoupon(request, context);
+    const { user, error } = await withUser(request, 'admin');
+    if (error) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    
+    return await deleteCoupon(request, context, user);
   } catch (err) {
-    return Response.json({ success: false, message: err.message }, { status: 500 });
+    console.error('DELETE /coupon/[id] error:', err);
+    return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
   }
 }

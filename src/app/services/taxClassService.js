@@ -7,7 +7,7 @@ class TaxClassService {
     this.repo = new TaxClassRepository();
   }
 
-  async getAllTaxClasses(query) {
+  async getAllTaxClasses(query, vendorId = null) {
     try {
       const { page = 1, limit = 10, filters = '{}', searchFields = '{}', sort = '{}' } = query;
 
@@ -16,6 +16,11 @@ class TaxClassService {
       const parsedSort = JSON.parse(sort);
 
       const conditions = { deletedAt: null };
+
+      // Add vendor filter if vendorId is provided
+      if (vendorId) {
+        conditions.vendor = vendorId;
+      }
 
       for (const [key, val] of Object.entries(parsedFilters)) {
         conditions[key] = val;
@@ -34,7 +39,7 @@ class TaxClassService {
         sortBy[field] = dir === 'asc' ? 1 : -1;
       }
 
-      return await this.repo.getAll(conditions, sortBy, parseInt(page), parseInt(limit));
+      return await this.repo.getAllTaxClasses(conditions, sortBy, parseInt(page), parseInt(limit));
     } catch (error) {
       throw new AppError('Failed to fetch tax classes', StatusCodes.INTERNAL_SERVER_ERROR);
     }
@@ -58,9 +63,9 @@ class TaxClassService {
     }
   }
 
-  async findByName(name) {
+  async findByName(name, vendorId = null) {
     try {
-      return await this.repo.findByName(name);
+      return await this.repo.findByName(name, vendorId);
     } catch (error) {
       throw new AppError('Failed to find tax class by name', StatusCodes.INTERNAL_SERVER_ERROR);
     }

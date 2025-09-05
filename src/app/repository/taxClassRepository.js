@@ -16,9 +16,11 @@ class TaxClassRepository extends CrudRepository {
     }
   }
 
-  async findByName(name) {
+  async findByName(name, vendor = null) {
     try {
-      return await TaxClass.findOne({ name, deletedAt: null });
+      const filter = { name, deletedAt: null };
+      if (vendor) filter.vendor = vendor;
+      return await TaxClass.findOne(filter);
     } catch (error) {
       throw new AppError('Failed to find tax class by name', StatusCodes.INTERNAL_SERVER_ERROR);
     }
@@ -35,11 +37,12 @@ class TaxClassRepository extends CrudRepository {
 
   async update(id, data) {
     try {
-      const taxClass = await TaxClass.findById(id);
-      if (!taxClass) return null;
-
-      taxClass.set(data);
-      return await taxClass.save();
+      const taxClass = await TaxClass.findOneAndUpdate(
+        { _id: id, deletedAt: null }, 
+        data, 
+        { new: true }
+      );
+      return taxClass;
     } catch (error) {
       throw new AppError('Failed to update tax class', StatusCodes.INTERNAL_SERVER_ERROR);
     }
@@ -47,10 +50,20 @@ class TaxClassRepository extends CrudRepository {
 
   async softDelete(id) {
     try {
-      return await TaxClass.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true });
+      return await TaxClass.findByIdAndUpdate(
+        id, 
+        { deletedAt: new Date(), deleted: true }, 
+        { new: true }
+      );
     } catch (error) {
       throw new AppError('Failed to delete tax class', StatusCodes.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  async getAllTaxClasses(filter = {}, sort = {}, page = 1, limit = 10, populate = [], select = {}) {
+    // Add deletedAt null filter
+    const filterConditions = { ...filter, deletedAt: null };
+    return this.getAll(filterConditions, sort, page, limit, populate, select);
   }
 }
 
