@@ -43,8 +43,9 @@ export async function POST(request) {
     const authResult = await verifyAdminAccess(request);
     if (authResult.error) return authResult.error;
 
+    const { user } = authResult;
     const body = await request.json();
-    const result = await createColorCode(body); // Directly pass raw body
+    const result = await createColorCode(body, user); // Pass both body and user
 
     return NextResponse.json(result.body, { status: result.status || 500 });
   } catch (err) {
@@ -60,8 +61,12 @@ export async function POST(request) {
 export async function GET(request) {
   try {
     await dbConnect();
+    const authResult = await verifyAdminAccess(request);
+    if (authResult.error) return authResult.error;
+
+    const { user } = authResult;
     const query = Object.fromEntries(new URL(request.url).searchParams.entries());
-    const result = query.id ? await getColorCodeById(query.id) : await getColorCodes(query);
+    const result = query.id ? await getColorCodeById(query.id) : await getColorCodes(query, user);
     return NextResponse.json(result.body, { status: result.status || 500 });
   } catch (err) {
     return NextResponse.json({ success: false, message: 'Server error', error: err.message }, { status: 500 });

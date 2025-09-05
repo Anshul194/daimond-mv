@@ -16,6 +16,12 @@ const colorCodeSchema = new Schema({
     lowercase: true,
     trim: true,
   },
+  vendor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Admin',
+    default: null,
+    index: true
+  },
   colorCode: {
     type: String,
     required: true,

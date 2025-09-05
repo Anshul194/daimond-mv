@@ -6,12 +6,16 @@ import { successResponse, errorResponse } from '../utils/response.js';
 const colorCodeService = new ColorCodeService();
 const redis = initRedis();
 
-export async function createColorCode(body) {
+export async function createColorCode(body, user = null) {
   try {
     const { error, value } = colorCodeCreateValidator.validate({
       name: body.name,
       colorCode: body.colorCode,
     });
+
+    if (user && user.role === 'vendor') {
+      value.vendor = (user._id || user.id).toString();
+    }
 
     if (error) {
       return {
@@ -89,10 +93,14 @@ export async function createColorCode(body) {
 //   }
 // }
 
-export async function getColorCodes(query) {
+export async function getColorCodes(query, user = null) {
   try {
     console.log('Get ColorCodes query:', query);
-    const result = await colorCodeService.getAllColorCodes(query);
+    let vendorId = null;
+    if (user && user.role === 'vendor') {
+      vendorId = (user._id || user.id).toString();
+    }
+    const result = await colorCodeService.getAllColorCodes(query, vendorId);
 
     return {
       status: 200,

@@ -14,7 +14,7 @@ class ColorCodeService {
   //   }
   // }
 
-  async getAllColorCodes(query) {
+  async getAllColorCodes(query, vendorId = null) {
   try {
     console.log("Query Parameters:", query);
     const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
@@ -32,6 +32,11 @@ class ColorCodeService {
 
     // Basic filter conditions
     const filterConditions = { deletedAt: null };
+    
+    // Add vendor filter if vendorId is provided
+    if (vendorId) {
+      filterConditions.vendor = vendorId;
+    }
 
     // Apply filters
     for (const [key, value] of Object.entries(parsedFilters)) {
