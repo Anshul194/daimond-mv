@@ -51,7 +51,7 @@ export async function GET(req) {
       //pass all query parameters for filtering/pagination
       const query = Object.fromEntries(searchParams.entries());
       const result = await getAllOrders(query);
-      return NextResponse.json(result, { status: 200 });
+      return NextResponse.json(result.body, { status: result.status });
     }
 
     // User: get orders by user_id
