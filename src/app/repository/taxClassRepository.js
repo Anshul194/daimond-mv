@@ -61,10 +61,21 @@ class TaxClassRepository extends CrudRepository {
     }
   }
 
-  async getAllTaxClasses(filter = {}, sort = {}, page = 1, limit = 10, populate = [], select = {}) {
+ async getAllTaxClasses(filter = {}, sort = {}, page = 1, limit = 10, populate = [], select = {}) {
+  try {
     // Add deletedAt null filter
     const filterConditions = { ...filter, deletedAt: null };
-    return this.getAll(filterConditions, sort, page, limit, populate, select);
+
+    // Ensure vendor is always populated
+    const populateFields = [
+      { path: 'vendor', select: 'username email storeName contactNumber role isActive' },
+      ...populate
+    ];
+
+    return this.getAll(filterConditions, sort, page, limit, populateFields, select);
+  } catch (error) {
+    console.error('Error in getAllTaxClasses:', error);
+    throw error;
   }
 
   async getActiveTaxClassesWithOptions(vendorId = null) {
@@ -107,6 +118,8 @@ class TaxClassRepository extends CrudRepository {
       throw new AppError('Failed to get active tax classes with options', StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
+}
+
 }
 
 export default TaxClassRepository;

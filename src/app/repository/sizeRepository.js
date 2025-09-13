@@ -16,6 +16,49 @@ class SizeRepository extends CrudRepository {
       throw error;
     }
   }
+async getAll(filterCon = {}, sortCon = {}, pageNum, limitNum, populateFields = [], selectFields = {}) {
+  sortCon = Object.keys(sortCon).length === 0 ? { createdAt: -1 } : sortCon;
+  let query;
+
+  if (pageNum > 0) {
+    query = this.model
+      .find(filterCon)
+      .select(selectFields)
+      .sort(sortCon)
+      .skip((pageNum - 1) * limitNum)
+      .limit(limitNum)
+      .collation({ locale: 'en', strength: 2 });
+  } else {
+    query = this.model
+      .find(filterCon)
+      .select(selectFields)
+      .sort(sortCon)
+      .collation({ locale: 'en', strength: 2 });
+  }
+
+  // Populate vendor
+  query = query.populate({
+    path: 'vendor',
+    select: 'username email storeName contactNumber role isActive'
+  });
+
+  // Populate additional fields if provided
+  if (populateFields?.length > 0 && Object.keys(selectFields).length === 0) {
+    populateFields.forEach((field) => {
+      query = query.populate(field);
+    });
+  }
+
+  const result = await query;
+  const totalDocuments = await this.model.countDocuments(filterCon);
+
+  return {
+    result,
+    currentPage: pageNum,
+    totalPages: Math.ceil(totalDocuments / limitNum),
+    totalDocuments,
+  };
+}
 
   async create(data) {
     try {

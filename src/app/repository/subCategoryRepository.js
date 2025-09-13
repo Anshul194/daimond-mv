@@ -14,6 +14,10 @@ class SubCategoryRepository extends CrudRepository {
     const skip = (page - 1) * limit;
     const query = SubCategory.find(filterConditions)
       .populate('category')
+       .populate({ // populate vendor
+        path: 'vendor',
+        select: 'username email storeName contactNumber role isActive'
+      })
       .sort(sortConditions)
       .skip(skip)
       .limit(limit);

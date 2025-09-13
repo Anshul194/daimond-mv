@@ -279,6 +279,7 @@ async updateInventoryDetailsAttributes(id, data) {
         .populate("category_id")
         .populate("subCategory_id")
         .populate("brand")
+        .populate("vendor", "username email storeName contactNumber role isActive") // Populate vendor details
         .lean();
     } catch (error) {
       console.error("Repo findAll error:", error);

@@ -12,15 +12,23 @@ class ColorCodeRepository {
     }
   }
 
-  async getAll(filterConditions, sortConditions, page, limit) {
+async getAll(filterConditions, sortConditions, page, limit) {
   try {
     const skip = (page - 1) * limit;
 
-    const query = ColorCode.find(filterConditions)
+    // Build the query
+    let query = ColorCode.find(filterConditions)
       .sort(sortConditions)
       .skip(skip)
       .limit(limit);
 
+    // Populate vendor details
+    query = query.populate({
+      path: 'vendor',
+      select: 'username email storeName contactNumber role isActive'
+    });
+
+    // Execute query
     const results = await query.exec();
     const totalDocuments = await ColorCode.countDocuments(filterConditions);
 
@@ -35,6 +43,7 @@ class ColorCodeRepository {
     throw error;
   }
 }
+
 
 
   async findById(id) {
