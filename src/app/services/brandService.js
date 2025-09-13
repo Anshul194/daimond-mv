@@ -27,6 +27,11 @@ class BrandService {
       // Build filter conditions for multiple fields
       const filterConditions = { deletedAt: null };
 
+      // Always apply vendor filter if present in query
+      if (query.vendor) {
+        filterConditions.vendor = query.vendor;
+      }
+
       for (const [key, value] of Object.entries(parsedFilters)) {
         filterConditions[key] = value;
       }

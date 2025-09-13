@@ -73,7 +73,7 @@ class BrandRepository extends CrudRepository {
   async softDelete(id) {
     try {
       console.log('Repo softDelete called with:', id);
-      return await Brand.findByIdAndDelete(
+      return await Brand.findByIdAndUpdate(
         id,
         { deletedAt: new Date() },
         { new: true }

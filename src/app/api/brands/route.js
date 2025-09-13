@@ -5,7 +5,7 @@ import {
 } from '../../controllers/brandController.js';
 import { NextResponse } from 'next/server';
 import { verifyAdminAccess } from '../../middlewares/commonAuth.js';
-
+import { verifyTokenAndUser } from '../../middlewares/commonAuth.js';
 export async function POST(request) {
   try {
     await dbConnect();
@@ -14,7 +14,7 @@ export async function POST(request) {
     if (authResult.error) return authResult.error;
 
     const form = await request.formData(); 
-    const result = await createBrand(form); 
+    const result = await createBrand(form, authResult.user); 
 
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
@@ -27,12 +27,26 @@ export async function GET(request) {
   try {
     await dbConnect();
 
+    let admin = null;
+    let authResult = null;
+    // Try to get token, but don't require it
+    try {
+      authResult = await verifyTokenAndUser(request, 'admin');
+      if (!authResult.error) admin = authResult.user;
+    } catch (e) {
+      // Ignore auth errors for public access
+      admin = null;
+    }
+
     // Extract query params from NextRequest
     const { searchParams } = new URL(request.url);
     const query = Object.fromEntries(searchParams.entries());
 
+    console?.log('[DEBUG] Incoming query params:', query);
+    console?.log('[DEBUG] Admin info:', admin);
+
     // Pass query to service
-    const result = await getBrands(query);
+    const result = await getBrands(query, admin);
     return NextResponse.json(result.body, { status: result.status });
 
   } catch (err) {

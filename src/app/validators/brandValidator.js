@@ -19,6 +19,7 @@ const baseBrandSchema = {
     'string.uri': 'Logo must be a valid URL.'
   }),
 
+  vendor: Joi.string().allow('').optional(),
 
 };
 
@@ -28,6 +29,7 @@ export const brandCreateValidator = Joi.object({
   title: baseBrandSchema.title.optional(),
   description: baseBrandSchema.description.optional(),
   logo: baseBrandSchema.logo.optional(),
+  vendor: baseBrandSchema.vendor.optional(),
 
 });
 
@@ -37,5 +39,6 @@ export const brandUpdateValidator = Joi.object({
   title: baseBrandSchema.title.optional(),
   description: baseBrandSchema.description.optional(),
   logo: baseBrandSchema.logo.optional(),
+  vendor: baseBrandSchema.vendor.optional(),
   
 }).min(1);

@@ -10,7 +10,7 @@ import initRedis from "../config/redis.js";
 const productAttributeService = new ProductAttributeService();
 const redis = initRedis();
 
-export async function createProductAttribute(form) {
+export async function createProductAttribute(form, admin = null) {
   try {
     const title = form.get("title");
     const category_id = form.get("category_id"); // <-- 👈 Add this line
@@ -53,11 +53,22 @@ export async function createProductAttribute(form) {
 
     // (existing code...)
 
+    // Always set vendor field from admin if vendor, or allow superadmin to set or leave null
+    let vendorId = null;
+
+    if (admin && admin.role == 'vendor') {
+      vendorId = admin._id.toString();
+    } else if (admin && admin.role == 'superadmin') {
+      // Allow superadmin to set vendor or leave null
+      vendorId = form.get('vendor') || null;
+    }
+
     // Validate final data
     const { error, value } = productAttributeCreateValidator.validate({
       title,
       terms,
       category_id, // 👈 Add this here to validate if needed
+      vendor: vendorId,
     });
 
     if (error) {
@@ -92,8 +103,17 @@ export async function createProductAttribute(form) {
   }
 }
 
-export async function getProductAttributes(query) {
+export async function getProductAttributes(query, admin = null) {
   try {
+    // Enforce vendor filter for vendors
+    if (admin && admin.role === 'vendor') {
+      query.vendor = (admin._id || admin.id).toString();
+    } else if (admin && admin.role === 'superadmin') {
+      // Superadmins can filter by vendor if desired
+      if (query.vendor) {
+        query.vendor = query.vendor;
+      }
+    }
     console.log("Get Product Attributes query:", query);
     const result = await productAttributeService.getAllProductAttributes(query);
     return {

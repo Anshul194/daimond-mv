@@ -29,6 +29,11 @@ const productAttributeSchema = new Schema({
     type: Date,
     default: null,
   },
+  vendor: {
+    type: Schema.Types.ObjectId,
+    ref: 'Admin',
+    default: null,
+  },
   lastModifiedBy: {
     id: {
       type: Schema.Types.ObjectId,

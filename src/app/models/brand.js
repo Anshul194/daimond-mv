@@ -28,7 +28,15 @@ const brandSchema = new Schema({
     lowercase: true,
     trim: true,
   },
-
+  vendor: {
+    type: Schema.Types.ObjectId,
+    ref: 'Admin',
+    default: null,
+  },
+  deletedAt: {
+    type: Date,
+    default: null,
+  },
 }, {
   timestamps: true
 });

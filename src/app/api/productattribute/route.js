@@ -7,7 +7,7 @@ import {
   deleteProductAttribute
 } from '../../controllers/productAttributeController.js';
 import { NextResponse } from 'next/server';
-import { verifyAdminAccess } from '../../middlewares/commonAuth.js';
+import { verifyAdminAccess ,verifyTokenAndUser} from '../../middlewares/commonAuth.js';
 // import  verifyAdminAccess  from '../../middlewares/commonAuth.js';
 import {parseNestedFormData} from '../../utils/parseNestedFormData.js';
 
@@ -16,12 +16,27 @@ export async function GET(request) {
   try {
     await dbConnect();
 
+    let admin = null;
+    let authResult = null;
+    // Try to get token, but don't require it
+     try {
+         authResult = await verifyTokenAndUser(request, 'admin');
+         if (!authResult.error) admin = authResult.user;
+       } catch (e) {
+        console?.log('No admin authentication, proceeding as public',e?.message);
+         // Ignore auth errors for public access
+         admin = null;
+       }
+
     // Extract query params from NextRequest
     const { searchParams } = new URL(request.url);
     const query = Object.fromEntries(searchParams.entries());
     const id = searchParams.get('id');
 
-    const result = id ? await getProductAttributeById(id) : await getProductAttributes(query);
+    console?.log('[DEBUG] Incoming query params:', query);
+    console?.log('[DEBUG] Admin info:', admin);
+
+    const result = id ? await getProductAttributeById(id) : await getProductAttributes(query, admin);
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
     console.error('GET /product-attributes error:', err);
@@ -44,7 +59,7 @@ export async function POST(request) {
     if (authResult.error) return authResult.error;
 
     const form = await request.formData();
-    const result = await createProductAttribute(form);
+    const result = await createProductAttribute(form, authResult.user);
 
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {

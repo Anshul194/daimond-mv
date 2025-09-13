@@ -7,7 +7,8 @@ import { successResponse, errorResponse } from '../utils/response.js';
 const brandService = new BrandService();
 const redis = initRedis(); 
 
-export async function createBrand(form) {
+// Accepts a second argument: admin (from token)
+export async function createBrand(form, admin = null) {
   try {
     let logoUrl = '';
 
@@ -44,11 +45,24 @@ export async function createBrand(form) {
       }
     }
 
+    // Always set vendor field from admin if vendor, or allow superadmin to set or leave null
+    let vendorId = null;
+
+    console?.log("aDMIN", admin)
+
+    if (admin && admin.role == 'vendor') {
+      vendorId = admin._id.toString();
+    } else if (admin && admin.role == 'superadmin') {
+      // Allow superadmin to set vendor or leave null
+      vendorId = form.get('vendor') || null;
+    }
+
     const { error, value } = brandCreateValidator.validate({
       name,
       title,
       description,
       logo: logoUrl,
+      vendor: vendorId,
     });
 
     if (error) {
@@ -75,9 +89,19 @@ export async function createBrand(form) {
   }
 }
 
-export async function getBrands(query) {
+// Accepts a second argument: admin (from token)
+export async function getBrands(query, admin = null) {
   try {
-    console.log('Get Brands query:', query);
+    // Enforce vendor filter for vendors
+    if (admin && admin.role === 'vendor') {
+      query.vendor = (admin._id || admin.id).toString();
+    } else if (admin && admin.role === 'superadmin') {
+      // Superadmins can filter by vendor if desired
+      if (query.vendor) {
+        query.vendor = query.vendor;
+      }
+    }
+    console.log('[DEBUG] Final query to service:', query);
     const result = await brandService.getAllBrands(query);
 
     return {
