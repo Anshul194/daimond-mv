@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": " next dev --turbopack",
+    "dev": "next dev --turbopack",
     "build": "DISABLE_ESLINT_PLUGIN=true next build",
-    "start": "DISABLE_ESLINT_PLUGIN=true next start"
+    "start": "DISABLE_ESLINT_PLUGIN=true next start -p $PORT"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.8.2",
@@ -30,7 +30,6 @@
     "multer": "^2.0.1",
     "next": "15.3.2",
     "nodemailer": "^7.0.5",
-    "npm": "^11.4.2",
     "pdfkit": "^0.17.1",
     "puppeteer": "^24.14.0",
     "react": "^19.0.0",
