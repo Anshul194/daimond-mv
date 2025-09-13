@@ -14,7 +14,8 @@ class TaxClassOptionRepository extends CrudRepository {
         .populate('class_id', 'name')
         .populate('country_id', 'name')
         .populate('state_id', 'name')
-        .populate('city_id', 'name');
+        .populate('city_id', 'name')
+        .populate('vendor', 'username email storeName contactNumber role isActive');
     } catch (error) {
       throw new AppError('Failed to find tax class option by ID', StatusCodes.INTERNAL_SERVER_ERROR);
     }
@@ -28,6 +29,7 @@ class TaxClassOptionRepository extends CrudRepository {
         .populate('country_id', 'name')
         .populate('state_id', 'name')
         .populate('city_id', 'name')
+        .populate('vendor', 'username email storeName contactNumber role isActive')
         .sort({ priority: 1, createdAt: -1 });
     } catch (error) {
       throw new AppError('Failed to find tax class options by class ID', StatusCodes.INTERNAL_SERVER_ERROR);
@@ -52,7 +54,8 @@ class TaxClassOptionRepository extends CrudRepository {
       ).populate('class_id', 'name')
         .populate('country_id', 'name')
         .populate('state_id', 'name')
-        .populate('city_id', 'name');
+        .populate('city_id', 'name')
+        .populate('vendor', 'username email storeName contactNumber role isActive');
       return taxClassOption;
     } catch (error) {
       throw new AppError('Failed to update tax class option', StatusCodes.INTERNAL_SERVER_ERROR);
@@ -71,10 +74,26 @@ class TaxClassOptionRepository extends CrudRepository {
     }
   }
 
-  async getAllTaxClassOptions(filter = {}, sort = {}, page = 1, limit = 10, populate = [], select = {}) {
-    // Add deletedAt null filter
-    const filterConditions = { ...filter, deletedAt: null };
-    return this.getAll(filterConditions, sort, page, limit, populate, select);
+  // async getAllTaxClassOptions(filter = {}, sort = {}, page = 1, limit = 10, populate = [], select = {}) {
+  //   // Add deletedAt null filter
+  //   const filterConditions = { ...filter, deletedAt: null };
+  //   return this.getAll(filterConditions, sort, page, limit, populate, select);
+  // }
+   async getAllTaxClassOptions(filter = {}, sort = {}, page = 1, limit = 10, populate = [], select = {}) {
+    try {
+      const filterConditions = { ...filter, deletedAt: null };
+
+      // Always populate vendor
+      const populateFields = [
+        { path: 'vendor', select: 'username email storeName contactNumber role isActive' },
+        ...populate
+      ];
+
+      return await this.getAll(filterConditions, sort, page, limit, populateFields, select);
+    } catch (error) {
+      console.error('TaxClassRepo getAllTaxClassOptions error:', error);
+      throw error;
+    }
   }
 
   async findWithPopulation(filter = {}, sort = { priority: 1, createdAt: -1 }, page = 1, limit = 10) {
@@ -88,6 +107,7 @@ class TaxClassOptionRepository extends CrudRepository {
           .populate('country_id', 'name')
           .populate('state_id', 'name')
           .populate('city_id', 'name')
+          .populate('vendor', 'username email storeName contactNumber role isActive')
           .skip(skip)
           .limit(limit)
           .sort(sort),

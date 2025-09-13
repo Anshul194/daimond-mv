@@ -16,6 +16,30 @@ class BrandRepository extends CrudRepository {
       throw error;
     }
   }
+  async getAll(filterConditions, sortConditions, page, limit) {
+    try {
+      const skip = (page - 1) * limit;
+
+      let query = Brand.find(filterConditions)
+        .sort(sortConditions)
+        .skip(skip)
+        .limit(limit)
+        .populate({ path: 'vendor', select: 'username email storeName contactNumber role isActive' });
+
+      const results = await query.exec();
+      const totalDocuments = await Brand.countDocuments(filterConditions);
+
+      return {
+        results,
+        totalDocuments,
+        currentPage: page,
+        totalPages: Math.ceil(totalDocuments / limit),
+      };
+    } catch (error) {
+      console.error('BrandRepo getAll error:', error);
+      throw error;
+    }
+  }
 
   async create(data) {
     try {

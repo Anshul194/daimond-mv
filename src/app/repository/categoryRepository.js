@@ -7,6 +7,26 @@ class CategoryRepository extends CrudRepository {
   constructor() {
     super(Category);
   }
+
+  async getAll(filter = {}, sort = {}, page = 1, limit = 10) {
+  const skip = (page - 1) * limit;
+  const query = this.model
+    .find(filter)
+    .sort(sort)
+    .skip(skip)
+    .limit(limit)
+    .populate({
+      path: 'vendor',
+      select: 'username email storeName contactNumber role isActive', // fields you want
+    });
+  
+  const totalDocuments = await this.model.countDocuments(filter);
+  const result = await query.exec();
+  const totalPages = Math.ceil(totalDocuments / limit);
+
+  return { result, currentPage: page, totalPages, totalDocuments };
+}
+
   
 
 

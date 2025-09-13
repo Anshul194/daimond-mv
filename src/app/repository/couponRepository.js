@@ -34,10 +34,21 @@ class CouponRepository extends CrudRepository {
     );
   }
 
-  async getAllCoupons(filter = {}, sort = {}, page = 1, limit = 10, populate = [], select = {}) {
-    // Add deletedAt null filter
-    const filterConditions = { ...filter, deletedAt: null };
-    return this.getAll(filterConditions, sort, page, limit, populate, select);
+   async getAllCoupons(filter = {}, sort = {}, page = 1, limit = 10, populate = [], select = {}) {
+    try {
+      const filterConditions = { ...filter, deletedAt: null };
+
+      // Always populate vendor
+      const populateFields = [
+        { path: 'vendor', select: 'username email storeName contactNumber role isActive' },
+        ...populate
+      ];
+
+      return await this.getAll(filterConditions, sort, page, limit, populateFields, select);
+    } catch (error) {
+      console.error('CouponRepo getAllCoupons error:', error);
+      throw error;
+    }
   }
 
   async softDelete(id) {
