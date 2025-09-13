@@ -172,3 +172,24 @@ export async function deleteTaxClass(id, user = null) {
     };
   }
 }
+
+export async function getActiveTaxClassWithOptions(user = null) {
+  try {
+    let vendorId = null;
+    if (user && user.role === 'vendor') {
+      vendorId = (user._id || user.id).toString();
+    }
+
+    const activeTaxClasses = await taxClassService.getActiveTaxClassesWithOptions(vendorId);
+    return { 
+      status: 200, 
+      body: successResponse(activeTaxClasses, 'Active tax classes with options fetched') 
+    };
+  } catch (err) {
+    console.error('Get Active TaxClasses with Options error:', err.message);
+    return { 
+      status: 500, 
+      body: errorResponse('Server error', 500) 
+    };
+  }
+}

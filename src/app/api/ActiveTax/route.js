@@ -1,11 +1,24 @@
 import dbConnect from '../../lib/mongodb.js';
 import { getActiveTaxClassWithOptions } from '../../controllers/taxClassController.js';
 import { NextResponse } from 'next/server';
+import { verifyTokenAndUser } from '../../middlewares/commonAuth.js';
 
 export async function GET(request) {
   try {
     await dbConnect();
-    const taxClass = await getActiveTaxClassWithOptions();
+
+    let user = null;
+    let authResult = null;
+    // Try to get token, but don't require it
+    try {
+      authResult = await verifyTokenAndUser(request, 'admin');
+      if (!authResult.error) user = authResult.user;
+    } catch (e) {
+      // Ignore auth errors for public access
+      user = null;
+    }
+
+    const taxClass = await getActiveTaxClassWithOptions(user);
     return NextResponse.json(taxClass.body, { status: taxClass.status });
   }
   catch (err) {

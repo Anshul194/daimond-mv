@@ -90,6 +90,14 @@ class TaxClassService {
       throw new AppError(error.message || 'Failed to delete tax class', StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
+
+  async getActiveTaxClassesWithOptions(vendorId = null) {
+    try {
+      return await this.repo.getActiveTaxClassesWithOptions(vendorId);
+    } catch (error) {
+      throw new AppError('Failed to get active tax classes with options', StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
 }
 
 export default TaxClassService;

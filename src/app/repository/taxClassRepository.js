@@ -1,4 +1,5 @@
 import TaxClass from '../models/TaxClass.js';
+import TaxClassOption from '../models/TaxClassOption.js';
 import CrudRepository from './crud-repository.js';
 import AppError from '../utils/errors/app-error.js';
 import { StatusCodes } from 'http-status-codes';
@@ -64,6 +65,47 @@ class TaxClassRepository extends CrudRepository {
     // Add deletedAt null filter
     const filterConditions = { ...filter, deletedAt: null };
     return this.getAll(filterConditions, sort, page, limit, populate, select);
+  }
+
+  async getActiveTaxClassesWithOptions(vendorId = null) {
+    try {
+      // First get active tax classes
+      const filter = { isActivated: true, deletedAt: null };
+      if (vendorId) {
+        filter.vendor = vendorId;
+      }
+
+      const activeTaxClasses = await TaxClass.find(filter).sort({ createdAt: -1 });
+
+      // Then get their options
+      const classIds = activeTaxClasses.map(tc => tc._id);
+      const options = await TaxClassOption.find({ 
+        class_id: { $in: classIds }, 
+        deletedAt: null 
+      })
+      .populate('country_id', 'name')
+      .populate('state_id', 'name')
+      .populate('city_id', 'name')
+      .sort({ priority: 1 });
+
+      // Group options by class_id
+      const optionsByClass = options.reduce((acc, option) => {
+        const classId = option.class_id.toString();
+        if (!acc[classId]) acc[classId] = [];
+        acc[classId].push(option);
+        return acc;
+      }, {});
+
+      // Attach options to tax classes
+      const result = activeTaxClasses.map(taxClass => ({
+        ...taxClass.toObject(),
+        options: optionsByClass[taxClass._id.toString()] || []
+      }));
+
+      return result;
+    } catch (error) {
+      throw new AppError('Failed to get active tax classes with options', StatusCodes.INTERNAL_SERVER_ERROR);
+    }
   }
 }
 
