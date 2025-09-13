@@ -178,7 +178,7 @@ const CheckoutPage = () => {
       try {
         const response = await axiosInstance.get("/api/ActiveTax");
         console.log("Tax data response: ===>", response.data);
-        setTaxData(response.data.data.options);
+        setTaxData(response.data.options);
       } catch (error) {
         console.error("Error fetching tax data:", error);
         toast.error("Failed to fetch tax data.");
@@ -343,12 +343,12 @@ const CheckoutPage = () => {
   };
 
   useEffect(() => {
-    if (Details.zipcode) {
+    if (Details.zipcode && taxData) {
       const tax = taxData.find((item) => item.postal_code === Details.zipcode);
       setApplicableTax(tax ? tax.rate : 0);
       setApplicableTaxId(tax ? tax._id : null);
     }
-  }, [Details.zipcode]);
+  }, [Details.zipcode, taxData]);
 
   const calculateTotalWithTax = (total, discount = 0) => {
     const discountedTotal = total - discount;
@@ -555,9 +555,9 @@ const CheckoutPage = () => {
                   <div className="space-y-3 mb-6">
                     <div className="space-y-4 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
                       {cartItems.map((item, index) => (
-                        <div className="border-black last:border-b-0">
+                        <div key={item.pid_id} className="border-black last:border-b-0">
                           <div
-                            key={index}
+                            key={`${item.pid_id}-product`}
                             className="flex items-center space-x-4 pb-4 last:pb-0"
                           >
                             <img
@@ -599,7 +599,7 @@ const CheckoutPage = () => {
                           </div>
                           {item.selectedDiamond && (
                             <div
-                              key={index}
+                              key={`${item.pid_id}-diamond`}
                               className="flex items-center space-x-4 pb-4 border-b  last:pb-0"
                             >
                               <div className="w-16 h-20 bg-gray-100  flex items-center justify-center text-2xl flex-shrink-0">
@@ -670,7 +670,7 @@ const CheckoutPage = () => {
                         Details.name !== "" &&
                         Details.phone !== "" &&
                         Details.address !== "" &&
-                        Details.zip !== "" ? (
+                        Details.zipcode !== "" ? (
                           <div>
                             <div className="flex justify-between font-semibold text-md gap-4 items-end text-black">
                               <div className="flex flex-col gap-1 w-3/4 justify-between">
@@ -754,7 +754,10 @@ const CheckoutPage = () => {
                         <span>Tax:</span>
                         <span>
                           {currencySymbol}
-                          {((originalTotal * ApplicableTax) / 100).toFixed(2)}
+                          {couponApplied && couponData?.discount
+                            ? (((originalTotal - couponData.discount) * ApplicableTax) / 100).toFixed(2)
+                            : ((originalTotal * ApplicableTax) / 100).toFixed(2)
+                          }
                         </span>
                       </div>
                     )}

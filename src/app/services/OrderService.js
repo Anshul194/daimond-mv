@@ -10,6 +10,7 @@ import OrderTrack from "../models/OrderTrack.js";
 import OrderPaymentMeta from "../models/OrderPaymentMeta.js";
 import User from "../models/User.js";
 import Product from "../models/Product.js";
+import TaxClassOption from "../models/TaxClassOption.js";
 import orderHelpersService from "./orderHelpersService.js";
 import mongoose from "mongoose";
 import generateInvoicePdf from "../lib/generateInvoice.js";
@@ -85,6 +86,19 @@ class OrderService {
         "Service: Cart content:",
         JSON.stringify(cartContent, null, 2)
       );
+
+      // Fetch products to get correct vendor IDs
+      const productIds = cartContent.map(item => item.id);
+      const products = await Product.find({ _id: { $in: productIds } }).select('vendor').lean();
+      const productVendorMap = products.reduce((map, p) => {
+        map[p._id.toString()] = p.vendor;
+        return map;
+      }, {});
+      // Update cartContent with correct vendor_id from product
+      cartContent.forEach(item => {
+        item.options.vendor_id = productVendorMap[item.id];
+      });
+
       const groupedCart = await orderHelpersServices.groupCartByVendor(
         cartContent
       );
@@ -92,6 +106,7 @@ class OrderService {
         "Service: Grouped cart:",
         JSON.stringify(groupedCart, null, 2)
       );
+      const orderVendor = Object.keys(groupedCart).length === 1 ? new mongoose.Types.ObjectId(Object.keys(groupedCart)[0]) : null;
       let totalAmount = 0;
       let totalShippingCharge = 0;
       let shippingCostData = {};
@@ -131,6 +146,7 @@ class OrderService {
         // invoice_url: invoice,
         order_status: "pending",
         payment_status: "unpaid",
+        vendor: orderVendor,
         tax_id:
           body.tax_id && mongoose.Types.ObjectId.isValid(body.tax_id)
             ? new mongoose.Types.ObjectId(body.tax_id)
@@ -323,7 +339,7 @@ class OrderService {
   }
 
   //getAllOrders for admin
-  async getAllOrders(query) {
+  async getAllOrders(query, admin = null) {
     try {
       console.log("Query Parameters:", query);
       const {
@@ -349,6 +365,20 @@ class OrderService {
 
       // Build filter conditions for multiple fields
       const filterConditions = { deletedAt: null };
+
+      // Handle vendor filtering based on role
+      if (admin && admin.role === 'vendor') {
+        const subOrders = await SubOrder.find({ vendor_id: admin._id.toString() }).select('order_id').lean();
+        console.log('SubOrders for vendor:', subOrders);
+        const orderIds = subOrders.map(s => s.order_id);
+        console.log('OrderIds for vendor:', orderIds);
+        filterConditions._id = { $in: orderIds };
+      } else {
+        // For admin or superadmin, apply vendor filter if present in query
+        if (query.vendor) {
+          filterConditions.vendor = query.vendor;
+        }
+      }
 
       for (const [key, value] of Object.entries(parsedFilters)) {
         filterConditions[key] = value;

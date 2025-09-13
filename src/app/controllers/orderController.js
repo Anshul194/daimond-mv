@@ -76,9 +76,19 @@ export async function getOrderById(id) {
   }
 }
 
-export async function getAllOrders(query) {
+export async function getAllOrders(query, admin = null) {
   try {
-    const response = await orderService.getAllOrders(query);
+    // Enforce vendor filter for vendors
+    if (admin && admin.role === 'vendor') {
+      query.vendor = (admin._id || admin.id).toString();
+    } else if (admin && admin.role === 'superadmin') {
+      // Superadmins can filter by vendor if desired
+      if (query.vendor) {
+        query.vendor = query.vendor;
+      }
+    }
+    console.log('[DEBUG] Final query to service:', query);
+    const response = await orderService.getAllOrders(query, admin);
     return {
       body: {
         success: true,

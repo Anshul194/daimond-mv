@@ -32,6 +32,11 @@ const orderSchema = new Schema(
     invoice_number: { type: Number, unique: true },
     order_number: String,
     user_id: { type: Schema.Types.ObjectId, ref: "User" },
+    vendor: {
+      type: Schema.Types.ObjectId,
+      ref: 'Admin',
+      default: null,
+    },
     type: String,
     note: String,
     selected_customer: { type: Schema.Types.ObjectId, ref: "User" },

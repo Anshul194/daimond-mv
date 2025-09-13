@@ -799,41 +799,48 @@ async function parseUpdateFormData(data) {
   };
 
   const itemVariants = [];
-  let itemIndex = 0;
+  // Handle array inputs for variants
+  const itemSizes = data.getAll("item_size") || [];
+  const itemColors = data.getAll("item_color") || [];
+  const itemExtraCosts = data.getAll("item_extra_cost") || [];
+  const itemStockCounts = data.getAll("item_stock_count") || [];
+  const inventoryDetailsIds = data.getAll("inventoryDetailsId") || [];
+  const itemImages = data.getAll("item_image") || [];
 
-  while (
-    data.get(`item_size[${itemIndex}]`) !== null ||
-    data.get(`inventoryDetailsId[${itemIndex}]`) !== null
-  ) {
+  const maxLength = Math.max(
+    itemSizes.length,
+    itemColors.length,
+    itemExtraCosts.length,
+    itemStockCounts.length,
+    inventoryDetailsIds.length,
+    itemImages.length
+  );
+
+  for (let i = 0; i < maxLength; i++) {
     const variant = {
-      inventoryDetailsId:
-        data.get(`inventoryDetailsId[${itemIndex}]`) || undefined,
-      size: data.get(`item_size[${itemIndex}]`) || undefined,
-      color: data.get(`item_color[${itemIndex}]`) || undefined,
-      additional_price:
-        parseFloat(data.get(`item_additional_price[${itemIndex}]`)) ||
-        undefined,
-      extra_cost:
-        parseFloat(data.get(`item_extra_cost[${itemIndex}]`)) || undefined,
-      stock_count:
-        parseInt(data.get(`item_stock_count[${itemIndex}]`)) || undefined,
-      image: data.get(`item_image[${itemIndex}]`),
+      inventoryDetailsId: inventoryDetailsIds[i] || undefined,
+      size: itemSizes[i] || undefined,
+      color: itemColors[i] || undefined,
+      additional_price: itemExtraCosts[i] ? parseFloat(itemExtraCosts[i]) : undefined,
+      stock_count: itemStockCounts[i] ? parseInt(itemStockCounts[i]) : undefined,
+      image: itemImages[i] || undefined,
       attributes: [],
     };
 
-    let attrIndex = 0;
-    while (
-      data.get(`item_attribute_name[${itemIndex}][${attrIndex}]`) !== null
-    ) {
-      variant.attributes.push({
-        name: data.get(`item_attribute_name[${itemIndex}][${attrIndex}]`),
-        value: data.get(`item_attribute_value[${itemIndex}][${attrIndex}]`),
-      });
-      attrIndex++;
+    // For attributes, if they exist as arrays
+    const attrNames = data.getAll(`item_attribute_name[${i}]`) || [];
+    const attrValues = data.getAll(`item_attribute_value[${i}]`) || [];
+
+    for (let j = 0; j < attrNames.length; j++) {
+      if (attrNames[j]) {
+        variant.attributes.push({
+          name: attrNames[j],
+          value: attrValues[j] || "",
+        });
+      }
     }
 
     itemVariants.push(variant);
-    itemIndex++;
   }
 
   return { productData, inventoryData, itemVariants };
@@ -865,7 +872,7 @@ async function updateInventoryDetailsInBatch(
       size: variantData.size,
       color: variantData.color,
       additional_price: variantData.additional_price,
-      extra_cost: variantData.extra_cost,
+      extra_cost: variantData.additional_price,
       stock_count: variantData.stock_count,
       image: imageUrl ? [imageUrl] : variantData.image || [],
     };

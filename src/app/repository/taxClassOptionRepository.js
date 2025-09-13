@@ -2,6 +2,11 @@ import TaxClassOption from '../models/TaxClassOption.js';
 import CrudRepository from './crud-repository.js';
 import AppError from '../utils/errors/app-error.js';
 import { StatusCodes } from 'http-status-codes';
+import Country from '../models/country.js';
+import State from '../models/state.js';
+import City from '../models/city.js';
+import TaxClass from '../models/TaxClass.js';
+import Admin from '../models/admin.js';
 
 class TaxClassOptionRepository extends CrudRepository {
   constructor() {

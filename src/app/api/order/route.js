@@ -37,9 +37,16 @@ export async function GET(req) {
   try {
     await dbConnect();
 
-    // Optional: Enable this if admin access is required
-    // const authResult = await verifyAdminAccess(req);
-    // if (authResult.error) return authResult.error;
+    let admin = null;
+    let authResult = null;
+    // Try to get token, but don't require it
+    try {
+      authResult = await verifyAdminAccess(req);
+      if (!authResult.error) admin = authResult.user;
+    } catch (e) {
+      // Ignore auth errors for public access
+      admin = null;
+    }
 
     // Extract user_id from query parameters
     const { searchParams } = new URL(req.url);
@@ -50,7 +57,7 @@ export async function GET(req) {
     if (isAdmin === "true") {
       //pass all query parameters for filtering/pagination
       const query = Object.fromEntries(searchParams.entries());
-      const result = await getAllOrders(query);
+      const result = await getAllOrders(query, admin);
       return NextResponse.json(result.body, { status: result.status });
     }
 
