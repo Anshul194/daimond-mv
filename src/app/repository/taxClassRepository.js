@@ -80,7 +80,9 @@ class TaxClassRepository extends CrudRepository {
     }
   }
 
-  async getActiveTaxClassesWithOptions(vendorId = null) {
+ 
+}
+ async getActiveTaxClassesWithOptions(vendorId = null) {
     try {
       // First get active tax classes
       const filter = { isActivated: true, deletedAt: null };
@@ -120,6 +122,5 @@ class TaxClassRepository extends CrudRepository {
       throw new AppError('Failed to get active tax classes with options', StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
-}
 
 export default TaxClassRepository;

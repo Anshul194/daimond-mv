@@ -43,7 +43,7 @@ class ProductService {
   async createProduct(data) {
     try {
       await this.ensureMongooseConnection();
-      console.log("Create Product data:", data);
+      console.log("Create Product data Services:", data);
       return await this.productRepo.create(data);
     } catch (error) {
       console.error("Error in createProduct:", error.message);

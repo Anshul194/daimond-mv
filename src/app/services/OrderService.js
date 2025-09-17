@@ -750,48 +750,48 @@ class OrderService {
   }
 
   async updateOrderById(id, updatePayload) {
-    try {
-      await dbConnect();
-      const objectIdRegex = /^[0-9a-fA-F]{24}$/;
-      if (!objectIdRegex.test(id)) {
-        throw new AppError("Invalid order ID format", StatusCodes.BAD_REQUEST);
-      }
-
-      const order = await Order.findById(id);
-      if (!order) {
-        throw new AppError("Order not found", StatusCodes.NOT_FOUND);
-      }
-
-      // Update only the fields provided in payload
-      Object.keys(updatePayload).forEach((key) => {
-        order[key] = updatePayload[key];
-      });
-
-      await order.save();
-
-      if (updatePayload.order_status) {
-        await OrderTrack.create({
-          order_id: order._id,
-          name: updatePayload.order_status,
-          updated_by: order.user_id || null,
-          table: "users",
-          created_at: new Date(),
-        });
-      }
-
-      return order;
-    } catch (error) {
-      console.error(
-        "OrderService updateOrderById error:",
-        error.message,
-        error.stack
-      );
-      throw new AppError(
-        error.message || "Failed to update order",
-        error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR
-      );
+  try {
+    await dbConnect();
+    const objectIdRegex = /^[0-9a-fA-F]{24}$/;
+    if (!objectIdRegex.test(id)) {
+      throw new AppError("Invalid order ID format", StatusCodes.BAD_REQUEST);
     }
+
+    const order = await Order.findById(id);
+    if (!order) {
+      throw new AppError("Order not found", StatusCodes.NOT_FOUND);
+    }
+
+    // Update only provided fields
+    Object.keys(updatePayload).forEach((key) => {
+      order[key] = updatePayload[key];
+    });
+
+    await order.save();
+
+    if (updatePayload.order_status) {
+      await OrderTrack.create({
+        order_id: order._id,
+        name: updatePayload.order_status,
+        updated_by: order.user_id || null,
+        table: "users",
+        created_at: new Date(),
+      });
+    }
+
+    return {
+      status: 200,
+      body: { success: true, message: "Order updated successfully", data: order },
+    };
+  } catch (error) {
+    console.error("OrderService updateOrderById error:", error.message, error.stack);
+    throw new AppError(
+      error.message || "Failed to update order",
+      error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR
+    );
   }
+}
+
 
   async getOrdersWithFilters(query) {
     // Parse filters, sort, page, limit from query
