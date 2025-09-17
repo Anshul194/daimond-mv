@@ -118,7 +118,9 @@ const Education = () => {
         const response = await dispatch(
           fetchSubCategoriesByCategoryId("6878cbb596dfc8337a3359b4")
         );
-        if (response.payload && response.payload) {
+        if (response.payload && Array.isArray(response.payload.data)) {
+          setData(response.payload.data.reverse());
+        } else if (Array.isArray(response.payload)) {
           setData(response.payload.reverse());
         } else {
           console.error("No data found in response:", response);

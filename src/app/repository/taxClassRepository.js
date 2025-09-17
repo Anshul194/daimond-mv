@@ -1,3 +1,4 @@
+
 import TaxClass from '../models/TaxClass.js';
 import TaxClassOption from '../models/TaxClassOption.js';
 import CrudRepository from './crud-repository.js';
@@ -39,8 +40,8 @@ class TaxClassRepository extends CrudRepository {
   async update(id, data) {
     try {
       const taxClass = await TaxClass.findOneAndUpdate(
-        { _id: id, deletedAt: null }, 
-        data, 
+        { _id: id, deletedAt: null },
+        data,
         { new: true }
       );
       return taxClass;
@@ -52,8 +53,8 @@ class TaxClassRepository extends CrudRepository {
   async softDelete(id) {
     try {
       return await TaxClass.findByIdAndUpdate(
-        id, 
-        { deletedAt: new Date(), deleted: true }, 
+        id,
+        { deletedAt: new Date(), deleted: true },
         { new: true }
       );
     } catch (error) {
@@ -61,21 +62,22 @@ class TaxClassRepository extends CrudRepository {
     }
   }
 
- async getAllTaxClasses(filter = {}, sort = {}, page = 1, limit = 10, populate = [], select = {}) {
-  try {
-    // Add deletedAt null filter
-    const filterConditions = { ...filter, deletedAt: null };
+  async getAllTaxClasses(filter = {}, sort = {}, page = 1, limit = 10, populate = [], select = {}) {
+    try {
+      // Add deletedAt null filter
+      const filterConditions = { ...filter, deletedAt: null };
 
-    // Ensure vendor is always populated
-    const populateFields = [
-      { path: 'vendor', select: 'username email storeName contactNumber role isActive' },
-      ...populate
-    ];
+      // Ensure vendor is always populated
+      const populateFields = [
+        { path: 'vendor', select: 'username email storeName contactNumber role isActive' },
+        ...populate
+      ];
 
-    return this.getAll(filterConditions, sort, page, limit, populateFields, select);
-  } catch (error) {
-    console.error('Error in getAllTaxClasses:', error);
-    throw error;
+      return this.getAll(filterConditions, sort, page, limit, populateFields, select);
+    } catch (error) {
+      console.error('Error in getAllTaxClasses:', error);
+      throw error;
+    }
   }
 
   async getActiveTaxClassesWithOptions(vendorId = null) {
@@ -90,14 +92,14 @@ class TaxClassRepository extends CrudRepository {
 
       // Then get their options
       const classIds = activeTaxClasses.map(tc => tc._id);
-      const options = await TaxClassOption.find({ 
-        class_id: { $in: classIds }, 
-        deletedAt: null 
+      const options = await TaxClassOption.find({
+        class_id: { $in: classIds },
+        deletedAt: null
       })
-      .populate('country_id', 'name')
-      .populate('state_id', 'name')
-      .populate('city_id', 'name')
-      .sort({ priority: 1 });
+        .populate('country_id', 'name')
+        .populate('state_id', 'name')
+        .populate('city_id', 'name')
+        .sort({ priority: 1 });
 
       // Group options by class_id
       const optionsByClass = options.reduce((acc, option) => {
@@ -118,8 +120,6 @@ class TaxClassRepository extends CrudRepository {
       throw new AppError('Failed to get active tax classes with options', StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
-}
-
 }
 
 export default TaxClassRepository;

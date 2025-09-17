@@ -754,8 +754,8 @@ const ProductModal = ({ onClose, loading }) => {
     console.log("Selected options changed:", selectedOptions);
     const filteredMetals = productData?.inventory?.inventory_details.filter(
       (metal) =>
-        metal.color._id === selectedOptions.metalType &&
-        metal.size._id === selectedOptions.ringSize
+        metal.color?._id === selectedOptions?.metalType &&
+        metal.size?._id === selectedOptions?.ringSize
     );
 
     if (filteredMetals?.length > 0) {
