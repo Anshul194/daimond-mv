@@ -748,6 +748,26 @@ async function parseUpdateFormData(data) {
   console.log("Parsing update form data...");
   console.log("Received form data:", data);
 
+  // Helper to get the correct value for each variant index
+  function getVariantValue(field, idx) {
+    let val = data.getAll(field);
+    if (Array.isArray(val) && val.length > 0) {
+      // If value is an array of arrays (e.g., [[{}, {}], [{}, {}]]) for images, return the correct subarray
+      if (Array.isArray(val[0]) && typeof val[0] !== "string") {
+        return val[idx];
+      }
+      // If value is a single string with commas, split it
+      if (typeof val[0] === "string" && val[0].includes(",")) {
+        const arr = val[0].split(",");
+        return arr[idx] !== undefined ? arr[idx] : undefined;
+      }
+      // Otherwise, return the value at idx
+      return val[idx];
+    }
+    // If not array, just return as is
+    return val;
+  }
+
   const productData = {
     name: data.get("name") || undefined,
     category_id: data.get("category_id") || undefined,
@@ -808,22 +828,29 @@ async function parseUpdateFormData(data) {
   const itemImages = data.getAll("item_image") || [];
 
   const maxLength = Math.max(
-    itemSizes.length,
-    itemColors.length,
-    itemExtraCosts.length,
-    itemStockCounts.length,
-    inventoryDetailsIds.length,
-    itemImages.length
+    (data.getAll("item_size") || []).length,
+    (data.getAll("item_color") || []).length,
+    (data.getAll("item_extra_cost") || []).length,
+    (data.getAll("item_stock_count") || []).length,
+    (data.getAll("inventoryDetailsId") || []).length,
+    (data.getAll("item_image") || []).length
   );
 
   for (let i = 0; i < maxLength; i++) {
+    const size = getVariantValue("item_size", i);
+    const color = getVariantValue("item_color", i);
+    const extra_cost = getVariantValue("item_extra_cost", i);
+    const stock_count = getVariantValue("item_stock_count", i);
+    const inventoryDetailsId = getVariantValue("inventoryDetailsId", i);
+    const image = getVariantValue("item_image", i);
+
     const variant = {
-      inventoryDetailsId: inventoryDetailsIds[i] || undefined,
-      size: itemSizes[i] || undefined,
-      color: itemColors[i] || undefined,
-      additional_price: itemExtraCosts[i] ? parseFloat(itemExtraCosts[i]) : undefined,
-      stock_count: itemStockCounts[i] ? parseInt(itemStockCounts[i]) : undefined,
-      image: itemImages[i] || undefined,
+      inventoryDetailsId: inventoryDetailsId || undefined,
+      size: size || undefined,
+      color: color || undefined,
+      additional_price: extra_cost && !isNaN(parseFloat(extra_cost)) ? parseFloat(extra_cost) : undefined,
+      stock_count: stock_count && !isNaN(parseInt(stock_count)) ? parseInt(stock_count) : 0,
+      image: image || undefined,
       attributes: [],
     };
 
@@ -866,6 +893,20 @@ async function updateInventoryDetailsInBatch(
       );
     }
 
+    // Ensure stock_count is a valid number, default to 0 if not
+    let stock_count = 0;
+    if (
+      typeof variantData.stock_count === "number" &&
+      !isNaN(variantData.stock_count)
+    ) {
+      stock_count = variantData.stock_count;
+    } else if (
+      typeof variantData.stock_count === "string" &&
+      !isNaN(parseInt(variantData.stock_count))
+    ) {
+      stock_count = parseInt(variantData.stock_count);
+    }
+
     const detailData = {
       product_id: productId,
       product_inventory_id: inventoryId,
@@ -873,7 +914,7 @@ async function updateInventoryDetailsInBatch(
       color: variantData.color,
       additional_price: variantData.additional_price,
       extra_cost: variantData.additional_price,
-      stock_count: variantData.stock_count,
+      stock_count, // always a valid number
       image: imageUrl ? [imageUrl] : variantData.image || [],
     };
 
