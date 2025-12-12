@@ -95,7 +95,8 @@ class TaxClassService {
     try {
       return await this.repo.getActiveTaxClassesWithOptions(vendorId);
     } catch (error) {
-      throw new AppError('Failed to get active tax classes with options', StatusCodes.INTERNAL_SERVER_ERROR);
+      console.error('Error in taxClassService.getActiveTaxClassesWithOptions:', error);
+      throw new AppError(error.message || 'Failed to get active tax classes with options', StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
 }

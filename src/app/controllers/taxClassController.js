@@ -186,10 +186,10 @@ export async function getActiveTaxClassWithOptions(user = null) {
       body: successResponse(activeTaxClasses, 'Active tax classes with options fetched') 
     };
   } catch (err) {
-    console.error('Get Active TaxClasses with Options error:', err.message);
+    console.error('Get Active TaxClasses with Options error:', err);
     return { 
       status: 500, 
-      body: errorResponse('Server error', 500) 
+      body: errorResponse(err.message || 'Server error', 500) 
     };
   }
 }

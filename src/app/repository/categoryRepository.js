@@ -9,7 +9,8 @@ class CategoryRepository extends CrudRepository {
   }
 
   async getAll(filter = {}, sort = {}, page = 1, limit = 10) {
-  const skip = (page - 1) * limit;
+  const pageNum = Math.max(1, parseInt(page) || 1);
+  const skip = (pageNum - 1) * limit;
   const query = this.model
     .find(filter)
     .sort(sort)
@@ -24,7 +25,7 @@ class CategoryRepository extends CrudRepository {
   const result = await query.exec();
   const totalPages = Math.ceil(totalDocuments / limit);
 
-  return { result, currentPage: page, totalPages, totalDocuments };
+  return { result, currentPage: pageNum, totalPages, totalDocuments };
 }
 
   
