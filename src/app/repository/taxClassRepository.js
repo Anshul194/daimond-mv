@@ -122,5 +122,8 @@ class TaxClassRepository extends CrudRepository {
     }
   }
 }
+ 
+}
+ 
 
 export default TaxClassRepository;
