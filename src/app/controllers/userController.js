@@ -75,6 +75,7 @@ export async function sendOTP(data) {
     return new Response(
       JSON.stringify({
         success: true,
+        otp,
         message: "OTP sent successfully",
         email,
       }),

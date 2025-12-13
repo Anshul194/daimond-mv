@@ -106,7 +106,10 @@ class OrderService {
         "Service: Grouped cart:",
         JSON.stringify(groupedCart, null, 2)
       );
-      const orderVendor = Object.keys(groupedCart).length === 1 ? new mongoose.Types.ObjectId(Object.keys(groupedCart)[0]) : null;
+      const vendorKey = Object.keys(groupedCart).length === 1 ? Object.keys(groupedCart)[0] : null;
+      const orderVendor = vendorKey && vendorKey !== "admin" && mongoose.Types.ObjectId.isValid(vendorKey) 
+        ? new mongoose.Types.ObjectId(vendorKey) 
+        : null;
       let totalAmount = 0;
       let totalShippingCharge = 0;
       let shippingCostData = {};
