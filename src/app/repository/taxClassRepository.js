@@ -1,6 +1,9 @@
 
 import TaxClass from '../models/TaxClass.js';
 import TaxClassOption from '../models/TaxClassOption.js';
+import Country from '../models/country.js';
+import State from '../models/state.js';
+import City from '../models/city.js';
 import CrudRepository from './crud-repository.js';
 import AppError from '../utils/errors/app-error.js';
 import { StatusCodes } from 'http-status-codes';
@@ -122,8 +125,5 @@ class TaxClassRepository extends CrudRepository {
     }
   }
 }
- 
-}
- 
 
 export default TaxClassRepository;
