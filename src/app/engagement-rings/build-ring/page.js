@@ -9,7 +9,7 @@ const RingsBuild = () => {
   // Modal state - Initialize as closed
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRing, setSelectedRing] = useState(null);
-  
+
   // Reset modal state on component mount
   useEffect(() => {
     setIsModalOpen(false);
@@ -17,55 +17,65 @@ const RingsBuild = () => {
   }, []);
 
   const rings = [
-    { 
-      name: "ASHTON", 
+    {
+      name: "ASHTON",
+      slug: "ashton",
       price: "STARTING 439 USD",
-      images: ["/images/demoprod/cover.webp", "/images/demoprod/slideone.webp", "/images/demoprod/slidetwo.webp"]
+      image: ["/images/demoprod/aston.webp"]
     },
-    { 
-      name: "MOANA", 
+    {
+      name: "MOANA",
+      slug: "moana",
       price: "STARTING 1,096 USD",
-      images: ["/images/demoprod/cover.webp", "/images/demoprod/slideone.webp", "/images/demoprod/slidetwo.webp"]
+      image: ["/images/demoprod/cover.webp", "/images/demoprod/slideone.webp", "/images/demoprod/slidetwo.webp"]
     },
-    { 
-      name: "KAITLYN", 
+    {
+      name: "KAITLYN",
+      slug: "kaitlyn",
       price: "STARTING 806 USD",
-      images: ["/images/demoprod/cover.webp", "/images/demoprod/slideone.webp", "/images/demoprod/slidetwo.webp"]
+      image: ["/images/demoprod/cover.webp", "/images/demoprod/slideone.webp", "/images/demoprod/slidetwo.webp"]
     },
-    { 
-      name: "OCEA", 
+    {
+      name: "OCEA",
+      slug: "ocea",
       price: "STARTING 757 USD",
-      images: ["/images/demoprod/cover.webp", "/images/demoprod/slideone.webp", "/images/demoprod/slidetwo.webp"]
+      image: ["/images/demoprod/cover.webp", "/images/demoprod/slideone.webp", "/images/demoprod/slidetwo.webp"]
     },
-    { 
-      name: "JOANNA", 
+    {
+      name: "JOANNA",
+      slug: "joanna",
       price: "STARTING 877 USD",
-      images: ["/images/demoprod/cover.webp", "/images/demoprod/slideone.webp", "/images/demoprod/slidetwo.webp"]
+      image: ["/images/demoprod/cover.webp", "/images/demoprod/slideone.webp", "/images/demoprod/slidetwo.webp"]
     },
-    { 
-      name: "LIANA", 
+    {
+      name: "LIANA",
+      slug: "liana",
       price: "STARTING 912 USD",
-      images: ["/images/demoprod/cover.webp", "/images/demoprod/slideone.webp", "/images/demoprod/slidetwo.webp"]
+      image: ["/images/demoprod/cover.webp", "/images/demoprod/slideone.webp", "/images/demoprod/slidetwo.webp"]
     },
-    { 
-      name: "ALEXANDRA", 
+    {
+      name: "ALEXANDRA",
+      slug: "alexandra",
       price: "STARTING 1,958 USD",
-      images: ["/images/demoprod/cover.webp", "/images/demoprod/slideone.webp", "/images/demoprod/slidetwo.webp"]
+      image: ["/images/demoprod/cover.webp", "/images/demoprod/slideone.webp", "/images/demoprod/slidetwo.webp"]
     },
-    { 
-      name: "LANA", 
+    {
+      name: "LANA",
+      slug: "lana",
       price: "STARTING 1,633 USD",
-      images: ["/images/demoprod/cover.webp", "/images/demoprod/slideone.webp", "/images/demoprod/slidetwo.webp"]
+      image: ["/images/demoprod/cover.webp", "/images/demoprod/slideone.webp", "/images/demoprod/slidetwo.webp"]
     },
-    { 
-      name: "ARIZONA", 
+    {
+      name: "ARIZONA",
+      slug: "arizona",
       price: "STARTING 926 USD",
-      images: ["/images/demoprod/cover.webp", "/images/demoprod/slideone.webp", "/images/demoprod/slidetwo.webp"]
+      image: ["/images/demoprod/cover.webp", "/images/demoprod/slideone.webp", "/images/demoprod/slidetwo.webp"]
     },
-    { 
-      name: "CHIARA", 
+    {
+      name: "CHIARA",
+      slug: "chiara",
       price: "STARTING 954 USD",
-      images: ["/images/demoprod/cover.webp", "/images/demoprod/slideone.webp", "/images/demoprod/slidetwo.webp"]
+      image: ["/images/demoprod/cover.webp", "/images/demoprod/slideone.webp", "/images/demoprod/slidetwo.webp"]
     }
   ];
 
@@ -80,7 +90,7 @@ const RingsBuild = () => {
     console.log('Modal closing'); // Debug log
     setIsModalOpen(false);
     setSelectedRing(null);
-    
+
     // Additional cleanup - remove any body scroll lock
     document.body.style.overflow = 'unset';
   };
@@ -105,7 +115,7 @@ const RingsBuild = () => {
   return (
     <div className="bg-white min-h-screen">
       {/* Hero Banner */}
-      <div 
+      <div
         className="relative h-64 bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: "url('/images/engagementBanner.webp')",
@@ -138,7 +148,7 @@ const RingsBuild = () => {
         </p>
       </div>
 
-      <Filter/>
+      <Filter />
 
       {/* Product Section */}
       <div className="bg-white py-8 px-4">
