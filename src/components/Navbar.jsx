@@ -21,6 +21,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "@/store/slices/categorySlice";
 import axiosInstance from "@/axiosConfig/axiosInstance";
 import { set } from "mongoose";
+import ArdorLogo from "@/public/image/cropped-website-logo-1.webp";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -48,10 +49,10 @@ const Navbar = () => {
     { name: "NEW ARRIVALS", href: "/new-arrivals" },
     ...(categories && categories.length > 0
       ? [...categories].reverse().map((category) => ({
-          name: category.name.toUpperCase(),
-          href: `/${category.slug}`,
-          hasDropdown: true,
-        }))
+        name: category.name.toUpperCase(),
+        href: `/${category.slug}`,
+        hasDropdown: true,
+      }))
       : []),
   ];
 
@@ -331,9 +332,8 @@ const Navbar = () => {
           className={`fixed top-0 left-0 w-full h-screen bg-white/40 z-9999`}
         >
           <div
-            className={`h-24 max-sm:h-20 max-sm:px-10 px-32 ${
-              showSearch ? "mt-0" : "-mt-24 max-sm:-mt-20"
-            } bg-white flex justify-between items-center transition-all duration-300`}
+            className={`h-24 max-sm:h-20 max-sm:px-10 px-32 ${showSearch ? "mt-0" : "-mt-24 max-sm:-mt-20"
+              } bg-white flex justify-between items-center transition-all duration-300`}
           >
             <div className="w-2/3 flex gap-4 items-center">
               <SearchIcon className="text-gray-900" />
@@ -411,7 +411,7 @@ const Navbar = () => {
             </div>
 
             {/* Left Navigation Items - Desktop only */}
-            <div className="hidden xl:flex xl:w-[40%] items-center justify-between">
+            <div className="hidden xl:flex xl:w-[40%] items-center justify-end gap-12">
               {navItems.map((item) => (
                 <div
                   key={item.name}
@@ -461,18 +461,22 @@ const Navbar = () => {
 
             {/* Logo - Centered on mobile, normal position on desktop */}
             <div className="flex-shrink-0 absolute left-1/2 transform -translate-x-1/2 xl:transform-none">
-              <a
-                href="/"
-                className="text-xl md:text-3xl lg:text-4xl font-semibold tracking-[0.2em] text-gray-900"
-              >
-                CULLEN
-              </a>
+              <Link href="/">
+                <Image
+                  src={ArdorLogo}
+                  alt="Ardor Diamonds"
+                  width={125}
+                  height={50}
+                  className="object-contain" // Preserves aspect ratio
+                  priority // Important for LCP
+                />
+              </Link>
             </div>
 
             {/* Right side - Desktop: Navigation + Icons, Mobile: Shopping bag only */}
             <div className="flex xl:w-[40%] w-fit items-center gap-6">
               {/* Desktop Navigation */}
-              <div className="hidden xl:flex items-center space-x-8 w-full justify-between">
+              <div className="hidden xl:flex items-center justify-start gap-12 w-full">
                 {rightNavItems.map((item) => (
                   <div
                     key={item.name}
@@ -585,11 +589,10 @@ const Navbar = () => {
                     <div className="grid grid-cols-2 gap-4 max-w-full">
                       {/* Statement Rings */}
                       <a
-                        href={`/fine-jewellery-807?finejewellery=${
-                          fineJewellerSubCategories.filter((e) =>
-                            e.name.includes("Statement")
-                          )[0]?._id
-                        }`}
+                        href={`/fine-jewellery-807?finejewellery=${fineJewellerSubCategories.filter((e) =>
+                          e.name.includes("Statement")
+                        )[0]?._id
+                          }`}
                       >
                         <div className="group cursor-pointer">
                           <div className="relative overflow-hidden lg:mb-2 h-44">
@@ -615,11 +618,10 @@ const Navbar = () => {
 
                       {/* Stacker Rings */}
                       <a
-                        href={`/fine-jewellery-807?finejewellery=${
-                          fineJewellerSubCategories.filter((e) =>
-                            e.name.includes("Stacker")
-                          )[0]?._id
-                        }`}
+                        href={`/fine-jewellery-807?finejewellery=${fineJewellerSubCategories.filter((e) =>
+                          e.name.includes("Stacker")
+                        )[0]?._id
+                          }`}
                       >
                         <div className="group cursor-pointer">
                           <div className="relative overflow-hidden lg:mb-2 h-44">
@@ -646,10 +648,9 @@ const Navbar = () => {
                       {/* Minimal Rings */}
                       <a
                         href={
-                          `/fine-jewellery-807?finejewellery=${
-                            fineJewellerSubCategories.filter((e) =>
-                              e.name.includes("Minimal")
-                            )[0]?._id
+                          `/fine-jewellery-807?finejewellery=${fineJewellerSubCategories.filter((e) =>
+                            e.name.includes("Minimal")
+                          )[0]?._id
                           }` ||
                           "/fine-jewellery-807?finejewellery=6874b552f2ed2bebef46ccec"
                         }
