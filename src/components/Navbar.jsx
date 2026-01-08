@@ -460,7 +460,7 @@ const Navbar = () => {
             </div>
 
             {/* Logo - Centered on mobile, normal position on desktop */}
-            <div className="flex-shrink-0 absolute left-1/2 transform -translate-x-1/2 xl:transform-none">
+            <div className="flex-shrink-0 absolute left-1/2 transform -translate-x-1/2">
               <Link href="/">
                 <Image
                   src={ArdorLogo}

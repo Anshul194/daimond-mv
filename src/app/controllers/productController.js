@@ -29,12 +29,12 @@ export async function createProduct(formData, user = null) {
       data
     );
 
-     if (formData.get("is_diamond")) {
+    if (formData.get("is_diamond")) {
       productData.is_diamond = formData.get("is_diamond") === "true";
     }
     console.log("Parsed product data, including is_diamond:", productData);
     console.log("Received form data:", itemVariants);
-   
+
 
     // Step 2: Validate product data
     const { error, value } = productCreateValidator.validate(productData);
@@ -669,45 +669,45 @@ export async function updateProduct(id, formData) {
       __v: updatedProduct.__v,
       inventory: inventoryRecord
         ? {
-            _id: inventoryRecord._id,
-            product: inventoryRecord.product,
-            sku: inventoryRecord.sku,
-            stock_count: inventoryRecord.stock_count,
-            sold_count: inventoryRecord.sold_count,
-            created_at: inventoryRecord.created_at,
-            updated_at: inventoryRecord.updated_at,
-            __v: inventoryRecord.__v,
-            inventory_details: inventoryDetails.map((detail) => ({
-              _id: detail._id,
-              product_id: detail.product_id,
-              product_inventory_id: detail.product_inventory_id,
-              size: detail.size,
-              color: detail.color,
-              additional_price: detail.additional_price,
-              extra_cost: detail.extra_cost,
-              stock_count: detail.stock_count,
-              image: detail.image,
-              created_at: detail.created_at,
-              updated_at: detail.updated_at,
-              __v: detail.__v,
-              attributes: inventoryDetailAttributes
-                .filter(
-                  (attr) =>
-                    attr.inventory_details_id.toString() ===
-                    detail._id.toString()
-                )
-                .map((attr) => ({
-                  _id: attr._id,
-                  inventory_details_id: attr.inventory_details_id,
-                  product_id: attr.product_id,
-                  name: attr.name,
-                  value: attr.value,
-                  created_at: attr.created_at,
-                  updated_at: attr.updated_at,
-                  __v: attr.__v,
-                })),
-            })),
-          }
+          _id: inventoryRecord._id,
+          product: inventoryRecord.product,
+          sku: inventoryRecord.sku,
+          stock_count: inventoryRecord.stock_count,
+          sold_count: inventoryRecord.sold_count,
+          created_at: inventoryRecord.created_at,
+          updated_at: inventoryRecord.updated_at,
+          __v: inventoryRecord.__v,
+          inventory_details: inventoryDetails.map((detail) => ({
+            _id: detail._id,
+            product_id: detail.product_id,
+            product_inventory_id: detail.product_inventory_id,
+            size: detail.size,
+            color: detail.color,
+            additional_price: detail.additional_price,
+            extra_cost: detail.extra_cost,
+            stock_count: detail.stock_count,
+            image: detail.image,
+            created_at: detail.created_at,
+            updated_at: detail.updated_at,
+            __v: detail.__v,
+            attributes: inventoryDetailAttributes
+              .filter(
+                (attr) =>
+                  attr.inventory_details_id.toString() ===
+                  detail._id.toString()
+              )
+              .map((attr) => ({
+                _id: attr._id,
+                inventory_details_id: attr.inventory_details_id,
+                product_id: attr.product_id,
+                name: attr.name,
+                value: attr.value,
+                created_at: attr.created_at,
+                updated_at: attr.updated_at,
+                __v: attr.__v,
+              })),
+          })),
+        }
         : null,
       execution_time: executionTime,
     };
@@ -1016,7 +1016,7 @@ export async function getProducts(query, user = null) {
 export async function getProductById(id, slug, categorySlug) {
   try {
     const product = await productService.getProductByIdAndSlug(
-      categorySlug,
+      id, // categorySlug passed as id from route params
       slug
     );
     if (!product) {
