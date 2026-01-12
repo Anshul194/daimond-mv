@@ -136,8 +136,28 @@ class ProductRepository extends CrudRepository {
 
   async createInventory(data) {
     try {
+      // Validate required fields
+      if (!data || !data.product) {
+        throw new Error("Product ID is required to create inventory");
+      }
+      
+      // Ensure SKU is always provided - generate if missing
+      if (!data.sku || !data.sku.trim()) {
+        // Convert product to string if it's an ObjectId
+        const productId = data.product.toString ? data.product.toString() : data.product;
+        data.sku = `SKU-${productId}-${Date.now()}`;
+      } else {
+        data.sku = data.sku.trim();
+      }
+      
       const inventory = new ProductInventory(data);
-      return await inventory.save();
+      const savedInventory = await inventory.save();
+      
+      if (!savedInventory || !savedInventory._id) {
+        throw new Error("Failed to save inventory - no _id returned");
+      }
+      
+      return savedInventory;
     } catch (error) {
       console.error("Repo createInventory error:", error);
       throw error;

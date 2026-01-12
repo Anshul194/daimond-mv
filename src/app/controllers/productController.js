@@ -137,18 +137,33 @@ export async function createProduct(formData, user = null) {
     // Step 5: Create product
     console.log("Product data to be stored, including is_diamond:", value);
     product = await productService.createProduct(value);
+    
+    if (!product || !product._id) {
+      throw new Error("Failed to create product - product is undefined or missing _id");
+    }
+    
     createdResources.push({ type: "product", id: product._id });
     console.log("Product created:", product._id);
 
     // Step 6: Create inventory record
+    // Generate SKU if not provided to avoid duplicate key errors
+    const sku = inventoryData.sku && inventoryData.sku.trim() 
+      ? inventoryData.sku.trim() 
+      : `SKU-${product._id}-${Date.now()}`;
+    
     const inventory = {
       product: product._id,
-      sku: inventoryData.sku,
-      stock_count: inventoryData.stock_count,
+      sku: sku,
+      stock_count: inventoryData.stock_count || 0,
       sold_count: 0,
     };
 
     const inventoryRecord = await productService.createInventory(inventory);
+    
+    if (!inventoryRecord || !inventoryRecord._id) {
+      throw new Error("Failed to create inventory - inventoryRecord is undefined or missing _id");
+    }
+    
     createdResources.push({ type: "inventory", id: inventoryRecord._id });
 
     // Step 7: Batch create inventory details and attributes
@@ -178,7 +193,7 @@ export async function createProduct(formData, user = null) {
     );
 
     const propertyData = formData.get("properties");
-    if (propertyData) {
+    if (propertyData && inventoryDetails && inventoryDetails.length > 0 && inventoryDetails[0] && inventoryDetails[0]._id) {
       const actualData = JSON.parse(propertyData);
 
       const createAttributePromises = Object.keys(actualData).map((key) => {
@@ -191,6 +206,8 @@ export async function createProduct(formData, user = null) {
       });
 
       await Promise.all(createAttributePromises);
+    } else if (propertyData && (!inventoryDetails || inventoryDetails.length === 0)) {
+      console.warn("Properties data provided but no inventory details created. Skipping attribute creation.");
     }
     // Step 9: Construct response data
     const responseData = {

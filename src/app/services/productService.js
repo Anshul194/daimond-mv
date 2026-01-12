@@ -1099,6 +1099,15 @@ class ProductService {
       if (!inventory)
         throw new AppError("Inventory not found", StatusCodes.NOT_FOUND);
 
+      // Ensure SKU is not set to null/empty - generate one if needed
+      if (data.sku !== undefined) {
+        if (!data.sku || !data.sku.trim()) {
+          data.sku = `SKU-${productId}-${Date.now()}`;
+        } else {
+          data.sku = data.sku.trim();
+        }
+      }
+
       inventory.set(data);
       return await inventory.save();
     } catch (error) {
