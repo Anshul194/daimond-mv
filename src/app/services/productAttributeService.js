@@ -38,7 +38,14 @@ class ProductAttributeService {
       }
 
       for (const [key, value] of Object.entries(parsedFilters)) {
-        filterConditions[key] = value;
+        // Skip null, undefined, or "null" string values
+        if (value === null || value === undefined || value === "null" || value === "") {
+          continue;
+        }
+        
+        // Map 'category' to 'category_id' if needed
+        const filterKey = key === 'category' ? 'category_id' : key;
+        filterConditions[filterKey] = value;
       }
 
       // Build search conditions for multiple fields with partial matching

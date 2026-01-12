@@ -66,13 +66,14 @@ export async function GET(request, { params }) {
     await dbConnect();
     const awaitedParams = await params;
     console.log(" new GET /product/:id called with params:", awaitedParams);
-    const { id, slug, categorySlug } = awaitedParams; // Added categorySlug
-    const result = await getProductById(id, slug, categorySlug);
+    const { id, slug } = awaitedParams;
+    // id is the category slug, slug is the product slug
+    const result = await getProductById(id, slug);
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
     console.error("GET /product/:id error:", err);
     return NextResponse.json(
-      { success: false, message: "Server error" },
+      { success: false, message: err.message || "Server error" },
       { status: 500 }
     );
   }

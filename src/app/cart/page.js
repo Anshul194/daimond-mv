@@ -66,9 +66,12 @@ const Cart = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 max-sm:grid-cols-1 gap-4 lg:gap-8">
         {/* Cart Items Section */}
         <div className="lg:col-span-2">
-          {data.map((item) => (
+          {data.map((item, index) => {
+            // Create a unique key combining pid_id with selected options and diamond
+            const uniqueKey = `${item.pid_id}-${item.selectedOptions?.metalType?.color?._id || item.selectedOptions?.metalType || 'no-metal'}-${item.selectedOptions?.ringSize?.size?._id || item.selectedOptions?.ringSize || 'no-size'}-${item.selectedDiamond?._id || 'no-diamond'}-${index}`;
+            return (
             <div
-              key={item.pid_id}
+              key={uniqueKey}
               className="mb-6 lg:mb-8 pb-6 border-b border-gray-200 last:border-b-0"
             >
               {/* Mobile Layout */}
@@ -217,7 +220,8 @@ const Cart = () => {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Checkout Section */}

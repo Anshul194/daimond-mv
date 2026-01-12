@@ -1013,10 +1013,11 @@ export async function getProducts(query, user = null) {
   }
 }
 
-export async function getProductById(id, slug, categorySlug) {
+export async function getProductById(id, slug) {
   try {
+    // id is the category slug, slug is the product slug
     const product = await productService.getProductByIdAndSlug(
-      id, // categorySlug passed as id from route params
+      id,
       slug
     );
     if (!product) {
