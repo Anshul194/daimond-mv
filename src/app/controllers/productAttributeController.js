@@ -256,15 +256,24 @@ export async function updateProductAttribute(id, data) {
       };
     }
 
-    const existing = await productAttributeService.findByTitle(value.title);
-    if (existing && existing._id.toString() !== id) {
-      return {
-        status: 400,
-        body: {
-          success: false,
-          message: "Product attribute with this title already exists",
-        },
-      };
+    // Only check for duplicate title if title is being updated
+    if (value.title) {
+      // Get the current attribute to compare titles
+      const currentAttribute = await productAttributeService.getProductAttributeById(id);
+      
+      // Only check for duplicates if the title is actually changing
+      if (!currentAttribute || currentAttribute.title?.toLowerCase() !== value.title?.toLowerCase()) {
+        const existing = await productAttributeService.findByTitle(value.title);
+        if (existing && existing._id.toString() !== id.toString()) {
+          return {
+            status: 400,
+            body: {
+              success: false,
+              message: "Product attribute with this title already exists",
+            },
+          };
+        }
+      }
     }
 
     const updated = await productAttributeService.updateProductAttribute(
