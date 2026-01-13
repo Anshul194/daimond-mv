@@ -76,8 +76,9 @@ const RingsGrid = ({
         {rings?.map((ring, index) => (
           <Link
             href={
-              pathname.includes("new-arrivals")
-                ? `${ring?.category_id?.slug}/${ring.slug}`
+              pathname.includes("new-arrivals") ||
+              pathname.includes("shop-all-jewelry")
+                ? `/${ring?.category_id?.slug}/${ring.slug}`
                 : `${pathname}/${ring.slug}`
             }
             key={index}
