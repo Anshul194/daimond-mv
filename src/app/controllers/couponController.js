@@ -118,9 +118,19 @@ export async function updateCoupon(request, { params }, user = null) {
     const { id } = params;
     const data = await request.json();
 
-    // Clean empty fields
+    // Remove MongoDB internal fields that shouldn't be updated
+    const fieldsToExclude = ['_id', '__v', 'createdAt', 'updatedAt'];
+    
+    // Clean empty fields and exclude internal fields
     const cleanedFields = Object.entries(data).reduce((acc, [key, value]) => {
-      if (value !== '' && value !== null && value !== undefined) acc[key] = value;
+      // Skip MongoDB internal fields
+      if (fieldsToExclude.includes(key)) {
+        return acc;
+      }
+      // Only include non-empty values
+      if (value !== '' && value !== null && value !== undefined) {
+        acc[key] = value;
+      }
       return acc;
     }, {});
 
