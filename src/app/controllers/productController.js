@@ -29,12 +29,12 @@ export async function createProduct(formData, user = null) {
       data
     );
 
-     if (formData.get("is_diamond")) {
+    if (formData.get("is_diamond")) {
       productData.is_diamond = formData.get("is_diamond") === "true";
     }
     console.log("Parsed product data, including is_diamond:", productData);
     console.log("Received form data:", itemVariants);
-   
+
 
     // Step 2: Validate product data
     const { error, value } = productCreateValidator.validate(productData);
@@ -137,18 +137,33 @@ export async function createProduct(formData, user = null) {
     // Step 5: Create product
     console.log("Product data to be stored, including is_diamond:", value);
     product = await productService.createProduct(value);
+    
+    if (!product || !product._id) {
+      throw new Error("Failed to create product - product is undefined or missing _id");
+    }
+    
     createdResources.push({ type: "product", id: product._id });
     console.log("Product created:", product._id);
 
     // Step 6: Create inventory record
+    // Generate SKU if not provided to avoid duplicate key errors
+    const sku = inventoryData.sku && inventoryData.sku.trim() 
+      ? inventoryData.sku.trim() 
+      : `SKU-${product._id}-${Date.now()}`;
+    
     const inventory = {
       product: product._id,
-      sku: inventoryData.sku,
-      stock_count: inventoryData.stock_count,
+      sku: sku,
+      stock_count: inventoryData.stock_count || 0,
       sold_count: 0,
     };
 
     const inventoryRecord = await productService.createInventory(inventory);
+    
+    if (!inventoryRecord || !inventoryRecord._id) {
+      throw new Error("Failed to create inventory - inventoryRecord is undefined or missing _id");
+    }
+    
     createdResources.push({ type: "inventory", id: inventoryRecord._id });
 
     // Step 7: Batch create inventory details and attributes
@@ -178,7 +193,7 @@ export async function createProduct(formData, user = null) {
     );
 
     const propertyData = formData.get("properties");
-    if (propertyData) {
+    if (propertyData && inventoryDetails && inventoryDetails.length > 0 && inventoryDetails[0] && inventoryDetails[0]._id) {
       const actualData = JSON.parse(propertyData);
 
       const createAttributePromises = Object.keys(actualData).map((key) => {
@@ -191,6 +206,8 @@ export async function createProduct(formData, user = null) {
       });
 
       await Promise.all(createAttributePromises);
+    } else if (propertyData && (!inventoryDetails || inventoryDetails.length === 0)) {
+      console.warn("Properties data provided but no inventory details created. Skipping attribute creation.");
     }
     // Step 9: Construct response data
     const responseData = {
@@ -669,45 +686,45 @@ export async function updateProduct(id, formData) {
       __v: updatedProduct.__v,
       inventory: inventoryRecord
         ? {
-            _id: inventoryRecord._id,
-            product: inventoryRecord.product,
-            sku: inventoryRecord.sku,
-            stock_count: inventoryRecord.stock_count,
-            sold_count: inventoryRecord.sold_count,
-            created_at: inventoryRecord.created_at,
-            updated_at: inventoryRecord.updated_at,
-            __v: inventoryRecord.__v,
-            inventory_details: inventoryDetails.map((detail) => ({
-              _id: detail._id,
-              product_id: detail.product_id,
-              product_inventory_id: detail.product_inventory_id,
-              size: detail.size,
-              color: detail.color,
-              additional_price: detail.additional_price,
-              extra_cost: detail.extra_cost,
-              stock_count: detail.stock_count,
-              image: detail.image,
-              created_at: detail.created_at,
-              updated_at: detail.updated_at,
-              __v: detail.__v,
-              attributes: inventoryDetailAttributes
-                .filter(
-                  (attr) =>
-                    attr.inventory_details_id.toString() ===
-                    detail._id.toString()
-                )
-                .map((attr) => ({
-                  _id: attr._id,
-                  inventory_details_id: attr.inventory_details_id,
-                  product_id: attr.product_id,
-                  name: attr.name,
-                  value: attr.value,
-                  created_at: attr.created_at,
-                  updated_at: attr.updated_at,
-                  __v: attr.__v,
-                })),
-            })),
-          }
+          _id: inventoryRecord._id,
+          product: inventoryRecord.product,
+          sku: inventoryRecord.sku,
+          stock_count: inventoryRecord.stock_count,
+          sold_count: inventoryRecord.sold_count,
+          created_at: inventoryRecord.created_at,
+          updated_at: inventoryRecord.updated_at,
+          __v: inventoryRecord.__v,
+          inventory_details: inventoryDetails.map((detail) => ({
+            _id: detail._id,
+            product_id: detail.product_id,
+            product_inventory_id: detail.product_inventory_id,
+            size: detail.size,
+            color: detail.color,
+            additional_price: detail.additional_price,
+            extra_cost: detail.extra_cost,
+            stock_count: detail.stock_count,
+            image: detail.image,
+            created_at: detail.created_at,
+            updated_at: detail.updated_at,
+            __v: detail.__v,
+            attributes: inventoryDetailAttributes
+              .filter(
+                (attr) =>
+                  attr.inventory_details_id.toString() ===
+                  detail._id.toString()
+              )
+              .map((attr) => ({
+                _id: attr._id,
+                inventory_details_id: attr.inventory_details_id,
+                product_id: attr.product_id,
+                name: attr.name,
+                value: attr.value,
+                created_at: attr.created_at,
+                updated_at: attr.updated_at,
+                __v: attr.__v,
+              })),
+          })),
+        }
         : null,
       execution_time: executionTime,
     };
@@ -1013,10 +1030,11 @@ export async function getProducts(query, user = null) {
   }
 }
 
-export async function getProductById(id, slug, categorySlug) {
+export async function getProductById(id, slug) {
   try {
+    // id is the category slug, slug is the product slug
     const product = await productService.getProductByIdAndSlug(
-      categorySlug,
+      id,
       slug
     );
     if (!product) {

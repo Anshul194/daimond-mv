@@ -138,9 +138,9 @@ const JewelryFilter = ({ Data }) => {
                 SETTING STYLE ?
               </h3>
               <div className="flex w-full overflow-x-scroll">
-                {Data?.Style?.map((profile) => (
+                {Data?.Style?.map((profile, index) => (
                   <div
-                    key={profile._id}
+                    key={profile._id || profile.id || `style-${index}`}
                     onClick={() =>
                       handleStyleSelect(profile.value.toLowerCase())
                     }
@@ -195,9 +195,9 @@ const JewelryFilter = ({ Data }) => {
               </div>
 
               <div className="flex gap-4 justify-center">
-                {Data?.["METAL TYPE"]?.map((metal) => (
+                {Data?.["METAL TYPE"]?.map((metal, index) => (
                   <div
-                    key={metal._id}
+                    key={metal._id || metal.id || `metal-${index}`}
                     onClick={() => handleMetalSelect(metal.value.toLowerCase())}
                     className={`flex flex-col items-center cursor-pointer p-2 rounded-lg transition-all ${
                       selectedMetal === metal.value.toLowerCase()
@@ -280,9 +280,9 @@ const JewelryFilter = ({ Data }) => {
               </button>
 
               <div className="flex gap-4 flex-1 overflow-hidden">
-                {visibleShapes?.map((shape) => (
+                {visibleShapes?.map((shape, index) => (
                   <div
-                    key={shape._id}
+                    key={shape._id || shape.id || `shape-${index}`}
                     onClick={() => handleShapeSelect(shape.value.toLowerCase())}
                     className={`flex flex-col items-center cursor-pointer  rounded-lg transition-all ${
                       selectedShape === shape.value.toLowerCase()
@@ -364,9 +364,9 @@ const JewelryFilter = ({ Data }) => {
             </div>
 
             <div className="flex gap-4 justify-center">
-              {Data?.["METAL TYPE"]?.map((metal) => (
+              {Data?.["METAL TYPE"]?.map((metal, index) => (
                 <div
-                  key={metal._id}
+                  key={metal._id || metal.id || `metal-${index}`}
                   onClick={() => handleMetalSelect(metal.value.toLowerCase())}
                   className={`flex flex-col items-center cursor-pointer p-2 rounded-lg transition-all ${
                     selectedMetal === metal.value.toLowerCase()
@@ -401,9 +401,9 @@ const JewelryFilter = ({ Data }) => {
               SETTING STYLE ?
             </h3>
             <div className="flex max-sm:w-[90vw] max-sm:overflow-x-auto">
-              {Data?.Style?.map((profile) => (
+              {Data?.Style?.map((profile, index) => (
                 <div
-                  key={profile._id}
+                  key={profile._id || profile.id || `style-${index}`}
                   onClick={() => handleStyleSelect(profile.value.toLowerCase())}
                   className={`flex flex-col items-center cursor-pointer p-3 rounded-lg transition-all min-w-[100px] ${
                     selectedSetting === profile.value.toLowerCase()
@@ -445,9 +445,9 @@ const JewelryFilter = ({ Data }) => {
               BAND TYPE ?
             </h3>
             <div className="flex gap-4 overflow-x-auto scrollbar-hide">
-              {Data?.["BAND TYPE"]?.map((band) => (
+              {Data?.["BAND TYPE"]?.map((band, index) => (
                 <div
-                  key={band._id}
+                  key={band._id || band.id || `band-${index}`}
                   onClick={() => handleBandSelect(band.value.toLowerCase())}
                   className={`flex flex-col items-center cursor-pointer p-3 rounded-lg transition-all min-w-[80px] ${
                     selectedBand === band.value.toLowerCase()
@@ -489,9 +489,9 @@ const JewelryFilter = ({ Data }) => {
               SETTING PROFILE ?
             </h3>
             <div className="flex gap-4">
-              {Data?.["SETTING"]?.map((profile) => (
+              {Data?.["SETTING"]?.map((profile, index) => (
                 <div
-                  key={profile.id}
+                  key={profile._id || profile.id || `setting-${index}`}
                   onClick={() =>
                     handleProfileSelect(profile.value.toLowerCase())
                   }

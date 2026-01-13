@@ -69,20 +69,38 @@ const RingsBuild = ({ props }) => {
     );
     console.log("categoryID", categoryID);
 
-    // Use Promise.all to fetch all attributes in parallel
-    const responses = await Promise.all(
-      attributes.map((attribute) => {
-        return axiosInstance.get(
-          `/api/productattribute?filters={"category_id":"${categoryID}","title":"${attribute}"}`
-        );
-      })
-    );
+    // Attributes to fetch (same set used in other category pages)
+    const attributes = [
+      "Shape",
+      "Style",
+      "METAL TYPE",
+      "BAND TYPE",
+      "SETTING",
+      "BAND",
+    ];
 
-    // Push data in attributeData with key
+    // Only fetch attributes if we have a valid category ID
     const attributeData = {};
-    responses.forEach((response, idx) => {
-      attributeData[attributes[idx]] = response.data.data.data[0]?.terms;
-    });
+    if (categoryID) {
+      try {
+        // Use Promise.all to fetch all attributes in parallel
+        const responses = await Promise.all(
+          attributes.map((attribute) => {
+            return axiosInstance.get(
+              `/api/productattribute?filters={"category_id":"${categoryID}","title":"${attribute}"}`
+            );
+          })
+        );
+
+        // Push data in attributeData with key
+        responses.forEach((response, idx) => {
+          attributeData[attributes[idx]] = response.data.data.data[0]?.terms;
+        });
+      } catch (err) {
+        console.error("Error fetching product attributes:", err);
+        // Continue without attributes rather than throwing to the UI
+      }
+    }
 
     // Combine the results into an object
 

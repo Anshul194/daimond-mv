@@ -14,6 +14,7 @@ const productInventorySchema = new Schema({
         type: String,
         // required: true,
         unique: true,
+        sparse: true, // Allow multiple null values
         trim: true,
     },
     stock_count: {
@@ -33,7 +34,8 @@ const productInventorySchema = new Schema({
 });
 
 // Indexes for faster querying
-productInventorySchema.index({ sku: 1 }, { unique: true });
+// Sparse unique index: allows multiple null values but enforces uniqueness for non-null values
+productInventorySchema.index({ sku: 1 }, { unique: true, sparse: true });
 productInventorySchema.index({ product: 1 });
 
 const ProductInventory = models.ProductInventory || model('ProductInventory', productInventorySchema);

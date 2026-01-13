@@ -137,11 +137,31 @@ const SliderBox = ({
   // Helper function to get item data based on type
   const getItemData = useCallback(
     (item) => {
+      const getValidImage = (img) => {
+        if (!img) return null;
+        if (typeof img === "string" && img.trim() !== "") return img;
+        if (typeof img === "object" && !Array.isArray(img)) return img.url || img.src || null;
+        return null;
+      };
+
+      let imageSrc = getValidImage(item.image);
+
+      if (!imageSrc && Array.isArray(item.image) && item.image.length > 0) {
+        imageSrc = getValidImage(item.image[0]);
+      }
+
+      if (!imageSrc && Array.isArray(item.images) && item.images.length > 0) {
+        imageSrc = getValidImage(item.images[0]);
+      }
+
+      // Final fallback
+      if (!imageSrc) imageSrc = "/images/fallback.webp";
+
       if (type === "products") {
         return {
           id: item._id || item.id,
           name: item.name || item.title || "Unnamed Product",
-          image: item.image || item.images?.[0] || "/images/fallback.webp",
+          image: imageSrc,
           backgroundPosition: item.backgroundPosition || "center center",
           price: item.price || null,
           originalPrice: item.originalPrice || null,
@@ -150,7 +170,7 @@ const SliderBox = ({
         return {
           id: item._id || item.value,
           name: item.value || item.name || "Unnamed Style",
-          image: item.image || "/images/fallback.webp",
+          image: imageSrc,
           backgroundPosition: item.backgroundPosition || "center center",
         };
       }

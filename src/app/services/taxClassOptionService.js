@@ -21,8 +21,8 @@ class TaxClassOptionService {
         is_shipping,
         is_compound,
         search,
-        sortBy = 'priority',
-        sortOrder = 'asc'
+        sortBy = 'createdAt',
+        sortOrder = 'desc'
       } = query;
 
       const pageNum = parseInt(page);
