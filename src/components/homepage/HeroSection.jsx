@@ -73,7 +73,7 @@ const HeroSection = () => {
 
           {/* CTA Button */}
           <Link href="/engagement-rings/build-ring">
-            <button className="bg-green-700 hover:bg-green-800 text-white font-light font-gintoNormal py-4 px-5 text-[10px] tracking-wide transition-colors duration-200">
+            <button className="bg-green-700 w-[170px] hover:bg-green-800 text-white font-light font-gintoNormal py-4 px-5 text-[10px] tracking-wide transition-colors duration-200">
               EXPLORE ENGAGEMENT
             </button>
           </Link>
