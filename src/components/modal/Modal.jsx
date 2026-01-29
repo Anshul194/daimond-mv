@@ -507,8 +507,8 @@ const ProductModal = ({ isOpen, onClose, productData, loading }) => {
       <div className="md:block relative w-full md:max-w-full lg:max-w-[60vw] xl:max-w-[800px] h-screen md:h-[100vh] md:mx-auto bg-[#F2F2F2] shadow-xl overflow-scroll pb-32">
         <ModalHeader onClose={onClose} />
 
-        <div className="flex flex-col md:flex-row overflow-hidden h-fit" style={{ height: 'calc(100% - 64px)' }}>
-          <div className="w-full md:w-1/2 h-4/5 relative">
+        <div className="flex flex-col md:flex-row">
+          <div className="w-full md:w-1/2 h-auto relative md:sticky md:top-0 md:self-start md:max-h-screen">
             <ImageSlider 
               images={productImages}
               currentIndex={currentImageIndex}

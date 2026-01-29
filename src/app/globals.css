@@ -127,6 +127,13 @@ button {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+h1{
+  color:black;
+}
+
+p{
+  color:black;
+}
 
 .dropdown-enter {
   opacity: 0;

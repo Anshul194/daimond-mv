@@ -43,6 +43,7 @@ const Navbar = () => {
   const [fineJewellerSubCategories, setFineJewellerSubCategories] = useState(
     []
   );
+  const [showMoreDropdown, setShowMoreDropdown] = useState(false);
   const dispatch = useDispatch();
 
   const navItems = [
@@ -55,6 +56,17 @@ const Navbar = () => {
       }))
       : []),
   ];
+
+
+  const visiblePriority = ["WEDDING RINGS", "ENGAGEMENT RINGS", "FINE JEWELLERY"];
+
+  const visibleLeftNavItems = navItems.filter((item) =>
+    visiblePriority.includes(item.name)
+  ).sort((a, b) => visiblePriority.indexOf(a.name) - visiblePriority.indexOf(b.name));
+
+  const hiddenLeftNavItems = navItems.filter(
+    (item) => !visiblePriority.includes(item.name)
+  );
 
   const getAttribute = async () => {
     try {
@@ -397,22 +409,22 @@ const Navbar = () => {
         </div>
       )}
       {/* Desktop Navbar */}
-      <nav className="sticky top-0 w-full xl:h-32 bg-[#FEFAF5] z-40">
+      <nav className="sticky top-0 w-full h-16 lg:h-32 bg-[#FEFAF5] z-40">
         <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20 xl:h-32">
+          <div className="flex items-center justify-between h-16 lg:h-32">
             {/* Mobile Menu Button - Left side on mobile */}
-            <div className="xl:hidden w-12 flex justify-start">
+            <div className="lg:hidden w-12 flex justify-start">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="text-gray-800 hover:text-gray-600 transition-colors duration-200"
+                className="text-black hover:text-black transition-colors duration-200"
               >
                 <Menu size={24} />
               </button>
             </div>
 
             {/* Left Navigation Items - Desktop only */}
-            <div className="hidden xl:flex xl:w-[40%] items-center justify-end gap-12">
-              {navItems.map((item) => (
+            <div className="hidden lg:flex lg:w-[40%] items-center justify-end md:gap-6 xl:gap-12">
+              {visibleLeftNavItems.map((item) => (
                 <div
                   key={item.name}
                   className="relative font-cullen"
@@ -451,12 +463,82 @@ const Navbar = () => {
                         ? "/fine-jewellery-807?finejewellery=6874b552f2ed2bebef46ccec"
                         : item?.href
                     }
-                    className="text-gray-800 hover:text-[#236339] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-200"
+                    className="text-black hover:text-[#236339] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-200"
                   >
                     {item.name}
                   </a>
                 </div>
               ))}
+
+              {/* MORE Dropdown */}
+              {hiddenLeftNavItems.length > 0 && (
+                <div
+                  className="relative font-cullen"
+                  onMouseEnter={() => setShowMoreDropdown(true)}
+                  onMouseLeave={() => setShowMoreDropdown(false)}
+                >
+                  <span className="text-black cursor-pointer hover:text-[#236339] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-200">
+                    MORE
+                  </span>
+
+                  {showMoreDropdown && (
+                    <div className="absolute top-full left-0 w-48 bg-[#FEFAF5] shadow-md border border-gray-100 py-2 z-50 flex flex-col mt-2">
+                       <div className="w-full h-full absolute top-[-10px] left-0 bg-transparent"></div>
+                      {hiddenLeftNavItems.map((item) => (
+                        <div
+                          key={item.name}
+                          className="relative px-6 py-3 hover:bg-gray-50"
+                          onMouseEnter={() => {
+                            if (item.hasDropdown) {
+                              if (item.name === "FINE JEWELLERY") {
+                                setShowJewelleryDropdown(true);
+                                setOpenMenuData(
+                                  attributesData[item.name] || {}
+                                );
+                              } else if (item.name === "WEDDING RINGS") {
+                                setShowWeddingDropdown(true);
+                                setOpenMenuData(
+                                  attributesData[item.name] || {}
+                                );
+                              } else if (item.name === "ENGAGEMENT RINGS") {
+                                setShowEngagementDropdown(true);
+                                setOpenMenuData(
+                                  attributesData[item.name] || {}
+                                );
+                              }
+                            }
+                          }}
+                          onMouseLeave={() => {
+                            if (item.hasDropdown) {
+                              if (item.name === "FINE JEWELLERY") {
+                                setShowJewelleryDropdown(false);
+                                // setOpenMenuData(null);
+                              } else if (item.name === "WEDDING RINGS") {
+                                setShowWeddingDropdown(false);
+                                // setOpenMenuData(null);
+                              } else if (item.name === "ENGAGEMENT RINGS") {
+                                setShowEngagementDropdown(false);
+                                // setOpenMenuData(null);
+                              }
+                            }
+                          }}
+                        >
+                          <a
+                            href={
+                              item.name === "FINE JEWELLERY"
+                                ? "/fine-jewellery-807?finejewellery=6874b552f2ed2bebef46ccec"
+                                : item?.href
+                            }
+                            className="text-black hover:text-[#236339] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-200 block"
+                          >
+                            {item.name}
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Logo - Centered on mobile, normal position on desktop */}
@@ -467,16 +549,16 @@ const Navbar = () => {
                   alt="Ardor Diamonds"
                   width={125}
                   height={50}
-                  className="object-contain" // Preserves aspect ratio
+                  className="object-contain w-[60px] md:w-[105px] lg:w-[125px]" // Preserves aspect ratio
                   priority // Important for LCP
                 />
               </Link>
             </div>
 
             {/* Right side - Desktop: Navigation + Icons, Mobile: Shopping bag only */}
-            <div className="flex xl:w-[40%] w-fit items-center gap-6">
+            <div className="flex lg:w-[40%] w-fit items-center gap-6">
               {/* Desktop Navigation */}
-              <div className="hidden xl:flex items-center justify-start gap-12 w-full">
+              <div className="hidden lg:flex items-center justify-start md:gap-6 xl:gap-12 w-full">
                 {rightNavItems.map((item) => (
                   <div
                     key={item.name}
@@ -500,7 +582,7 @@ const Navbar = () => {
                   >
                     <Link
                       href={item.href}
-                      className="text-gray-800 hover:text-[#236339] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-200"
+                      className="text-black hover:text-[#236339] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-200"
                     >
                       {item.name}
                     </Link>
@@ -511,19 +593,19 @@ const Navbar = () => {
                 <div className="flex items-center space-x-4">
                   <button
                     onClick={() => setShowSearch(true)}
-                    className="text-gray-800 hover:text-gray-600 transition-colors duration-200"
+                    className="text-black hover:text-black transition-colors duration-200"
                   >
                     <Search size={20} />
                   </button>
                   <Link href={"/cart"}>
-                    <button className="text-gray-800 hover:text-gray-600 transition-colors duration-200">
+                    <button className="text-black hover:text-black transition-colors duration-200">
                       <ShoppingBag size={20} />
                     </button>
                   </Link>
 
                   <button
                     onClick={handelProfileClick}
-                    className="text-gray-800 hover:text-gray-600 transition-colors duration-200"
+                    className="text-black hover:text-black transition-colors duration-200"
                   >
                     <User size={20} />
                   </button>
@@ -531,9 +613,9 @@ const Navbar = () => {
               </div>
 
               {/* Mobile Shopping Bag Icon */}
-              <div className="xl:hidden w-12 flex justify-end">
+              <div className="lg:hidden w-12 flex justify-end">
                 <Link href={"/cart"}>
-                  <button className="text-gray-800 hover:text-gray-600 transition-colors duration-200">
+                  <button className="text-black hover:text-black transition-colors duration-200">
                     <ShoppingBag size={20} />
                   </button>
                 </Link>
@@ -557,7 +639,7 @@ const Navbar = () => {
                   {/* Left Side - Text Categories */}
                   <div className="w-48">
                     <div>
-                      <h3 className="text-gray-700 text-sm font-medium font-gintoNord tracking-wide mb-6">
+                      <h3 className="text-black text-sm font-medium font-gintoNord tracking-wide mb-6">
                         JEWELLERY
                       </h3>
                       <div className="space-y-4">
@@ -574,7 +656,7 @@ const Navbar = () => {
                             <a
                               key={index}
                               href={`/fine-jewellery-807?finejewellery=${item._id}`}
-                              className="block capitalize text-gray-600 hover:text-[#236339] text-sm font-gintoNormal transition-colors duration-200"
+                              className="block capitalize text-black hover:text-[#236339] text-sm font-gintoNormal transition-colors duration-200"
                             >
                               {item.name}
                             </a>
@@ -596,7 +678,7 @@ const Navbar = () => {
                       >
                         <div className="group cursor-pointer">
                           <div className="relative overflow-hidden lg:mb-2 h-44">
-                            <h3 className="text-gray-700 text-sm font-medium tracking-wide group-hover:text-[#236339] font-gintoNord transition-colors duration-200">
+                            <h3 className="text-black text-sm font-medium tracking-wide group-hover:text-[#236339] font-gintoNord transition-colors duration-200">
                               STATEMENT RINGS
                             </h3>
                             <div className="w-full h-full bg-slate-300 flex items-center justify-center">
@@ -625,7 +707,7 @@ const Navbar = () => {
                       >
                         <div className="group cursor-pointer">
                           <div className="relative overflow-hidden lg:mb-2 h-44">
-                            <h3 className="text-gray-700 text-sm font-medium tracking-wide group-hover:text-[#236339] font-gintoNord transition-colors duration-200">
+                            <h3 className="text-black text-sm font-medium tracking-wide group-hover:text-[#236339] font-gintoNord transition-colors duration-200">
                               STACKER RINGS
                             </h3>
                             <div className="w-full h-full bg-yellow-200 flex items-center justify-center">
@@ -657,7 +739,7 @@ const Navbar = () => {
                       >
                         <div className="group cursor-pointer">
                           <div className="relative overflow-hidden  lg:mb-2 h-44">
-                            <h3 className="text-gray-700 text-sm font-medium tracking-wide group-hover:text-[#236339] font-gintoNord transition-colors duration-200">
+                            <h3 className="text-black text-sm font-medium tracking-wide group-hover:text-[#236339] font-gintoNord transition-colors duration-200">
                               MINIMAL RINGS
                             </h3>
                             <div className="w-full h-full bg-pink-200 flex items-center justify-center">
@@ -681,7 +763,7 @@ const Navbar = () => {
                       <a href={`/fine-jewellery-807/initial-signet-ring-317`}>
                         <div className="group cursor-pointer">
                           <div className="relative overflow-hidden  lg:mb-2 h-44">
-                            <h3 className="text-gray-700 text-sm font-medium tracking-wide group-hover:text-[#236339] font-gintoNord transition-colors duration-200">
+                            <h3 className="text-black text-sm font-medium tracking-wide group-hover:text-[#236339] font-gintoNord transition-colors duration-200">
                               INITIAL SIGNET RING
                             </h3>
                             <div className="w-full h-full bg-blue-200 flex items-center justify-center">
@@ -720,13 +802,13 @@ const Navbar = () => {
               <div className="flex gap-12">
                 {/* BUILD A RING */}
                 <div className="w-60">
-                  <h3 className="text-gray-700 text-sm font-gintoNord font-me-700 font-ge tracking-wide mb-6">
+                  <h3 className="text-black text-sm font-gintoNord font-me-700 font-ge tracking-wide mb-6">
                     BUILD A RING
                   </h3>
                   <div className="space-y-4">
                     <a
                       href="/engagement-230"
-                      className="flex items-center font-gintoNord text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200"
+                      className="flex items-center font-gintoNord text-black hover:text-[#236339] text-sm transition-colors duration-200"
                     >
                       <div className="w-6 h-6 rounded-full border-2 border-gray-400 mr-3 flex items-center justify-center">
                         <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
@@ -737,7 +819,7 @@ const Navbar = () => {
 
                   <Link href="/new-arrivals">
                     <div className="mt-8">
-                      <h4 className="text-gray-700 text-[10px] font-gintoNord font-medium tracking-wide mb-4">
+                      <h4 className="text-black text-[10px] font-gintoNord font-medium tracking-wide mb-4">
                         NEW ARRIVALS
                       </h4>
                     </div>
@@ -745,7 +827,7 @@ const Navbar = () => {
 
                   <Link href="/custom-made-engagement-rings">
                     <div className="mt-3">
-                      <h4 className="text-gray-700 text-[10px] font-gintoNord font-medium tracking-wide mb-4">
+                      <h4 className="text-black text-[10px] font-gintoNord font-medium tracking-wide mb-4">
                         CUSTOM-MADE RINGS
                       </h4>
                     </div>
@@ -754,7 +836,7 @@ const Navbar = () => {
 
                 {/* SHOP BY METAL */}
                 <div className="w-60">
-                  <h3 className="text-gray-700 font-gintoNord text-sm font-medium tracking-wide mb-6">
+                  <h3 className="text-black font-gintoNord text-sm font-medium tracking-wide mb-6">
                     SHOP BY METAL
                   </h3>
                   <div className="space-y-4">
@@ -763,7 +845,7 @@ const Navbar = () => {
                         <a
                           key={index}
                           href={`/engagement-230?metal=${metal.value.toLowerCase()}`}
-                          className="flex gap-2 items-center text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                          className="flex gap-2 items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                         >
                           <Image
                             height={24}
@@ -779,7 +861,7 @@ const Navbar = () => {
 
                 {/* SHOP BY STYLE */}
                 <div className="w-60">
-                  <h3 className="text-gray-700 font-gintoNord text-sm font-medium tracking-wide mb-6">
+                  <h3 className="text-black font-gintoNord text-sm font-medium tracking-wide mb-6">
                     SHOP BY STYLE
                   </h3>
                   <div className="space-y-4">
@@ -787,7 +869,7 @@ const Navbar = () => {
                       openMenuData["Style"]?.map((style, index) => (
                         <a
                           href={`/engagement-230?style=${style.value.toLowerCase()}`}
-                          className="flex gap-4 items-center text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                          className="flex gap-4 items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                         >
                           <Image
                             height={32}
@@ -804,43 +886,43 @@ const Navbar = () => {
 
                 {/* ENGAGEMENT RING GUIDANCE */}
                 <div className="w-60">
-                  <h3 className="text-gray-700 tex-700 font-gintoNord font-medium tracking-wide mb-6">
+                  <h3 className="text-black tex-700 font-gintoNord font-medium tracking-wide mb-6">
                     ENGAGEMENT RING GUIDANCE
                   </h3>
                   <div className="space-y-4">
                     <a
                       href="/engagement-rings/build-rings"
-                      className="block text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       Design Basics
                     </a>
                     <a
                       href="/engagement-rings/build-rings"
-                      className="block text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       Engagement Ring Guide
                     </a>
                     <a
                       href="/engagement-rings/build-rings"
-                      className="block text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       Find Your Ring Size
                     </a>
                     <a
                       href="/engagement-rings/build-rings"
-                      className="block text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       Precious Metals Guide
                     </a>
                     <a
                       href="/engagement-rings/build-rings"
-                      className="block text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       Our Crafting Process
                     </a>
                     <a
                       href="/engagement-rings/build-rings"
-                      className="block text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       Ring Care Guide
                     </a>
@@ -862,7 +944,7 @@ const Navbar = () => {
               <div className="flex gap-12">
                 {/* Left Side - Women's Section */}
                 <div className="w-60">
-                  <h3 className="text-gray-700 text-sm font-medium tracking-wide mb-6 font-gintoNord ">
+                  <h3 className="text-black text-sm font-medium tracking-wide mb-6 font-gintoNord ">
                     WOMEN
                   </h3>
                   <div className="space-y-4">
@@ -877,7 +959,7 @@ const Navbar = () => {
                         <a
                           key={index}
                           href={`/wedding-rings-873?gender=woman&style=${band.value.toLowerCase()}`}
-                          className="block text-gray-600 hover:text-[#236339] text-sm font-gintoNormal transition-colors duration-200"
+                          className="block text-black hover:text-[#236339] text-sm font-gintoNormal transition-colors duration-200"
                         >
                           {band.value} Woman Wedding Rings
                         </a>
@@ -887,7 +969,7 @@ const Navbar = () => {
 
                 {/* Middle - Women's by Metal */}
                 <div className="w-60">
-                  <h3 className="text-gray-700 text-sm font-medium tracking-wide mb-6 font-gintoNord ">
+                  <h3 className="text-black text-sm font-medium tracking-wide mb-6 font-gintoNord ">
                     RINGS BY METAL
                   </h3>
                   <div className="space-y-4">
@@ -896,7 +978,7 @@ const Navbar = () => {
                         <a
                           key={index}
                           href={`/engagement-230?metal=${metal.value.toLowerCase()}`}
-                          className="flex gap-2 items-center text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                          className="flex gap-2 items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                         >
                           <Image
                             height={24}
@@ -912,13 +994,13 @@ const Navbar = () => {
 
                 {/* Right Side - Men's Section */}
                 <div className="w-60">
-                  <h3 className="text-gray-700 text-sm font-medium tracking-wide mb-6 font-gintoNord ">
+                  <h3 className="text-black text-sm font-medium tracking-wide mb-6 font-gintoNord ">
                     MEN
                   </h3>
                   <div className="space-y-4">
                     <a
                       href="/wedding-rings-873?gender=man"
-                      className="block text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       All Men's Wedding Rings
                     </a>
@@ -927,7 +1009,7 @@ const Navbar = () => {
                         <a
                           key={index}
                           href={`/wedding-rings-873?gender=man&style=${band.value.toLowerCase()}`}
-                          className="block text-gray-600 hover:text-[#236339] text-sm font-gintoNormal transition-colors duration-200"
+                          className="block text-black hover:text-[#236339] text-sm font-gintoNormal transition-colors duration-200"
                         >
                           {band.value} Man's Wedding Rings
                         </a>
@@ -937,55 +1019,55 @@ const Navbar = () => {
 
                 {/* Far Right - Men's by Metal */}
                 {/* <div className="w-60">
-                  <h3 className="text-gray-700 text-sm font-medium tracking-wide mb-6 font-gintoNord ">
+                  <h3 className="text-black text-sm font-medium tracking-wide mb-6 font-gintoNord ">
                     MEN'S BY METAL
                   </h3>
                   <div className="space-y-4">
                     <a
                       href="/wedding-rings/women"
-                      className="flex items-center text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="flex items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 mr-3"></div>
                       Platinum
                     </a>
                     <a
                       href="/wedding-rings/women"
-                      className="flex items-center text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="flex items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       <div className="w-6 h-6 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-500 mr-3"></div>
                       Yellow Gold
                     </a>
                     <a
                       href="/wedding-rings/women"
-                      className="flex items-center text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="flex items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-300 to-rose-400 mr-3"></div>
                       Rose Gold
                     </a>
                     <a
                       href="/wedding-rings/women"
-                      className="flex items-center text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="flex items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-100 to-gray-300 mr-3"></div>
                       White Gold
                     </a>
                     <a
                       href="/wedding-rings/women"
-                      className="flex items-center text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="flex items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 mr-3"></div>
                       Titanium
                     </a>
                     <a
                       href="/wedding-rings/women"
-                      className="flex items-center text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="flex items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 mr-3"></div>
                       Tantalum
                     </a>
                     <a
                       href="/wedding-rings/women"
-                      className="flex items-center text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="flex items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-900 to-black mr-3"></div>
                       Carbon Fibre
@@ -995,37 +1077,37 @@ const Navbar = () => {
 
                 {/* Wedding Ring Guidance */}
                 <div className="w-60">
-                  <h3 className="text-gray-700 text-sm font-medium tracking-wide mb-6 font-gintoNord ">
+                  <h3 className="text-black text-sm font-medium tracking-wide mb-6 font-gintoNord ">
                     WEDDING RING GUIDANCE
                   </h3>
                   <div className="space-y-4">
                     <a
                       href="/wedding-rings/women"
-                      className="block text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       Wedding Ring Guide
                     </a>
                     <a
                       href="/wedding-rings/women"
-                      className="block text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       Design Basics
                     </a>
                     <a
                       href="/wedding-rings/women"
-                      className="block text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       Find Your Ring Size
                     </a>
                     <a
                       href="/precious-metals-guide"
-                      className="block text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       Precious Metals Guide
                     </a>
                     <a
                       href="/crafting-process"
-                      className="block text-gray-600 hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       Our Crafting Process
                     </a>
@@ -1049,25 +1131,25 @@ const Navbar = () => {
                 {/* Left Side - Contact Options */}
                 <div className="w-48 lg:w-[30%]">
                   <div>
-                    <h3 className="text-gray-700 text-sm font-medium font-gintoNord tracking-wide mb-6">
+                    <h3 className="text-black text-sm font-medium font-gintoNord tracking-wide mb-6">
                       CONTACT US
                     </h3>
                     <div>
                       <a
                         href="/contact"
-                        className="block text-gray-600 hover:bg-[#fff4e6] py-3 px-1 text-sm font-gintoNormal transition-colors duration-200"
+                        className="block text-black hover:bg-[#fff4e6] py-3 px-1 text-sm font-gintoNormal transition-colors duration-200"
                       >
                         Get In Touch
                       </a>
                       <a
                         href="/meet"
-                        className="block text-gray-600 hover:bg-[#fff4e6] py-3 px-1 text-sm font-gintoNormal transition-colors duration-200"
+                        className="block text-black hover:bg-[#fff4e6] py-3 px-1 text-sm font-gintoNormal transition-colors duration-200"
                       >
                         Book an Appointment
                       </a>
                       <a
                         href="/faqs"
-                        className="block text-gray-600 hover:bg-[#fff4e6] py-3 px-1 text-sm font-gintoNormal transition-colors duration-200"
+                        className="block text-black hover:bg-[#fff4e6] py-3 px-1 text-sm font-gintoNormal transition-colors duration-200"
                       >
                         FAQs
                       </a>
@@ -1081,7 +1163,7 @@ const Navbar = () => {
                     {/* Get In Touch */}
                     <div className="group cursor-pointer">
                       <div className="relative overflow-hidden lg:mb-2 h-44">
-                        <h3 className="text-gray-700 text-sm font-medium tracking-wide  group-hover:text-[#236339] font-gintoNord transition-colors duration-200">
+                        <h3 className="text-black text-sm font-medium tracking-wide  group-hover:text-[#236339] font-gintoNord transition-colors duration-200">
                           GET IN TOUCH
                         </h3>
                         <div className="w-full h-full bg-slate-300 flex items-center justify-center">
@@ -1099,7 +1181,7 @@ const Navbar = () => {
                     {/* Book Appointment */}
                     <div className="group cursor-pointer">
                       <div className="relative overflow-hidden lg:mb-2 h-44">
-                        <h3 className="text-gray-700 text-sm font-medium tracking-wide group-hover:text-[#236339] font-gintoNord transition-colors duration-200">
+                        <h3 className="text-black text-sm font-medium tracking-wide group-hover:text-[#236339] font-gintoNord transition-colors duration-200">
                           BOOK AN APPOINTMENT
                         </h3>
                         <div className="w-full h-full bg-yellow-200 flex items-center justify-center">
@@ -1141,7 +1223,7 @@ const Navbar = () => {
                       }
                     >
                       {" "}
-                      <h2 className="block w-full text-gray-600 hover:bg-slate-500/5 py-2  px-2 text-lg font-medium font-gintoNormal transition-colors duration-200">
+                      <h2 className="block w-full text-black hover:bg-slate-500/5 py-2  px-2 text-lg font-medium font-gintoNormal transition-colors duration-200">
                         {category.subCategory.name}
                       </h2>
                     </Link>
@@ -1157,7 +1239,7 @@ const Navbar = () => {
                         key={blog._id}
                       >
                         {" "}
-                        <h2 className="block w-full text-gray-600 hover:bg-slate-500/5 py-2 ml-4 px-2 text-sm font-medium font-gintoNormal transition-colors duration-200">
+                        <h2 className="block w-full text-black hover:bg-slate-500/5 py-2 ml-4 px-2 text-sm font-medium font-gintoNormal transition-colors duration-200">
                           {" "}
                           {blog.title}
                         </h2>
@@ -1166,7 +1248,7 @@ const Navbar = () => {
 
                     <Link
                       href={"#"}
-                      className="block w-full text-gray-600 hover:bg-slate-500/5 py-2 ml-4 px-2 text-sm font-medium italic underline transition-colors duration-200"
+                      className="block w-full text-black hover:bg-slate-500/5 py-2 ml-4 px-2 text-sm font-medium italic underline transition-colors duration-200"
                     >
                       View more
                     </Link>
@@ -1184,19 +1266,19 @@ const Navbar = () => {
           <div className="h-full w-[80%] max-w-[240px] bg-[#FEFAF5] flex flex-col">
             {/* Header with close button */}
             <div className="flex items-center justify-between px-4 h-16 border-b border-gray-200 bg-[#FEFAF5] relative z-[10000]">
-              <div className="w-6"></div> {/* Spacer */}
+              {/* <div className="w-6"></div>  */}
               <button
                 onClick={() => {
                   setShowSearch(true);
                   setIsMobileMenuOpen(false);
                 }}
-                className="text-gray-800 hover:text-gray-600 transition-colors duration-200"
+                className="text-black hover:text-black transition-colors duration-200"
               >
                 <Search size={20} />
               </button>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-gray-800 hover:text-gray-600 transition-colors duration-200"
+                className="text-black hover:text-black transition-colors duration-200"
               >
                 <X size={24} />
               </button>
@@ -1205,19 +1287,17 @@ const Navbar = () => {
             {/* Navigation Items */}
             <div className="flex-1 px-4 py-8 overflow-y-auto">
               <div className="space-y-6">
-                {/* Regular nav items without dropdowns */}
-                {navItems
-                  .filter((item) => !item.hasDropdown)
-                  .map((item) => (
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      className="block text-gray-800 hover:text-gray-600 text-[10px] font-medium tracking-wide transition-colors duration-200"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {item.name}
-                    </a>
-                  ))}
+                {/* Hidden items from desktop (More dropdown) */}
+                {hiddenLeftNavItems.map((item) => (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    className="block text-black hover:text-black text-[10px] font-medium tracking-wide transition-colors duration-200"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {item.name}
+                  </a>
+                ))}
 
                 {/* Accordion for Fine Jewellery */}
                 {mobileAccordionItems.map((accordionItem, index) => (
@@ -1227,7 +1307,7 @@ const Navbar = () => {
                   >
                     <button
                       onClick={() => toggleAccordion(index)}
-                      className="flex items-center justify-between w-full text-left text-gray-800 hover:text-gray-600 text-[10px] font-medium tracking-wide transition-colors duration-200"
+                      className="flex items-center justify-between w-full text-left text-black hover:text-black text-[10px] font-medium tracking-wide transition-colors duration-200"
                     >
                       <span>{accordionItem.title}</span>
                       {expandedAccordion === index ? (
@@ -1244,7 +1324,7 @@ const Navbar = () => {
                             {subcat.items ? (
                               // If subcategory has items, show as a submenu
                               <div>
-                                <div className="text-gray-600 text-[10px] font-medium tracking-wide mb-2">
+                                <div className="text-black text-[10px] font-medium tracking-wide mb-2">
                                   {subcat.name}
                                 </div>
                                 <div className="ml-3 space-y-2">
@@ -1252,7 +1332,7 @@ const Navbar = () => {
                                     <a
                                       key={item.name}
                                       href={item.href}
-                                      className="block text-gray-500 hover:text-[#236339] text-[10px] transition-colors duration-200"
+                                      className="block text-black hover:text-[#236339] text-[10px] transition-colors duration-200"
                                       onClick={() => setIsMobileMenuOpen(false)}
                                     >
                                       {item.name}
@@ -1264,7 +1344,7 @@ const Navbar = () => {
                               // If subcategory has no items, show as direct link
                               <a
                                 href={subcat.href}
-                                className="block text-gray-600 hover:text-[#236339] text-[10px] transition-colors duration-200"
+                                className="block text-black hover:text-[#236339] text-[10px] transition-colors duration-200"
                                 onClick={() => setIsMobileMenuOpen(false)}
                               >
                                 {subcat.name}
@@ -1282,7 +1362,7 @@ const Navbar = () => {
                   <a
                     key={item.name}
                     href={item.href}
-                    className="block text-gray-800 hover:text-gray-600 text-[10px] font-medium tracking-wide transition-colors duration-200"
+                    className="block text-black hover:text-black text-[10px] font-medium tracking-wide transition-colors duration-200"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {item.name}
@@ -1292,7 +1372,7 @@ const Navbar = () => {
                 {/* Book Appointment - Special styling */}
                 <a
                   href="/book-appointment"
-                  className="block text-teal-600 hover:text-teal-700 text-lg font-medium tracking-wide transition-colors duration-200 pt-4"
+                  className="block text-black hover:text-black text-lg font-medium tracking-wide transition-colors duration-200 pt-4"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   BOOK APPOINTMENT
@@ -1304,7 +1384,7 @@ const Navbar = () => {
             <div className="px-4 pb-8">
               {/* Currency Selector */}
               <div className="mb-8">
-                <select className="text-gray-800 text-sm font-medium tracking-wide bg-transparent border-none outline-none">
+                <select className="text-black text-sm font-medium tracking-wide bg-transparent border-none outline-none">
                   <option>IN (USD $)</option>
                   <option>IN (EUR €)</option>
                   <option>IN (GBP £)</option>
@@ -1315,13 +1395,13 @@ const Navbar = () => {
               <div className="flex items-center space-x-6 flex-wrap gap-2">
                 <a
                   href="#"
-                  className="text-gray-800 hover:text-gray-600 transition-colors duration-200"
+                  className="text-black hover:text-black transition-colors duration-200"
                 >
                   <Instagram size={20} />
                 </a>
                 <a
                   href="#"
-                  className="text-gray-800 hover:text-gray-600 transition-colors duration-200"
+                  className="text-black hover:text-black transition-colors duration-200"
                 >
                   <svg
                     width="20"
@@ -1334,19 +1414,19 @@ const Navbar = () => {
                 </a>
                 <a
                   href="#"
-                  className="text-gray-800 hover:text-gray-600 transition-colors duration-200"
+                  className="text-black hover:text-black transition-colors duration-200"
                 >
                   <Facebook size={20} />
                 </a>
                 <a
                   href="#"
-                  className="text-gray-800 hover:text-gray-600 transition-colors duration-200"
+                  className="text-black hover:text-black transition-colors duration-200"
                 >
                   <Youtube size={20} />
                 </a>
                 <a
                   href="#"
-                  className="text-gray-800 hover:text-gray-600 transition-colors duration-200"
+                  className="text-black hover:text-black transition-colors duration-200"
                 >
                   <svg
                     width="20"
@@ -1359,7 +1439,7 @@ const Navbar = () => {
                 </a>
                 <a
                   href="#"
-                  className="text-gray-800 hover:text-gray-600 transition-colors duration-200"
+                  className="text-black hover:text-black transition-colors duration-200"
                 >
                   <svg
                     width="20"
