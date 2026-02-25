@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const AdminSchema = new mongoose.Schema({
     username: {
@@ -19,7 +19,7 @@ const AdminSchema = new mongoose.Schema({
         unique: true,
         trim: true,
         lowercase: true,
-        index: true 
+        index: true
     },
     role: {
         type: String,
@@ -29,7 +29,7 @@ const AdminSchema = new mongoose.Schema({
     storeName: {
         type: String,
         trim: true,
-        required: function() { return this.role === 'vendor'; },
+        required: function () { return this.role === 'vendor'; },
     },
     contactNumber: {
         type: String,
@@ -44,7 +44,7 @@ const AdminSchema = new mongoose.Schema({
         default: true,
     }
 }, {
-    timestamps: true 
+    timestamps: true
 });
 
 // Compound index for username and email (optional, if you query both together)

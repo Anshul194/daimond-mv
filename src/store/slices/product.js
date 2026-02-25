@@ -1,6 +1,32 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../../axiosConfig/axiosInstance";
 
+// Helper function to convert sort format to query string format
+const convertSortToQueryString = (sortValue) => {
+  if (!sortValue || sortValue === "") {
+    return undefined;
+  }
+
+  // Handle special sort options
+  if (sortValue === "best_sellers") {
+    return "BEST";
+  }
+
+  if (sortValue === "newest") {
+    return "NEWEST";
+  }
+
+  // Handle format like "price_asc", "price_desc", etc.
+  if (sortValue.includes("_")) {
+    const [field, direction] = sortValue.split("_");
+    if (field === "price") {
+      return direction === "asc" ? "PRICE_LOW_TO_HIGH" : "PRICE_HIGH_TO_LOW";
+    }
+  }
+
+  return undefined;
+};
+
 // Async thunk to fetch products by category
 export const fetchProductsByCategory = createAsyncThunk(
   "product/fetchByCategory",
@@ -8,31 +34,78 @@ export const fetchProductsByCategory = createAsyncThunk(
     try {
       const params = new URLSearchParams();
 
-      const payload = {};
-
-      if (data.categoryId) {
-        payload.category_id = data.categoryId;
+      // Add sort parameter
+      if (data.sort) {
+        const sortValue = convertSortToQueryString(data.sort);
+        if (sortValue) {
+          params.append("sort_by", sortValue);
+        }
       }
 
-      if (data.gender && data.gender !== "both" && data.gender !== "") {
-        payload.gender = data.gender;
+      // Handle category IDs - include or exclude
+      if (data.includeCategoryIds && Array.isArray(data.includeCategoryIds) && data.includeCategoryIds.length > 0) {
+        params.append("include_category_ids", data.includeCategoryIds.join(","));
       }
 
-      if (data.subCategory) {
-        payload.subCategory_id = data.subCategory;
+      if (data.excludeCategoryIds && Array.isArray(data.excludeCategoryIds) && data.excludeCategoryIds.length > 0) {
+        params.append("exclude_category_ids", data.excludeCategoryIds.join(","));
+      }
+
+      // If single categoryId is provided, add it to include_category_ids
+      if (data.categoryId && !data.includeCategoryIds) {
+        params.append("include_category_ids", data.categoryId);
+      }
+
+      // Add in-stock filter
+      if (data.inStock) {
+        params.append("in_stock", "yes");
+      }
+
+      // Add page parameter
+      if (data.page) {
+        params.append("page", data.page);
       }
 
       if (data.limit) {
         params.append("limit", data.limit);
       }
-      if (data.sort) {
-        params.append("sort", data.sort);
+
+      // Add price range filters
+      if (data.priceMin !== undefined) {
+        params.append("price_min", data.priceMin);
+      }
+      if (data.priceMax !== undefined) {
+        params.append("price_max", data.priceMax);
       }
 
-      params.append("filters", JSON.stringify(payload));
-      if (data.attributeFilter && data.attributeFilter.length > 0) {
-        params.append("attributeFilters", JSON.stringify(data.attributeFilter));
+      // Add carat range filters
+      if (data.caratMin !== undefined) {
+        params.append("carat_min", data.caratMin);
       }
+      if (data.caratMax !== undefined) {
+        params.append("carat_max", data.caratMax);
+      }
+
+      // Add attribute filters (shape, metal, stones)
+      if (data.attributeFilter && data.attributeFilter.length > 0) {
+        // Assuming attributeFilter is an array of attribute IDs or values
+        params.append("attribute_filters", data.attributeFilter.join(","));
+      }
+
+      // Add subcategory filter if provided
+      if (data.subCategory) {
+        params.append("subcategory_id", data.subCategory);
+      }
+
+      // Add gender filter
+      if (data.gender) {
+        params.append("gender", data.gender);
+      }
+
+      const finalUrl = `/api/product?${params.toString()}`;
+      console.log('Fetching products from URL:', finalUrl);
+      console.log('API Request params:', Object.fromEntries(params));
+
       const response = await axiosInstance.get("/api/product", {
         params,
         headers: {
@@ -51,7 +124,9 @@ export const fetchProductsByCategory = createAsyncThunk(
       };
     } catch (err) {
       console.log("Error fetching products:", err);
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(
+        err.response?.data?.message || err.message || "Failed to fetch products"
+      );
     }
   }
 );
@@ -73,7 +148,9 @@ export const fetchProductsByCategoryWithPagination = createAsyncThunk(
       return response.data?.body?.data?.docs;
     } catch (err) {
       console.log("Error fetching products with pagination:", err);
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(
+        err.response?.data?.message || err.message || "Failed to fetch products"
+      );
     }
   }
 );
@@ -92,7 +169,9 @@ export const fetchProductById = createAsyncThunk(
       return { ...productData, detailedDataLoaded: true };
     } catch (err) {
       console.log("Error fetching product by id:", err);
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(
+        err.response?.data?.message || err.message || "Failed to fetch product"
+      );
     }
   }
 );
@@ -118,29 +197,97 @@ export const fetchProductsByAttribute = createAsyncThunk(
       return response.data?.body?.data?.docs;
     } catch (err) {
       console.log("Error fetching products by attribute:", err);
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(
+        err.response?.data?.message || err.message || "Failed to fetch products"
+      );
     }
   }
 );
 
 export const getMoreProducts = createAsyncThunk(
   "product/getMoreProducts",
-  async ({ categoryId, page = 1, limit = 10 }, { rejectWithValue }) => {
+  async ({ categoryId, page = 1, limit = 10, sort, inStock, subCategory, attributeFilter, priceMin, priceMax, caratMin, caratMax, includeCategoryIds, excludeCategoryIds, gender }, { rejectWithValue }) => {
     try {
+      const params = new URLSearchParams();
+
+      // Add sort parameter
+      if (sort) {
+        const sortValue = convertSortToQueryString(sort);
+        if (sortValue) {
+          params.append("sort_by", sortValue);
+        }
+      }
+
+      // Handle category IDs - include or exclude
+      if (includeCategoryIds && Array.isArray(includeCategoryIds) && includeCategoryIds.length > 0) {
+        params.append("include_category_ids", includeCategoryIds.join(","));
+      }
+
+      if (excludeCategoryIds && Array.isArray(excludeCategoryIds) && excludeCategoryIds.length > 0) {
+        params.append("exclude_category_ids", excludeCategoryIds.join(","));
+      }
+
+      // If single categoryId is provided, add it to include_category_ids
+      if (categoryId && !includeCategoryIds) {
+        params.append("include_category_ids", categoryId);
+      }
+
+      // Add in-stock filter
+      if (inStock) {
+        params.append("in_stock", "yes");
+      }
+
+      if (page) {
+        params.append("page", page);
+      }
+
+      if (limit) {
+        params.append("limit", limit);
+      }
+
+      // Add price range filters
+      if (priceMin !== undefined) {
+        params.append("price_min", priceMin);
+      }
+      if (priceMax !== undefined) {
+        params.append("price_max", priceMax);
+      }
+
+      // Add carat range filters
+      if (caratMin !== undefined) {
+        params.append("carat_min", caratMin);
+      }
+      if (caratMax !== undefined) {
+        params.append("carat_max", caratMax);
+      }
+
+      // Add attribute filters
+      if (attributeFilter && attributeFilter.length > 0) {
+        params.append("attribute_filters", attributeFilter.join(","));
+      }
+
+      // Add subcategory filter if provided
+      if (subCategory) {
+        params.append("subcategory_id", subCategory);
+      }
+
+      // Add gender filter
+      if (gender) {
+        params.append("gender", gender);
+      }
+
       const response = await axiosInstance.get("/api/product", {
-        params: {
-          filters: JSON.stringify({ category_id: categoryId }),
-          page,
-          limit,
-        },
+        params,
         headers: {
-          "content-type": "application/json",
+          "content-type": "application/x-www-form-urlencoded",
         },
       });
       return response.data?.body?.data?.docs;
     } catch (err) {
       console.log("Error fetching more products:", err);
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue(
+        err.response?.data?.message || err.message || "Failed to load more products"
+      );
     }
   }
 );
@@ -186,6 +333,8 @@ const productSlice = createSlice({
       .addCase(fetchProductsByCategory.pending, (state) => {
         state.loading = true;
         state.error = null;
+        // Clear existing products when starting a new fetch
+        state.items = [];
       })
       .addCase(fetchProductsByCategory.fulfilled, (state, action) => {
         console.log(
@@ -193,6 +342,7 @@ const productSlice = createSlice({
           action.payload
         );
         state.loading = false;
+        // Replace items with new data (don't append)
         state.items = action.payload.items || [];
         state.pagination = action.payload.pagination || {
           currentPage: 1,

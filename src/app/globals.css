@@ -135,6 +135,22 @@ p{
   color:black;
 }
 
+/* Override all light gray text colors to dark for better readability */
+.text-gray-500,
+.text-gray-600,
+.text-gray-700,
+.text-gray-800 {
+  color: #1a1a1a !important;
+}
+
+.text-gray-400 {
+  color: #2d2d2d !important;
+}
+
+.text-gray-900 {
+  color: #000000 !important;
+}
+
 .dropdown-enter {
   opacity: 0;
   transform: translateY(-10px);

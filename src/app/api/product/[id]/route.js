@@ -37,10 +37,12 @@ export async function PUT(request, context) {
       if (!rawBody) throw new Error("Empty JSON body");
 
       const json = JSON.parse(rawBody);
+      console.log("Received JSON body:", json);
       const formData = new FormData();
       Object.entries(json).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          formData.append(key, value);
+          formData.append(key, String(value));
+          console.log(`FormData append: ${key} = ${value}`);
         }
       });
       data = formData;
@@ -49,7 +51,11 @@ export async function PUT(request, context) {
     }
 
     // ✅ Call the controller
-    console.log("Data to update:", data);
+    console.log("Data to update keys:", Array.from(data.keys()));
+    // Log variant specific keys to see if they are actually indexed
+    const variantKeys = Array.from(data.keys()).filter(k => k.includes('['));
+    console.log("Variant-related keys being sent:", variantKeys);
+
     const result = await updateProduct(id, data);
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {

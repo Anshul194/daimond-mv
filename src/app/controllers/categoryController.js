@@ -7,7 +7,7 @@ import { categoryCreateValidator, categoryUpdateValidator } from '../validators/
 import { successResponse, errorResponse } from '../utils/response.js';
 
 const categoryService = new CategoryService();
-const redis = initRedis(); 
+const redis = initRedis();
 
 // Accepts a second argument: admin (from token)
 export async function createCategory(form, admin = null) {
@@ -96,16 +96,25 @@ export async function getCategories(query, admin = null) {
     }
     console.log('[DEBUG] Final query to service:', query);
     const result = await categoryService.getAllCategories(query);
-    console.log('[DEBUG] Categories returned:', Array.isArray(result) ? result.length : result);
-    return {
-      status: 200,
-      body: successResponse(result, 'Categories fetched successfully'),
+    console.log('[DEBUG] Categories returned:', result);
+    
+    // Handle the result structure - it should have { result, currentPage, totalPages, totalDocuments }
+    const categoriesData = result?.result || result || [];
+    const responseData = {
+      result: categoriesData, // Use 'result' to match frontend expectation
+      currentPage: result?.currentPage || 1,
+      totalPages: result?.totalPages || 1,
+      totalDocuments: result?.totalDocuments || categoriesData.length
     };
+    
+    // successResponse already returns { status, body: {...} }, so we return it directly
+    return successResponse(responseData, 'Categories fetched successfully');
   } catch (err) {
     console.error('Get Categories error:', err.message);
+    console.error('Get Categories error stack:', err.stack);
     return {
       status: 500,
-      body: errorResponse('Server error', 500),
+      body: errorResponse(err.message || 'Server error', 500),
     };
   }
 }

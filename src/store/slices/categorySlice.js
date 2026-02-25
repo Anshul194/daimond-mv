@@ -10,13 +10,17 @@ export const fetchCategories = createAsyncThunk(
     try {
       const response = await axiosInstance.get('/api/category', {
         headers: {
-            'Content-Type': 'application/json',
+          'Content-Type': 'application/json',
         },
       });
-      console.log('response',response.data);
+      console.log('response', response.data);
       return response.data?.body?.data?.result || [];
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Error fetching categories');
+      return rejectWithValue(
+        error.response?.data?.message ||
+        error.message ||
+        "Error fetching categories"
+      );
     }
   }
 );

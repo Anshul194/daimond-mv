@@ -461,7 +461,13 @@ const Navbar = () => {
                     href={
                       item.name === "FINE JEWELLERY"
                         ? "/fine-jewellery-807?finejewellery=6874b552f2ed2bebef46ccec"
-                        : item?.href
+                        : item.name === "WEDDING RINGS"
+                          ? "/wedding-rings-105"
+                          : item.name === "ENGAGEMENT RINGS"
+                            ? "/engagement-rings-334"
+                            : item.name === "RINGS"
+                              ? "/rings-945"
+                              : item?.href
                     }
                     className="text-black hover:text-[#236339] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-200"
                   >
@@ -483,7 +489,7 @@ const Navbar = () => {
 
                   {showMoreDropdown && (
                     <div className="absolute top-full left-0 w-48 bg-[#FEFAF5] shadow-md border border-gray-100 py-2 z-50 flex flex-col mt-2">
-                       <div className="w-full h-full absolute top-[-10px] left-0 bg-transparent"></div>
+                      <div className="w-full h-full absolute top-[-10px] left-0 bg-transparent"></div>
                       {hiddenLeftNavItems.map((item) => (
                         <div
                           key={item.name}
@@ -527,7 +533,13 @@ const Navbar = () => {
                             href={
                               item.name === "FINE JEWELLERY"
                                 ? "/fine-jewellery-807?finejewellery=6874b552f2ed2bebef46ccec"
-                                : item?.href
+                                : item.name === "WEDDING RINGS"
+                                  ? "/wedding-rings-105"
+                                  : item.name === "ENGAGEMENT RINGS"
+                                    ? "/engagement-rings-334"
+                                    : item.name === "RINGS"
+                                      ? "/rings-945"
+                                      : item?.href
                             }
                             className="text-black hover:text-[#236339] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-200 block"
                           >
@@ -807,7 +819,7 @@ const Navbar = () => {
                   </h3>
                   <div className="space-y-4">
                     <a
-                      href="/engagement-230"
+                      href="/engagement-rings-334"
                       className="flex items-center font-gintoNord text-black hover:text-[#236339] text-sm transition-colors duration-200"
                     >
                       <div className="w-6 h-6 rounded-full border-2 border-gray-400 mr-3 flex items-center justify-center">
@@ -844,7 +856,7 @@ const Navbar = () => {
                       openMenuData["METAL TYPE"]?.map((metal, index) => (
                         <a
                           key={index}
-                          href={`/engagement-230?metal=${metal.value.toLowerCase()}`}
+                          href={`/engagement-rings-334?metal=${metal.value.toLowerCase()}`}
                           className="flex gap-2 items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                         >
                           <Image
@@ -868,7 +880,7 @@ const Navbar = () => {
                     {openMenuData &&
                       openMenuData["Style"]?.map((style, index) => (
                         <a
-                          href={`/engagement-230?style=${style.value.toLowerCase()}`}
+                          href={`/engagement-rings-334?style=${style.value.toLowerCase()}`}
                           className="flex gap-4 items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                         >
                           <Image
@@ -949,7 +961,7 @@ const Navbar = () => {
                   </h3>
                   <div className="space-y-4">
                     <a
-                      href="/wedding-rings-873?gender=woman"
+                      href="/wedding-rings-105?gender=woman"
                       className="block text-gray-900  hover:text-[#236339] font-gintoNormal text-sm transition-colors duration-200"
                     >
                       All Women's Wedding Rings
@@ -958,10 +970,10 @@ const Navbar = () => {
                       openMenuData["Style"]?.map((band, index) => (
                         <a
                           key={index}
-                          href={`/wedding-rings-873?gender=woman&style=${band.value.toLowerCase()}`}
+                          href={`/wedding-rings-105?gender=woman&style=${band.value.toLowerCase()}`}
                           className="block text-black hover:text-[#236339] text-sm font-gintoNormal transition-colors duration-200"
                         >
-                          {band.value} Woman Wedding Rings
+                          {band.value} Women's Wedding Rings
                         </a>
                       ))}
                   </div>
@@ -977,7 +989,7 @@ const Navbar = () => {
                       openMenuData["METAL TYPE"]?.map((metal, index) => (
                         <a
                           key={index}
-                          href={`/engagement-230?metal=${metal.value.toLowerCase()}`}
+                          href={`/engagement-rings-334?metal=${metal.value.toLowerCase()}`}
                           className="flex gap-2 items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                         >
                           <Image
@@ -999,7 +1011,7 @@ const Navbar = () => {
                   </h3>
                   <div className="space-y-4">
                     <a
-                      href="/wedding-rings-873?gender=man"
+                      href="/wedding-rings-105?gender=man"
                       className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       All Men's Wedding Rings

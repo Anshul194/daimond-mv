@@ -28,19 +28,34 @@ class FaqService {
 
   async getAllFaqs(query) {
     try {
+      // Ensure query is an object
+      const queryObj = query || {};
       const {
         page = 1,
         limit = 10,
         filters = '{}',
         searchFields = '{}',
         sort = '{}',
-      } = query;
+      } = queryObj;
 
-      const pageNum = parseInt(page);
-      const limitNum = parseInt(limit);
-      const parsedFilters = JSON.parse(filters);
-      const parsedSearchFields = JSON.parse(searchFields);
-      const parsedSort = JSON.parse(sort);
+      // Helper function to safely parse JSON strings
+      const safeJsonParse = (str, defaultValue = {}) => {
+        if (!str || str === '' || str === 'undefined' || str === 'null') {
+          return defaultValue;
+        }
+        try {
+          return JSON.parse(str);
+        } catch (e) {
+          console.warn(`Failed to parse JSON: ${str}, using default value`);
+          return defaultValue;
+        }
+      };
+
+      const pageNum = parseInt(page) || 1;
+      const limitNum = parseInt(limit) || 10;
+      const parsedFilters = safeJsonParse(filters, {});
+      const parsedSearchFields = safeJsonParse(searchFields, {});
+      const parsedSort = safeJsonParse(sort, {});
 
       // Build filter object with search
       let filterConditions = { deletedAt: null, ...parsedFilters };

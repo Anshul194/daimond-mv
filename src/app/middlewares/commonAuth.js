@@ -13,10 +13,10 @@ export async function verifyTokenAndUser(request, userType = 'admin') {
   try {
     // Connect to database
     await dbConnect();
-    
+
     // Extract access token from Authorization header
     const accessToken = request.headers.get('authorization')?.replace('Bearer ', '');
-    
+
     if (!accessToken) {
       return {
         error: NextResponse.json(
@@ -30,7 +30,7 @@ export async function verifyTokenAndUser(request, userType = 'admin') {
     const redis = initRedis();
     const tokenStatus = await redis.get(`accessToken:${accessToken}`);
     console.log('[Auth] Token status from Redis:', tokenStatus);
-    
+
     if (!tokenStatus || tokenStatus !== 'valid') {
       return {
         error: NextResponse.json(
@@ -56,8 +56,18 @@ export async function verifyTokenAndUser(request, userType = 'admin') {
 
     // Extract user ID from token
     const userId = decoded.id || decoded.userId || decoded.sub;
-    console.log('[Auth] Extracted userId:', userId);
-    
+    console.log('[Auth Debug] Extracted userId:', userId);
+
+    if (!userId) {
+      console.log('[Auth Debug] User ID missing in token payload:', decoded);
+      return {
+        error: NextResponse.json(
+          { success: false, message: 'User ID not found in token' },
+          { status: 401 }
+        )
+      };
+    }
+
     // if (!userId) {
     //   return {
     //     error: NextResponse.json(
@@ -66,14 +76,14 @@ export async function verifyTokenAndUser(request, userType = 'admin') {
     //     )
     //   };
     // }
-     if (!userId) {
+    if (!userId) {
       console.log('[Auth] User ID not found in token');
       return { error: NextResponse.json({ success: false, message: 'User ID not found in token' }, { status: 401 }) };
     }
 
     let user;
     let userModel;
-    
+
     // Check user existence based on userType
     if (userType === 'admin') {
       user = await Admin.findById(userId).select('-password');
@@ -82,24 +92,24 @@ export async function verifyTokenAndUser(request, userType = 'admin') {
       user = await User.findById(userId).select('-password');
       userModel = 'User';
     } else {
-       console.log('[Auth] Invalid user type specified:', userType);
+      console.log('[Auth] Invalid user type specified:', userType);
       return {
-        
+
         error: NextResponse.json(
           { success: false, message: 'Invalid user type specified' },
           { status: 500 }
         )
       };
     }
-    
-     console.log(`[Auth] Found user in ${userModel} collection:`, user);
+
+    console.log(`[Auth] Found user in ${userModel} collection:`, user);
     if (!user) {
       console.log(`[Auth] Access denied. ${userModel} not found.`);
       return {
         error: NextResponse.json(
-          { 
-            success: false, 
-            message: `Access denied. ${userModel} account not found.` 
+          {
+            success: false,
+            message: `Access denied. ${userModel} account not found.`
           },
           { status: 403 }
         )
@@ -227,16 +237,16 @@ export async function verifyAnyUserAccess(request) {
  * Higher-order function for admin-only routes
  */
 export function withAdminAuth(handler) {
-  return async function(request, ...args) {
+  return async function (request, ...args) {
     const authResult = await verifyAdminAccess(request);
-    
+
     if (authResult.error) {
       return authResult.error;
     }
 
     // Add admin info to request context
     request.admin = authResult.user;
-    
+
     return handler(request, ...args);
   };
 }
@@ -245,16 +255,16 @@ export function withAdminAuth(handler) {
  * Higher-order function for user-only routes
  */
 export function withUserAuth(handler) {
-  return async function(request, ...args) {
+  return async function (request, ...args) {
     const authResult = await verifyUserAccess(request);
-    
+
     if (authResult.error) {
       return authResult.error;
     }
 
     // Add user info to request context
     request.user = authResult.user;
-    
+
     return handler(request, ...args);
   };
 }
@@ -263,9 +273,9 @@ export function withUserAuth(handler) {
  * Higher-order function for routes accessible by both admin and user
  */
 export function withAnyAuth(handler) {
-  return async function(request, ...args) {
+  return async function (request, ...args) {
     const authResult = await verifyAnyUserAccess(request);
-    
+
     if (authResult.error) {
       return authResult.error;
     }
@@ -276,7 +286,7 @@ export function withAnyAuth(handler) {
     } else {
       request.user = authResult.user;
     }
-    
+
     return handler(request, ...args);
   };
 }
@@ -291,7 +301,7 @@ export async function getUserFromToken(accessToken) {
 
     const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
     const userId = decoded.id || decoded.userId || decoded.sub;
-    
+
     if (!userId) return null;
 
     await dbConnect();

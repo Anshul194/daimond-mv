@@ -26,10 +26,10 @@ const JewelryFilter = () => {
   ];
 
   const metals = [
-    { id: 'platinum', name: '18K WHITE GOLD', color: 'bg-gray-300' },
-    { id: 'yellow-gold', name: '18K YELLOW GOLD', color: 'bg-yellow-300' },
-    { id: 'rose-gold', name: '18K ROSE GOLD', color: 'bg-rose-300' },
-    { id: 'white-gold', name: '18K WHITE GOLD', color: 'bg-gray-400' }
+    { id: 'platinum', name: 'Platinum', color: 'bg-gray-300' },
+    { id: 'yellow-gold', name: 'YELLOW GOLD', color: 'bg-yellow-300' },
+    { id: 'rose-gold', name: 'ROSE GOLD', color: 'bg-rose-300' },
+    { id: 'white-gold', name: ' WHITE GOLD', color: 'bg-gray-400' }
   ];
 
   const settings = [

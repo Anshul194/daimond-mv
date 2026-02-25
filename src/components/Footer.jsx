@@ -99,6 +99,8 @@ export default function Footer() {
     clientCare: false,
   });
   const [otherCategory, setOtherCategory] = useState([]);
+  const [isMounted, setIsMounted] = useState(false);
+  
   const toggleAccordion = (section) => {
     setOpenAccordions((prev) => ({
       ...prev,
@@ -111,13 +113,19 @@ export default function Footer() {
       const res = await axiosInstance.get(
         `api/category/subcategory?categoryId=6854fd3b5e53f236d75c07c1`
       );
-      setOtherCategory(res.data.data);
+      // Updated to match new API response structure: { body: { success, message, data } }
+      const categories = res.data?.body?.data || res.data?.data || [];
+      setOtherCategory(Array.isArray(categories) ? categories : []);
     } catch (error) {
       console.error("Error fetching attributes:", error);
+      // Set empty array on error to prevent map() errors
+      setOtherCategory([]);
     }
   };
 
   useEffect(() => {
+    // Mark as mounted to prevent hydration mismatch
+    setIsMounted(true);
     getAttribute();
   }, []);
 
@@ -304,16 +312,22 @@ export default function Footer() {
                   other category's
                 </h3>
                 <ul className="space-y-1">
-                  {otherCategory.map((category , index) => (
-                    <li key={index}>
-                      <Link
-                        href={`/fine-jewellery-807?finejewellery=${category._id}`}
-                        className="capitalize text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
-                      >
-                        {category.name}
-                      </Link>
-                    </li>
-                  ))}
+                  {isMounted && otherCategory && Array.isArray(otherCategory) && otherCategory.length > 0 ? (
+                    otherCategory.map((category, index) => (
+                      <li key={category._id || index}>
+                        <Link
+                          href={`/fine-jewellery-807?finejewellery=${category._id}`}
+                          className="capitalize text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                        >
+                          {category.name}
+                        </Link>
+                      </li>
+                    ))
+                  ) : isMounted ? (
+                    <li className="text-[10px] text-gray-400">No categories available</li>
+                  ) : (
+                    <li className="text-[10px] text-gray-400">Loading...</li>
+                  )}
                 </ul>
               </div>
 
@@ -334,16 +348,22 @@ export default function Footer() {
                 </button>
                 {openAccordions.aboutUs && (
                   <ul className="space-y-1 pt-4">
-                    {otherCategory.map((category , index) => (
-                      <li key={category._id}>
-                        <Link
-                          href={`/fine-jewellery-807?finejewellery=${category._id}`}
-                          className="capitalize text-[10px] hover:text-emerald-300 transition-colors font-gintoNord block"
-                        >
-                          {category.name}
-                        </Link>
-                      </li>
-                    ))}
+                    {isMounted && otherCategory && Array.isArray(otherCategory) && otherCategory.length > 0 ? (
+                      otherCategory.map((category, index) => (
+                        <li key={category._id || index}>
+                          <Link
+                            href={`/fine-jewellery-807?finejewellery=${category._id}`}
+                            className="capitalize text-[10px] hover:text-emerald-300 transition-colors font-gintoNord block"
+                          >
+                            {category.name}
+                          </Link>
+                        </li>
+                      ))
+                    ) : isMounted ? (
+                      <li className="text-[10px] text-gray-400">No categories available</li>
+                    ) : (
+                      <li className="text-[10px] text-gray-400">Loading...</li>
+                    )}
                   </ul>
                 )}
               </div>

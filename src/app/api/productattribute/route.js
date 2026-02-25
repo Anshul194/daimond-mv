@@ -14,7 +14,18 @@ import {parseNestedFormData} from '../../utils/parseNestedFormData.js';
 // GET - Fetch all attributes or single by ID
 export async function GET(request) {
   try {
-    await dbConnect();
+    // Connect to database first
+    try {
+      await dbConnect();
+      console.log('Database connected successfully for /productattribute');
+    } catch (dbError) {
+      console.error('Database connection error in /productattribute:', dbError.message);
+      return NextResponse.json({ 
+        success: false, 
+        message: 'Database connection failed. Please check your MongoDB connection string and ensure MongoDB is running.',
+        error: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+      }, { status: 503 }); // 503 Service Unavailable for connection issues
+    }
 
     let admin = null;
     let authResult = null;
@@ -32,16 +43,47 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const query = Object.fromEntries(searchParams.entries());
     const id = searchParams.get('id');
+    
+    // Handle filters parameter - if it's a JSON string, keep it as is; otherwise stringify it
+    if (query.filters && typeof query.filters === 'string') {
+      // Already a JSON string, keep it
+      try {
+        // Validate it's valid JSON
+        JSON.parse(query.filters);
+      } catch (e) {
+        // If not valid JSON, wrap it in quotes to make it a string value
+        query.filters = JSON.stringify({ title: query.filters });
+      }
+    } else if (query.filters && typeof query.filters === 'object') {
+      // If it's an object, stringify it
+      query.filters = JSON.stringify(query.filters);
+    } else if (!query.filters) {
+      // If filters is not provided, set default empty object
+      query.filters = '{}';
+    }
 
     console?.log('[DEBUG] Incoming query params:', query);
+    console?.log('[DEBUG] Parsed filters:', query.filters);
     console?.log('[DEBUG] Admin info:', admin);
 
     const result = id ? await getProductAttributeById(id) : await getProductAttributes(query, admin);
+    console.log('GET /productattribute - Result:', { status: result.status });
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
     console.error('GET /product-attributes error:', err);
+    console.error('GET /product-attributes error stack:', err.stack);
+    
+    // Check if it's a database connection error
+    if (err.message && (err.message.includes('ECONNREFUSED') || err.message.includes('MongoDB connection'))) {
+      return NextResponse.json({ 
+        success: false, 
+        message: 'Database connection failed. Please check your MongoDB connection.',
+        error: process.env.NODE_ENV === 'development' ? err.message : undefined
+      }, { status: 503 });
+    }
+    
     return NextResponse.json(
-      { success: false, message: 'Internal server error' },
+      { success: false, message: err.message || 'Internal server error' },
       { status: 500 }
     );
   }

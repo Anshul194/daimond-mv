@@ -243,9 +243,8 @@ class ProductService {
         if (data.quantity !== undefined)
           inventoryData.stock_count = parseInt(data.quantity);
 
-        let updatedInventory;
         if (inventory) {
-          updatedInventory = await this.productRepo.updateInventory(
+          await this.productRepo.updateInventory(
             inventory._id,
             inventoryData
           );
@@ -257,13 +256,8 @@ class ProductService {
             stock_count: data.quantity ? parseInt(data.quantity) : 0,
             sold_count: 0,
           };
-          updatedInventory = await this.productRepo.createInventory(newInventoryData);
+          await this.productRepo.createInventory(newInventoryData);
         }
-      }
-
-      // Update inventory details and attributes if provided
-      if (itemVariants && itemVariants.length > 0) {
-        await this.updateInventoryDetailsWithAttributes(id, itemVariants);
       }
 
       return updatedProduct;
@@ -542,6 +536,8 @@ class ProductService {
     try {
       await this.ensureMongooseConnection();
 
+      // Ensure query is an object
+      const queryObj = query || {};
       const {
         page = 1,
         limit = 10,
@@ -549,22 +545,81 @@ class ProductService {
         searchFields = "{}",
         sort = "{}", // Default to empty object
         attributeFilters = "[]",
-      } = query;
+        // New query parameters
+        include_category_ids,
+        exclude_category_ids,
+        in_stock,
+        price_min,
+        price_max,
+        carat_min,
+        carat_max,
+        subcategory_id,
+        sort_by,
+        attribute_filters,
+        gender,
+      } = queryObj;
 
-      const pageNum = parseInt(page);
-      const limitNum = parseInt(limit);
-      const parsedFilters = JSON.parse(filters);
-      const parsedSearchFields = JSON.parse(searchFields);
+      // Log all query parameters for debugging
+      console.log("=== getAllProducts Query Parameters ===");
+      console.log("include_category_ids:", include_category_ids);
+      console.log("exclude_category_ids:", exclude_category_ids);
+      console.log("in_stock:", in_stock, "type:", typeof in_stock);
+      console.log("page:", page, "limit:", limit);
+      console.log("========================================");
+
+      // Helper function to safely parse JSON strings
+      const safeJsonParse = (str, defaultValue = {}) => {
+        if (!str || str === '' || str === 'undefined' || str === 'null') {
+          return defaultValue;
+        }
+        try {
+          return JSON.parse(str);
+        } catch (e) {
+          console.warn(`Failed to parse JSON: ${str}, using default value`);
+          return defaultValue;
+        }
+      };
+
+      const pageNum = parseInt(page) || 1;
+      const limitNum = parseInt(limit) || 10;
+      const parsedFilters = safeJsonParse(filters, {});
+      const parsedSearchFields = safeJsonParse(searchFields, {});
       let parsedSort;
 
       // Handle string-based sort (e.g., "asc" or "desc")
       if (sort === "asc" || sort === "desc") {
         parsedSort = { createdAt: sort === "asc" ? 1 : -1 };
       } else {
-        parsedSort = JSON.parse(sort);
+        parsedSort = safeJsonParse(sort, {});
       }
 
-      const parsedAttributeFilters = JSON.parse(attributeFilters);
+      // Handle sort_by parameter (BEST, NEWEST, PRICE_LOW_TO_HIGH, PRICE_HIGH_TO_LOW)
+      if (sort_by) {
+        switch (sort_by) {
+          case "BEST":
+            parsedSort = { sold_count: -1 }; // Best sellers by sold count
+            break;
+          case "NEWEST":
+            parsedSort = { createdAt: -1 }; // Newest first
+            break;
+          case "PRICE_LOW_TO_HIGH":
+            parsedSort = { price: 1 }; // Price ascending
+            break;
+          case "PRICE_HIGH_TO_LOW":
+            parsedSort = { price: -1 }; // Price descending
+            break;
+          default:
+            // Keep existing parsedSort
+            break;
+        }
+      }
+
+      // Parse attribute_filters if provided (comma-separated string)
+      let parsedAttributeFilters = safeJsonParse(attributeFilters, []);
+      if (attribute_filters) {
+        const attributeFilterArray = attribute_filters.split(",").map(f => f.trim());
+        parsedAttributeFilters = [...parsedAttributeFilters, ...attributeFilterArray];
+      }
 
       // Convert *_id filters to ObjectId
       for (const key in parsedFilters) {
@@ -596,27 +651,313 @@ class ProductService {
       // Merge in any additional filters
       Object.assign(filterConditions, parsedFilters);
 
+      // Handle gender filter
+      if (gender && gender !== 'both') {
+        filterConditions.gender = gender;
+      }
+
+      // Handle include_category_ids (comma-separated string or array)
+      if (include_category_ids) {
+        const categoryIds = Array.isArray(include_category_ids)
+          ? include_category_ids
+          : include_category_ids.split(",").map(id => id.trim());
+        console.log("Parsed include_category_ids:", categoryIds);
+
+        // Convert to ObjectIds - handle both ObjectId strings and numeric IDs
+        const validCategoryIds = [];
+        const numericIds = [];
+
+        for (const id of categoryIds) {
+          // Check if it's a valid ObjectId (24 chars)
+          if (mongoose.Types.ObjectId.isValid(id) && id.length === 24) {
+            const objectId = new mongoose.Types.ObjectId(id);
+            validCategoryIds.push(objectId);
+            console.log(`✅ Valid ObjectId category ID: ${id} -> ${objectId}`);
+          } else if (!isNaN(id) && id.trim() !== '') {
+            // It's a numeric ID - we'll need to look it up
+            numericIds.push(parseInt(id));
+            console.log(`⚠️ Numeric category ID found (will try to map): ${id}`);
+          } else {
+            console.log(`❌ Category ID "${id}" is not a valid ObjectId or numeric ID, skipping`);
+          }
+        }
+
+        // If we have numeric IDs, try to map them to ObjectIds by querying categories
+        if (numericIds.length > 0) {
+          try {
+            // Fetch all categories and try to match by some numeric field or index
+            // Since we don't have a numeric ID field, we'll fetch all and use array index
+            const allCategories = await Category.find({ deletedAt: null }).sort({ createdAt: 1 }).lean();
+            console.log(`Found ${allCategories.length} categories for numeric ID mapping`);
+
+            // Map numeric IDs (assuming they're 1-based indices or some other mapping)
+            // If numeric IDs represent array positions, use them as indices
+            for (const numericId of numericIds) {
+              // Try as 1-based index (subtract 1 for 0-based array)
+              const categoryIndex = numericId - 1;
+              if (categoryIndex >= 0 && categoryIndex < allCategories.length) {
+                const category = allCategories[categoryIndex];
+                if (category && category._id) {
+                  validCategoryIds.push(new mongoose.Types.ObjectId(category._id));
+                  console.log(`Mapped numeric ID ${numericId} to ObjectId ${category._id}`);
+                }
+              }
+            }
+          } catch (mapError) {
+            console.error('Error mapping numeric category IDs:', mapError.message);
+          }
+        }
+
+        console.log("Valid include_category_ids (ObjectIds):", validCategoryIds);
+        console.log("Valid include_category_ids count:", validCategoryIds.length);
+        if (validCategoryIds.length > 0) {
+          filterConditions.category_id = { $in: validCategoryIds };
+          console.log("✅ Applied category filter:", JSON.stringify(filterConditions.category_id));
+        } else {
+          console.warn("⚠️ No valid ObjectId category IDs found - category filter will be skipped");
+          console.warn("⚠️ This means ALL products will be returned (not filtered by category)");
+        }
+      }
+
+      // Handle exclude_category_ids (comma-separated string or array)
+      if (exclude_category_ids) {
+        const categoryIds = Array.isArray(exclude_category_ids)
+          ? exclude_category_ids
+          : exclude_category_ids.split(",").map(id => id.trim());
+        console.log("Parsed exclude_category_ids:", categoryIds);
+
+        // Convert to ObjectIds - handle both ObjectId strings and numeric IDs
+        const validCategoryIds = [];
+        const numericIds = [];
+
+        for (const id of categoryIds) {
+          // Check if it's a valid ObjectId (24 chars)
+          if (mongoose.Types.ObjectId.isValid(id) && id.length === 24) {
+            validCategoryIds.push(new mongoose.Types.ObjectId(id));
+          } else if (!isNaN(id) && id.trim() !== '') {
+            // It's a numeric ID - we'll need to look it up
+            numericIds.push(parseInt(id));
+          } else {
+            console.log(`Exclude category ID "${id}" is not a valid ObjectId or numeric ID, skipping`);
+          }
+        }
+
+        // If we have numeric IDs, try to map them to ObjectIds
+        if (numericIds.length > 0) {
+          try {
+            const allCategories = await Category.find({ deletedAt: null }).sort({ createdAt: 1 }).lean();
+            for (const numericId of numericIds) {
+              const categoryIndex = numericId - 1;
+              if (categoryIndex >= 0 && categoryIndex < allCategories.length) {
+                const category = allCategories[categoryIndex];
+                if (category && category._id) {
+                  validCategoryIds.push(new mongoose.Types.ObjectId(category._id));
+                  console.log(`Mapped exclude numeric ID ${numericId} to ObjectId ${category._id}`);
+                }
+              }
+            }
+          } catch (mapError) {
+            console.error('Error mapping numeric exclude category IDs:', mapError.message);
+          }
+        }
+
+        console.log("Valid exclude_category_ids (ObjectIds):", validCategoryIds);
+        if (validCategoryIds.length > 0) {
+          if (filterConditions.category_id && filterConditions.category_id.$in) {
+            // If we already have $in, filter out excluded IDs from the $in array
+            const includeIds = filterConditions.category_id.$in;
+            const filteredIncludeIds = includeIds.filter(id => {
+              const idStr = id.toString();
+              return !validCategoryIds.some(exId => exId.toString() === idStr);
+            });
+            if (filteredIncludeIds.length > 0) {
+              filterConditions.category_id = { $in: filteredIncludeIds };
+            } else {
+              // All included categories are excluded, return empty
+              return {
+                docs: [],
+                total: 0,
+                page: pageNum,
+                limit: limitNum,
+                totalPages: 0,
+              };
+            }
+          } else {
+            filterConditions.category_id = {
+              ...filterConditions.category_id,
+              $nin: validCategoryIds,
+            };
+          }
+        } else {
+          console.warn("No valid ObjectId exclude category IDs found - exclude filter will be skipped");
+        }
+      }
+
+      // Handle subcategory_id
+      if (subcategory_id && mongoose.Types.ObjectId.isValid(subcategory_id)) {
+        filterConditions.subCategory_id = new mongoose.Types.ObjectId(subcategory_id);
+      }
+
+      // Handle price range filters
+      if (price_min !== undefined) {
+        const minPrice = parseFloat(price_min);
+        if (!isNaN(minPrice)) {
+          filterConditions.price = { ...filterConditions.price, $gte: minPrice };
+        }
+      }
+      if (price_max !== undefined) {
+        const maxPrice = parseFloat(price_max);
+        if (!isNaN(maxPrice)) {
+          filterConditions.price = { ...filterConditions.price, $lte: maxPrice };
+        }
+      }
+
+      // Handle carat range filters (these are typically in attributes)
+      // We'll handle this after attribute filtering
+
       // Build search conditions for multiple fields with partial matching
       for (const [field, value] of Object.entries(parsedSearchFields)) {
         filterConditions[field] = { $regex: value, $options: "i" };
       }
 
-      // Handle attribute value-only filtering
-      if (Array.isArray(parsedAttributeFilters) && parsedAttributeFilters.length > 0) {
-        const attributeRegexList = parsedAttributeFilters.map(
-          (val) => new RegExp(`^${val}$`, "i")
+      // Handle in_stock filter - filter by inventory stock_status
+      let inStockProductIds = null;
+      console.log("in_stock parameter:", in_stock, "type:", typeof in_stock);
+      if (in_stock === "yes" || in_stock === true || in_stock === "true") {
+        console.log("Filtering for in-stock products...");
+
+        // Query for inventories that are NOT out_of_stock
+        // This includes: stock_status = "in_stock" OR stock_status is null/undefined (defaults to in_stock)
+        const inStockInventories = await ProductInventory.find({
+          $or: [
+            { stock_status: "in_stock" },
+            { stock_status: { $exists: false } }, // Field doesn't exist
+            { stock_status: null }, // Field is null
+            { stock_status: "" }, // Field is empty string
+          ]
+        }).select("product stock_status").lean();
+
+        console.log(`Found ${inStockInventories.length} inventories that are in stock`);
+
+        // Also check what stock_status values exist in the database
+        const allInventories = await ProductInventory.find({}).select("product stock_status").limit(10).lean();
+        console.log("Sample inventory stock_status values:", allInventories.map(inv => ({
+          product: inv.product?.toString(),
+          stock_status: inv.stock_status
+        })));
+
+        // Get all product IDs that are NOT out_of_stock
+        const outOfStockInventories = await ProductInventory.find({
+          stock_status: "out_of_stock"
+        }).select("product").lean();
+        const outOfStockProductIds = new Set(
+          outOfStockInventories.map(inv => {
+            const productId = inv.product;
+            return productId?.toString ? productId.toString() : String(productId);
+          })
         );
+        console.log(`Found ${outOfStockProductIds.size} products that are out of stock`);
 
-        const matchingAttributes = await ProductInventoryDetailAttribute.find({
-          attribute_value: { $in: attributeRegexList },
-          deletedAt: null,
-        }).select("product_id");
+        // Convert product ObjectIds to strings - handle ObjectId properly
+        inStockProductIds = inStockInventories
+          .map(inv => {
+            let productId = inv.product;
+            // If it's an ObjectId, convert to string
+            if (productId && typeof productId === 'object' && productId.toString) {
+              productId = productId.toString();
+            } else if (productId && typeof productId === 'string') {
+              // Already a string
+              productId = productId;
+            } else {
+              // Try to convert
+              productId = String(productId);
+            }
+            return productId;
+          })
+          .filter(id => id && id !== 'undefined' && id !== 'null'); // Remove any invalid values
 
-        const productIds = [
-          ...new Set(matchingAttributes.map((item) => item.product_id.toString())),
-        ];
+        // Remove duplicates
+        inStockProductIds = [...new Set(inStockProductIds)];
 
-        if (productIds.length === 0) {
+        console.log("In-stock product IDs (first 10):", inStockProductIds.slice(0, 10));
+        console.log("Total unique in-stock products:", inStockProductIds.length);
+
+        if (inStockProductIds.length === 0) {
+          console.log("No products in stock, returning empty result");
+          // No products in stock, return empty result
+          return {
+            docs: [],
+            total: 0,
+            page: pageNum,
+            limit: limitNum,
+            totalPages: 0,
+          };
+        }
+      } else {
+        console.log("in_stock filter not applied (value:", in_stock, ")");
+      }
+
+      // --- [NEW] Nested Variant-Level Filtering (AND between categories, OR within) ---
+      const hasAttrFilters = Array.isArray(parsedAttributeFilters) && parsedAttributeFilters.length > 0;
+      const hasCaratFilters = carat_min !== undefined || carat_max !== undefined;
+
+      if (hasAttrFilters || hasCaratFilters) {
+        console.log("Applying nested filtering for:", {
+          attributes: parsedAttributeFilters,
+          carat: { min: carat_min, max: carat_max }
+        });
+
+        // 1. Fetch all matching attribute records
+        const attrRegexList = parsedAttributeFilters.map(v => new RegExp(`^${v}$`, "i"));
+        const matches = await ProductInventoryDetailAttribute.find({
+          $or: [
+            { attribute_value: { $in: attrRegexList } },
+            { attribute_name: { $regex: /carat/i } }
+          ],
+          deletedAt: null
+        }).lean();
+
+        // 2. Map matches to variants and identify required categories
+        const variantMatches = {}; // vid -> Set of matched category names
+        const vidToPid = {};
+        const requiredAttrCategories = new Set();
+        const matchedFilterValues = new Set();
+
+        matches.forEach(m => {
+          const vid = m.inventory_details_id?.toString();
+          const pid = m.product_id?.toString();
+          if (!vid || !pid) return;
+
+          const name = (m.attribute_name || "").toLowerCase();
+          const val = (m.attribute_value || "").toLowerCase();
+
+          if (!variantMatches[vid]) variantMatches[vid] = new Set();
+          vidToPid[vid] = pid;
+
+          // Check direct attribute match
+          if (parsedAttributeFilters.some(pf => pf.toLowerCase() === val)) {
+            variantMatches[vid].add(name);
+            requiredAttrCategories.add(name);
+            matchedFilterValues.add(val);
+          }
+
+          // Check carat match
+          if (name.includes("carat")) {
+            const caratVal = parseFloat(val);
+            const min = carat_min ? parseFloat(carat_min) : 0;
+            const max = carat_max ? parseFloat(carat_max) : 999999;
+            if (!isNaN(caratVal) && caratVal >= min && caratVal <= max) {
+              variantMatches[vid].add("carat_category_internal");
+              if (hasCaratFilters) requiredAttrCategories.add("carat_category_internal");
+            }
+          }
+        });
+
+        // 3. Verify all provided filters matched at least something
+        const unmatchedFilters = parsedAttributeFilters.filter(f => !matchedFilterValues.has(f.toLowerCase()));
+        if (unmatchedFilters.length > 0) {
+          console.log("Some filters had no matches in database:", unmatchedFilters);
+          // If some attribute filters exist that literally don't exist in DB, no product can match them
           return {
             docs: [],
             total: 0,
@@ -626,10 +967,75 @@ class ProductService {
           };
         }
 
-        filterConditions._id = { $in: productIds };
+        // 4. Find variants that match ALL required categories
+        const matchingProductIds = new Set();
+        for (const vid in variantMatches) {
+          const matchedCatsForVariant = variantMatches[vid];
+          // Must have matches in EVERY category that the user is filtering by
+          const satisfiesAllCategories = Array.from(requiredAttrCategories).every(cat =>
+            matchedCatsForVariant.has(cat)
+          );
+
+          if (satisfiesAllCategories) {
+            matchingProductIds.add(vidToPid[vid]);
+          }
+        }
+
+        console.log(`Nested filter found ${matchingProductIds.size} products from ${Object.keys(variantMatches).length} candidate variants`);
+
+        // 5. Combine with in_stock and apply to filterConditions
+        let finalIds = Array.from(matchingProductIds);
+        if (inStockProductIds !== null) {
+          finalIds = finalIds.filter(id => inStockProductIds.includes(id));
+          console.log(`Combining with in-stock: ${matchingProductIds.size} -> ${finalIds.length}`);
+        }
+
+        if (finalIds.length === 0) {
+          return {
+            docs: [],
+            total: 0,
+            page: pageNum,
+            limit: limitNum,
+            totalPages: 0,
+          };
+        }
+
+        filterConditions._id = { $in: finalIds.map(id => new mongoose.Types.ObjectId(id)) };
+      } else if (inStockProductIds !== null) {
+        // Only in_stock filter, no attribute/carat filters
+        const inStockObjectIds = inStockProductIds
+          .map(id => {
+            try {
+              if (mongoose.Types.ObjectId.isValid(id)) {
+                return new mongoose.Types.ObjectId(id);
+              }
+              return null;
+            } catch (e) {
+              return null;
+            }
+          })
+          .filter(id => id !== null);
+
+        if (inStockObjectIds.length === 0) {
+          return {
+            docs: [],
+            total: 0,
+            page: pageNum,
+            limit: limitNum,
+            totalPages: 0,
+          };
+        }
+        filterConditions._id = { $in: inStockObjectIds };
       }
 
       const skip = (pageNum - 1) * limitNum;
+
+      console.log("=== FINAL FILTER CONDITIONS ===");
+      console.log(JSON.stringify(filterConditions, null, 2));
+      console.log("inStockProductIds count:", inStockProductIds ? inStockProductIds.length : null);
+      console.log("Skip:", skip, "Limit:", limitNum);
+      console.log("Sort:", parsedSort);
+      console.log("=================================");
 
       const products = await this.productRepo.findAll(
         filterConditions,
@@ -637,7 +1043,23 @@ class ProductService {
         skip,
         limitNum
       );
+
+      console.log(`✅ Fetched ${products.length} products from database`);
+      if (products.length === 0 && filterConditions.category_id) {
+        console.warn("⚠️ No products found with category filter. Checking if products exist without category filter...");
+        // Check if any products exist at all
+        const totalProducts = await this.productRepo.countDocuments({ deletedAt: null });
+        console.log(`Total products in database (not deleted): ${totalProducts}`);
+        // Check if products exist with this category_id
+        const productsWithCategory = await this.productRepo.countDocuments({
+          category_id: filterConditions.category_id,
+          deletedAt: null
+        });
+        console.log(`Products with category_id ${JSON.stringify(filterConditions.category_id)}: ${productsWithCategory}`);
+      }
+
       const totalCount = await this.productRepo.countDocuments(filterConditions);
+      console.log(`Total count: ${totalCount}`);
 
       return {
         docs: products,
@@ -849,7 +1271,7 @@ class ProductService {
         deletedAt: null,
       };
 
-      if (categorySlug) {
+      if (categorySlug && !["products", "all", ":category"].includes(categorySlug.toLowerCase())) {
         const category = await Category.findOne({
           slug: categorySlug,
           deletedAt: null,
@@ -927,16 +1349,46 @@ class ProductService {
 
       console.log("Inventory details fetched:", inventoryDetails);
 
+      // Fetch all product attributes (including properties like Metal Type)
+      const allProductAttributes = await ProductInventoryDetailAttribute.find({
+        product_id: product._id,
+        deletedAt: null,
+      }).lean();
+
+      console.log("All product attributes fetched:", allProductAttributes.length);
+
       const groupedAttributes = {};
-      for (const attr of attributes) {
+      for (const attr of allProductAttributes) {
         const key = attr.inventory_details_id?.toString();
         if (!groupedAttributes[key]) groupedAttributes[key] = [];
         groupedAttributes[key].push(attr);
       }
 
+      // Group attributes by attribute_name for product-level properties
+      const productLevelAttributes = {};
+      allProductAttributes.forEach(attr => {
+        if (!productLevelAttributes[attr.attribute_name]) {
+          productLevelAttributes[attr.attribute_name] = [];
+        }
+        productLevelAttributes[attr.attribute_name].push(attr.attribute_value);
+      });
+
       let available_attributes = {};
       let product_inventory_set = [];
       let additional_info_store = {};
+
+      // Add product-level properties to available_attributes
+      Object.keys(productLevelAttributes).forEach(attrName => {
+        const values = [...new Set(productLevelAttributes[attrName])]; // Remove duplicates
+        if (!available_attributes[attrName]) {
+          available_attributes[attrName] = {};
+        }
+        values.forEach(value => {
+          if (!available_attributes[attrName][value]) {
+            available_attributes[attrName][value] = { term: value, image: "", pid_id: "" };
+          }
+        });
+      });
 
       for (const detail of inventoryDetails) {
         const detailId = detail._id?.toString();
@@ -1066,7 +1518,19 @@ class ProductService {
         ? { inventory_details: inventoryDetails }
         : null;
 
+      // Add properties object to product for easy access
+      const properties = {};
+      Object.keys(productLevelAttributes).forEach(attrName => {
+        const values = productLevelAttributes[attrName];
+        if (values.length > 0) {
+          // Use the first value as the property value (or join if multiple)
+          properties[attrName] = values[0];
+        }
+      });
+      product.properties = properties;
+
       console.log("Available attributes:", available_attributes);
+      console.log("Product properties:", properties);
       console.log("Product inventory set:", product_inventory_set.length);
 
       return {
@@ -1095,6 +1559,8 @@ class ProductService {
     try {
       await this.ensureMongooseConnection();
       console.log("Update Inventory data for product:", productId, data);
+      console.log("Stock status in data:", data.stock_status);
+      console.log("Manage stock in data:", data.manage_stock);
       const inventory = await ProductInventory.findOne({ product: productId });
       if (!inventory)
         throw new AppError("Inventory not found", StatusCodes.NOT_FOUND);
@@ -1108,8 +1574,43 @@ class ProductService {
         }
       }
 
-      inventory.set(data);
-      return await inventory.save();
+      // Explicitly set all fields to ensure they're updated
+      if (data.stock_count !== undefined) {
+        inventory.stock_count = data.stock_count;
+        inventory.markModified('stock_count');
+      }
+      if (data.stock_status !== undefined) {
+        inventory.stock_status = data.stock_status;
+        inventory.markModified('stock_status');
+      }
+      if (data.manage_stock !== undefined) {
+        inventory.manage_stock = data.manage_stock;
+        inventory.markModified('manage_stock');
+      }
+      if (data.lowStockThreshold !== undefined) {
+        inventory.lowStockThreshold = data.lowStockThreshold;
+        inventory.markModified('lowStockThreshold');
+      }
+      if (data.sku !== undefined) {
+        inventory.sku = data.sku;
+        inventory.markModified('sku');
+      }
+
+      console.log("Inventory before save:", {
+        stock_status: inventory.stock_status,
+        manage_stock: inventory.manage_stock,
+        stock_count: inventory.stock_count,
+        lowStockThreshold: inventory.lowStockThreshold
+      });
+
+      const saved = await inventory.save();
+      console.log("Inventory after save:", {
+        stock_status: saved.stock_status,
+        manage_stock: saved.manage_stock,
+        stock_count: saved.stock_count,
+        lowStockThreshold: saved.lowStockThreshold
+      });
+      return saved;
     } catch (error) {
       console.error("Error in updateInventory:", error.message);
       throw error;

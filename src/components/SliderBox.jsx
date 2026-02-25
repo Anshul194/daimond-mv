@@ -193,7 +193,12 @@ const SliderBox = ({
   if (error && items.length === 0) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-        <p className="text-red-600">Error: {error}</p>
+        <p className="text-red-600">
+          Error:{" "}
+          {typeof error === "string"
+            ? error
+            : error?.message || "An unknown error occurred"}
+        </p>
       </div>
     );
   }

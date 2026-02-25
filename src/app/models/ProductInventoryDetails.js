@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import ColorCode from './ColorCode';    
+import ColorCode from './ColorCode';
 
 const { Schema, model, models } = mongoose;
 
@@ -15,7 +15,7 @@ const productInventoryDetailSchema = new Schema({
         required: true,
     },
     color: {
-        type: Schema.Types.ObjectId,
+        type: String, // Changed from ObjectId to String to support literal names from frontend
         ref: 'ColorCode',
         default: null,
     },

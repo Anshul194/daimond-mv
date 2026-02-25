@@ -25,6 +25,20 @@ const productInventorySchema = new Schema({
         type: Number,
         default: 0,
     },
+    stock_status: {
+        type: String,
+        enum: ['in_stock', 'out_of_stock'],
+        default: 'in_stock',
+    },
+    manage_stock: {
+        type: String,
+        enum: ['yes', 'no'],
+        default: 'yes',
+    },
+    lowStockThreshold: {
+        type: Number,
+        default: 5,
+    },
     deletedAt: {
         type: Date,
         default: null,

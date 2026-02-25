@@ -23,7 +23,7 @@ export async function createProductAttribute(form, admin = null) {
       const value = form.get(`terms[${i}][value]`)?.trim() || "";
       // Optionally handle images if you expect them: terms[${i}][image]
       const image = form.get(`terms[${i}][image]`);
-      if (image) {
+      if (image && typeof image === 'object' && image instanceof File) {
         try {
           validateImageFile(image);
           const imageUrl = await saveFile(image, "attribute-images");
@@ -39,7 +39,9 @@ export async function createProductAttribute(form, admin = null) {
           };
         }
       } else {
-        terms.push({ value, image: "" }); // No image provided
+        // Carry over old image string or set to empty
+        const imageValue = (typeof image === 'string') ? image : "";
+        terms.push({ value, image: imageValue });
       }
       i++;
     }
@@ -103,6 +105,26 @@ export async function createProductAttribute(form, admin = null) {
   }
 }
 
+// Helper function to normalize image paths - remove all whitespace
+function normalizeImagePath(imagePath) {
+  if (!imagePath || typeof imagePath !== 'string') {
+    return '';
+  }
+  // Remove all whitespace and ensure proper format
+  return imagePath.trim().replace(/\s+/g, '');
+}
+
+// Helper function to normalize terms with image paths
+function normalizeTerms(terms) {
+  if (!Array.isArray(terms)) {
+    return [];
+  }
+  return terms.map(term => ({
+    ...term,
+    image: normalizeImagePath(term.image || '')
+  }));
+}
+
 export async function getProductAttributes(query, admin = null) {
   try {
     // Enforce vendor filter for vendors
@@ -116,6 +138,18 @@ export async function getProductAttributes(query, admin = null) {
     }
     console.log("Get Product Attributes query:", query);
     const result = await productAttributeService.getAllProductAttributes(query);
+
+    // Normalize image paths in all terms
+    if (result && result.data) {
+      result.data = result.data.map(attr => {
+        const attrObj = attr.toObject ? attr.toObject() : attr;
+        return {
+          ...attrObj,
+          terms: normalizeTerms(attrObj.terms || [])
+        };
+      });
+    }
+
     return {
       status: 200,
       body: {
@@ -147,12 +181,26 @@ export async function getProductAttributeByCategoryId(categoryId) {
         },
       };
     }
+    // Normalize image paths in terms
+    const normalizedAttribute = Array.isArray(attribute)
+      ? attribute.map(attr => {
+        const attrObj = attr.toObject ? attr.toObject() : attr;
+        return {
+          ...attrObj,
+          terms: normalizeTerms(attrObj.terms || [])
+        };
+      })
+      : {
+        ...(attribute.toObject ? attribute.toObject() : attribute),
+        terms: normalizeTerms(attribute.terms || [])
+      };
+
     return {
       status: 200,
       body: {
         success: true,
         message: "Product attribute fetched successfully",
-        data: attribute,
+        data: normalizedAttribute,
       },
     };
   } catch (err) {
@@ -173,12 +221,19 @@ export async function getProductAttributeById(id) {
         body: { success: false, message: "Product attribute not found" },
       };
     }
+
+    // Normalize image paths in terms
+    const normalizedAttribute = {
+      ...(attribute.toObject ? attribute.toObject() : attribute),
+      terms: normalizeTerms(attribute.terms || [])
+    };
+
     return {
       status: 200,
       body: {
         success: true,
         message: "Product attribute fetched successfully",
-        data: attribute,
+        data: normalizedAttribute,
       },
     };
   } catch (err) {
@@ -224,11 +279,14 @@ export async function updateProductAttribute(id, data) {
             };
           }
         } else if (typeof term.image === "string") {
+          // Clean and normalize image path - remove all whitespace
+          let imagePath = term.image.trim().replace(/\s+/g, '');
+
           // If image string doesn't start with '/', add folder path prefix
-          if (!term.image.startsWith("/")) {
-            termObj.image = "/attribute-images/" + term.image;
+          if (!imagePath.startsWith("/")) {
+            termObj.image = "/attribute-images/" + imagePath;
           } else {
-            termObj.image = term.image;
+            termObj.image = imagePath;
           }
         } else {
           termObj.image = "";
@@ -260,7 +318,7 @@ export async function updateProductAttribute(id, data) {
     if (value.title) {
       // Get the current attribute to compare titles
       const currentAttribute = await productAttributeService.getProductAttributeById(id);
-      
+
       // Only check for duplicates if the title is actually changing
       if (!currentAttribute || currentAttribute.title?.toLowerCase() !== value.title?.toLowerCase()) {
         const existing = await productAttributeService.findByTitle(value.title);
@@ -287,10 +345,15 @@ export async function updateProductAttribute(id, data) {
       };
     }
 
-    // Fix old stored images without folder prefix before returning
+    // Fix old stored images without folder prefix and normalize paths before returning
     updated.terms = updated.terms.map((term) => {
-      if (term.image && !term.image.startsWith("/")) {
-        term.image = "/attribute-images/" + term.image;
+      if (term.image && typeof term.image === 'string') {
+        // Normalize image path - remove whitespace
+        let imagePath = term.image.trim().replace(/\s+/g, '');
+        if (!imagePath.startsWith("/")) {
+          imagePath = "/attribute-images/" + imagePath;
+        }
+        term.image = imagePath;
       }
       return term;
     });

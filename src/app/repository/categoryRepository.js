@@ -8,27 +8,57 @@ class CategoryRepository extends CrudRepository {
     super(Category);
   }
 
-  async getAll(filter = {}, sort = {}, page = 1, limit = 10) {
-  const pageNum = Math.max(1, parseInt(page) || 1);
-  const skip = (pageNum - 1) * limit;
-  const query = this.model
-    .find(filter)
-    .sort(sort)
-    .skip(skip)
-    .limit(limit)
-    .populate({
-      path: 'vendor',
-      select: 'username email storeName contactNumber role isActive', // fields you want
-    });
-  
-  const totalDocuments = await this.model.countDocuments(filter);
-  const result = await query.exec();
-  const totalPages = Math.ceil(totalDocuments / limit);
+  async getAll(filter = {}, sort = {}, page = 1, limit = 100) {
+    try {
+      const pageNum = Math.max(1, parseInt(page) || 1);
+      const limitNum = Math.max(1, parseInt(limit) || 100);
+      const skip = (pageNum - 1) * limitNum;
 
-  return { result, currentPage: pageNum, totalPages, totalDocuments };
-}
+      // Ensure filter is an object
+      const filterObj = filter || {};
 
-  
+      // Build query
+      let query = this.model.find(filterObj);
+
+      // Apply sorting
+      if (sort && Object.keys(sort).length > 0) {
+        query = query.sort(sort);
+      }
+
+      // Apply pagination
+      query = query.skip(skip).limit(limitNum);
+
+      // Only populate vendor if filter has vendor field (indicating it exists in schema)
+      if (filterObj.vendor !== undefined && filterObj.vendor !== null) {
+        try {
+          query = query.populate({
+            path: 'vendor',
+            select: 'username email storeName contactNumber role isActive',
+            strictPopulate: false, // Don't throw error if vendor doesn't exist
+          });
+        } catch (populateError) {
+          console.warn('Vendor populate failed (field may not exist):', populateError.message);
+          // Continue without populate if vendor field doesn't exist
+        }
+      }
+
+      // Execute queries
+      const [totalDocuments, result] = await Promise.all([
+        this.model.countDocuments(filterObj),
+        query.lean().exec()
+      ]);
+
+      const totalPages = Math.ceil(totalDocuments / limitNum);
+
+      return { result: result || [], currentPage: pageNum, totalPages, totalDocuments };
+    } catch (error) {
+      console.error('CategoryRepository getAll error:', error);
+      console.error('CategoryRepository getAll error stack:', error.stack);
+      throw error;
+    }
+  }
+
+
 
 
 

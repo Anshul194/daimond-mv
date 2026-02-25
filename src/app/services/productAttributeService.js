@@ -10,31 +10,62 @@ class ProductAttributeService {
   async getAllProductAttributes(query) {
     try {
       console.log("Query Parameters:", query);
+      // Ensure query is an object
+      const queryObj = query || {};
       const {
         page = 1,
-        limit = 10,
+        limit = 100,
         filters = "{}",
         searchFields = "{}",
         sort = "{}",
-      } = query;
+      } = queryObj;
 
-      const pageNum = parseInt(page);
-      const limitNum = parseInt(limit);
+      // Helper function to safely parse JSON strings
+      const safeJsonParse = (str, defaultValue = {}) => {
+        if (!str || str === '' || str === 'undefined' || str === 'null') {
+          return defaultValue;
+        }
+        if (typeof str === 'object') {
+          return str;
+        }
+        try {
+          return JSON.parse(str);
+        } catch (e) {
+          console.warn(`Failed to parse JSON: ${str}, using default value`);
+          return defaultValue;
+        }
+      };
+
+      const pageNum = parseInt(page) || 1;
+      const limitNum = parseInt(limit) || 10;
 
       console.log("Page Number:", pageNum);
       console.log("Limit Number:", limitNum);
 
       // Parse JSON strings from query parameters to objects
-      const parsedFilters = JSON.parse(filters);
-      const parsedSearchFields = JSON.parse(searchFields);
-      const parsedSort = JSON.parse(sort);
+      const parsedFilters = safeJsonParse(filters, {});
+      const parsedSearchFields = safeJsonParse(searchFields, {});
+      const parsedSort = safeJsonParse(sort, {});
 
       // Build filter conditions for multiple fields
       const filterConditions = { deletedAt: null };
 
-      // Always apply vendor filter if present in query
-      if (query.vendor) {
-        filterConditions.vendor = query.vendor;
+      // Include global attributes (vendor: null) when filtering by vendor
+      if (queryObj.vendor) {
+        filterConditions.$and = filterConditions.$and || [];
+        filterConditions.$and.push({
+          $or: [
+            { vendor: queryObj.vendor },
+            { vendor: null },
+            { vendor: "" },
+            { vendor: { $exists: false } }
+          ]
+        });
+      }
+
+      // Support direct id filtering
+      if (queryObj.id) {
+        filterConditions._id = queryObj.id;
       }
 
       for (const [key, value] of Object.entries(parsedFilters)) {
@@ -42,10 +73,18 @@ class ProductAttributeService {
         if (value === null || value === undefined || value === "null" || value === "") {
           continue;
         }
-        
+
         // Map 'category' to 'category_id' if needed
         const filterKey = key === 'category' ? 'category_id' : key;
-        filterConditions[filterKey] = value;
+
+        // Handle title filter with case-insensitive partial matching for better robustness
+        if (key === 'title' && typeof value === 'string') {
+          const trimmedValue = value.trim();
+          // Use partial match with 'i' option to handle any case or hidden spaces
+          filterConditions[filterKey] = { $regex: trimmedValue, $options: 'i' };
+        } else {
+          filterConditions[filterKey] = value;
+        }
       }
 
       // Build search conditions for multiple fields with partial matching
@@ -64,12 +103,18 @@ class ProductAttributeService {
       }
 
       // Execute query with dynamic filters, sorting, and pagination
+      console.log("[DEBUG] Final filterConditions for Attributes:", JSON.stringify(filterConditions, null, 2));
       const productAttributes = await this.productAttributeRepo.getAll(
         filterConditions,
         sortConditions,
         pageNum,
         limitNum
       );
+
+      console.log(`[DEBUG] Found ${productAttributes.data?.length || 0} attributes. Total: ${productAttributes.total}`);
+      if (productAttributes.data?.length > 0) {
+        console.log("[DEBUG] First attribute title:", productAttributes.data[0].title);
+      }
 
       return productAttributes;
     } catch (error) {

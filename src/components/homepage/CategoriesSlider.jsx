@@ -141,7 +141,12 @@ const SliderBoxTwo = () => {
   if (status === "failed") {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-        <p className="text-red-600">Error: {error}</p>
+        <p className="text-red-600">
+          Error:{" "}
+          {typeof error === "string"
+            ? error
+            : error?.message || "An unknown error occurred"}
+        </p>
       </div>
     );
   }
@@ -163,9 +168,8 @@ const SliderBoxTwo = () => {
       <div className="relative overflow-hidden">
         <div
           ref={sliderRef}
-          className={`flex transition-transform duration-500 ease-in-out ${
-            isDragging ? "cursor-grabbing" : "cursor-grab"
-          }`}
+          className={`flex transition-transform duration-500 ease-in-out ${isDragging ? "cursor-grabbing" : "cursor-grab"
+            }`}
           style={{
             transform: `translateX(-${currentSlide * slideWidth}%)`,
           }}

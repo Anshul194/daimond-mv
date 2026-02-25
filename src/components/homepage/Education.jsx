@@ -115,18 +115,30 @@ const Education = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await dispatch(
+        const resultAction = await dispatch(
           fetchSubCategoriesByCategoryId("6878cbb596dfc8337a3359b4")
         );
-        if (response.payload && Array.isArray(response.payload.data)) {
-          setData(response.payload.data.reverse());
-        } else if (Array.isArray(response.payload)) {
-          setData(response.payload.reverse());
+
+        if (fetchSubCategoriesByCategoryId.fulfilled.match(resultAction)) {
+          const payload = resultAction.payload;
+          if (Array.isArray(payload)) {
+            setData([...payload].reverse());
+          } else if (payload && Array.isArray(payload.data)) {
+            setData([...payload.data].reverse());
+          } else {
+            console.warn("Unexpected data structure from Education API:", payload);
+            setData([]);
+          }
         } else {
-          console.error("No data found in response:", response);
+          console.warn(
+            "Failed to fetch Education subcategories:",
+            resultAction.payload
+          );
+          setData([]);
         }
       } catch (error) {
-        console.error("Error fetching blog categories:", error);
+        console.error("Error executing fetch in Education:", error);
+        setData([]);
       }
     };
     fetchData();
@@ -152,9 +164,8 @@ const Education = () => {
       <div className="relative overflow-hidden">
         <div
           ref={sliderRef}
-          className={`flex transition-transform duration-500 ease-in-out ${
-            isDragging ? "cursor-grabbing" : "cursor-grab"
-          }`}
+          className={`flex transition-transform duration-500 ease-in-out ${isDragging ? "cursor-grabbing" : "cursor-grab"
+            }`}
           style={{
             transform: `translateX(-${currentSlide * slideWidth}%)`,
           }}

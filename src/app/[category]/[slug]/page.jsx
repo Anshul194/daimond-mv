@@ -216,8 +216,8 @@ const ImageSlider = ({ images, currentIndex, onIndexChange }) => {
           <button
             key={index}
             className={`w-2 h-2 rounded-full transition-colors ${index === currentIndex
-                ? "bg-gray-800"
-                : "bg-gray-300 hover:bg-gray-400"
+              ? "bg-gray-800"
+              : "bg-gray-300 hover:bg-gray-400"
               }`}
             onClick={() => !isAnimating && onIndexChange(index)}
           />
@@ -236,8 +236,8 @@ const ThumbnailNavigation = ({ images, currentIndex, onIndexChange }) => {
           key={index}
           onClick={() => onIndexChange(index)}
           className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${index === currentIndex
-              ? "border-green-500 scale-110"
-              : "border-gray-200 hover:border-gray-400"
+            ? "border-green-500 scale-110"
+            : "border-gray-200 hover:border-gray-400"
             }`}
         >
           <img
@@ -459,7 +459,7 @@ const ProductDetails = ({
     error,
   } = useSelector((state) => state.cart);
   const isOnCart = cartItems?.some(
-    (item) => item.pid_id === productData?.product?._id
+    (item) => item.pid_id === productData?.product?._id || item.pid_id === productData?._id
   );
   console.log(productData);
   console.log("Cart items:", cartItems);
@@ -502,7 +502,7 @@ const ProductDetails = ({
 
       <div className="text-xl font-medium text-gray-800 mb-4">
         {currencySymbol}
-        {productData?.price?.toFixed(2) || "00.00"}
+        {(productPrice || productData?.price || 0).toFixed(2)}
       </div>
 
       <p className="text-gray-600 font-gintoNormal leading-5 mb-8">
@@ -713,8 +713,8 @@ const ProductDetails = ({
           >
             ADD TO CART | {currencySymbol}
             {selectedDiamond
-              ? (selectedDiamond.net + productPrice).toFixed(2)
-              : productPrice || "00"}
+              ? (Number(selectedDiamond.net || 0) + Number(productPrice || 0)).toFixed(2)
+              : (productPrice || 0).toFixed(2)}
           </button>
         )}
         {/* </Link> */}
@@ -735,27 +735,49 @@ const ProductModal = ({ onClose, loading }) => {
   const [selectedDiamond, setSelectedDiamond] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState({});
   const [variantId, setVariantId] = useState("");
+  const [isLoadingProduct, setIsLoadingProduct] = useState(true);
   const cartItems = useSelector((state) => state.cart.data);
 
   const { sizes } = useSelector((state) => state.size);
 
   const getData = async () => {
     try {
+      setIsLoadingProduct(true);
       const response = await axiosInstance.get(
         `/api/product/${category}/${slug}`
       );
       console.log("Product data fetched:", response.data.body.data.product);
 
-      setProductData(response.data.body.data.product);
-      setProductPrice(response.data.body.data.product.price);
+      const product = response.data.body.data.product;
+      setProductData(product);
+      setProductPrice(product.price);
 
-      const firstVariant = response?.data?.body?.data?.product?.inventory?.inventory_details[0];
-      setSelectedOptions({
-        metalType: firstVariant?.color?._id || firstVariant?.color || "",
-        ringSize: firstVariant?.size?._id || firstVariant?.size || "",
-      });
+      const firstVariant = product?.inventory?.inventory_details?.[0];
+
+      // Set default selected options from first variant if available
+      if (firstVariant) {
+        const metalTypeId = firstVariant?.color?._id || firstVariant?.color || null;
+        const ringSizeId = firstVariant?.size?._id || firstVariant?.size || null;
+
+        setSelectedOptions({
+          metalType: metalTypeId,
+          ringSize: ringSizeId,
+        });
+
+        console.log("Initial selected options set:", { metalType: metalTypeId, ringSize: ringSizeId });
+      } else {
+        console.warn("No inventory details found for product, selectedOptions will remain empty");
+        // If no variants, set empty options - user will need to select manually
+        setSelectedOptions({
+          metalType: "",
+          ringSize: "",
+        });
+      }
     } catch (error) {
       console.error("Failed to fetch product data:", error);
+      toast.error("Failed to load product data");
+    } finally {
+      setIsLoadingProduct(false);
     }
   };
   useEffect(() => {
@@ -772,10 +794,12 @@ const ProductModal = ({ onClose, loading }) => {
 
     if (filteredMetals?.length > 0) {
       const selectedMetal = filteredMetals[0];
-      setProductPrice(selectedMetal.additional_price);
+      const basePrice = Number(productData?.price || 0);
+      const additionalPrice = Number(selectedMetal.additional_price || 0);
+      setProductPrice(basePrice + additionalPrice);
       setVariantId(selectedMetal._id);
     } else {
-      setProductPrice(productData?.price);
+      setProductPrice(productData?.price || 0);
       setVariantId("");
     }
   }, [selectedOptions]);
@@ -785,15 +809,26 @@ const ProductModal = ({ onClose, loading }) => {
     console.log("Adding to cart with product data:", productData);
     console.log("Selected options:", selectedOptions);
 
-    if (
-      !productData ||
-      !selectedOptions.ringSize ||
-      !selectedOptions.metalType
-    ) {
+    // Check if product data is still loading
+    if (!productData) {
+      toast.error("Product data is still loading. Please wait...");
+      console.error("Product data is missing - still loading");
+      return;
+    }
+
+    // Check if inventory exists
+    if (!productData.inventory || !productData.inventory.inventory_details || productData.inventory.inventory_details.length === 0) {
+      toast.error("Product inventory is not available");
+      console.error("Product inventory is missing");
+      return;
+    }
+
+    // Check if required options are selected
+    if (!selectedOptions.ringSize || !selectedOptions.metalType) {
       toast.error(
         "Please select ring size and metal type before adding to cart"
       );
-      console.error("Product data or selected options are missing");
+      console.error("Selected options are missing:", { ringSize: selectedOptions.ringSize, metalType: selectedOptions.metalType });
       return;
     }
 
@@ -825,7 +860,7 @@ const ProductModal = ({ onClose, loading }) => {
   };
 
   const isOnCart = cartItems?.some(
-    (item) => item.pid_id === productData?.product?._id
+    (item) => item.pid_id === productData?._id
   );
 
   // Update selected options when productData changes
@@ -1007,19 +1042,18 @@ const ProductModal = ({ onClose, loading }) => {
               {isOnCart ? (
                 <button
                   onClick={handelAddToCart}
-                  className="bg-green-100 hover:bg-green-200 font-gintoNord text-[10px] w-full md:max-w-[300px] text-gray-800 font-medium px-10 py-2 rounded border border-gray-300 transition-colors"
+                  disabled={isLoadingProduct || !productData}
+                  className="bg-green-100 hover:bg-green-200 font-gintoNord text-[10px] w-full md:max-w-[300px] text-gray-800 font-medium px-10 py-2 rounded border border-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   ALREADY ADDED ON CART
                 </button>
               ) : (
                 <button
                   onClick={handelAddToCart}
-                  className="bg-green-100 hover:bg-green-200 font-gintoNord text-[10px] w-full md:max-w-[300px] text-gray-800 font-medium px-10 py-2 rounded border border-gray-300 transition-colors"
+                  disabled={isLoadingProduct || !productData || !selectedOptions.ringSize || !selectedOptions.metalType}
+                  className="bg-green-100 hover:bg-green-200 font-gintoNord text-[10px] w-full md:max-w-[300px] text-gray-800 font-medium px-10 py-2 rounded border border-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  ADD TO CART | {currencySymbol}
-                  {selectedDiamond
-                    ? (selectedDiamond.net + productPrice).toFixed(2)
-                    : productPrice?.toFixed(2) || "00.00"}
+                  {isLoadingProduct ? "Loading..." : `ADD TO CART | ${currencySymbol}${selectedDiamond ? (selectedDiamond.net + productPrice).toFixed(2) : productPrice?.toFixed(2) || "00.00"}`}
                 </button>
               )}
               {/* </Link> */}

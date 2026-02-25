@@ -9,7 +9,18 @@ export async function GET(request) {
 
     // ✅ Auth check: only vendor allowed
     const authResult = await verifyTokenAndUser(request, "admin");
+
+    console.log('[Debug Vendor Dashboard] Auth Result:', {
+      error: !!authResult.error,
+      userParams: authResult.user ? {
+        id: authResult.user._id,
+        role: authResult.user.role,
+        email: authResult.user.email
+      } : 'No User'
+    });
+
     if (authResult.error || authResult.user.role !== "vendor") {
+      console.log('[Debug Vendor Dashboard] Access Denied. Role mismatch or Auth error.');
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 403 }
