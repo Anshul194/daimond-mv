@@ -105,9 +105,9 @@ const Navbar = () => {
         "/api/navbar-categories-with-attributes"
       );
       let datas = {};
-      data.data.body.data.map((item) => {
+      (data.data?.body?.data || []).map((item) => {
         const att = {};
-        item.attributes.map((attr) => {
+        (item.attributes || []).map((attr) => {
           att[attr.title] = attr.terms;
         });
         datas[item.name] = att;
@@ -117,14 +117,14 @@ const Navbar = () => {
       const res = await axiosInstance.get(
         `api/category/subcategory?categoryId=6854fd3b5e53f236d75c07c1`
       );
-      setFineJewellerSubCategories(res.data.data);
+      setFineJewellerSubCategories(res.data?.data || []);
 
       const educationData = await axiosInstance.get(
         "/api/blog/category/6878cbb596dfc8337a3359b4/blogs"
       );
 
       console.log("Education Data:", educationData.data.body.data);
-      setEducationCategories(educationData.data.body.data);
+      setEducationCategories(educationData.data?.body?.data || []);
     } catch (error) {
       console.error("Error fetching attributes:", error);
     }
