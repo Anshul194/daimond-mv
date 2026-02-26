@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import ColorCode from './ColorCode';
+import ColorCode from './ColorCode.js';
 
 const { Schema, model, models } = mongoose;
 
@@ -39,6 +39,11 @@ const productInventoryDetailSchema = new Schema({
     image: {
         type: [String], // Changed to array of strings to support multiple images
         default: [],
+    },
+    sku: {
+        type: String,
+        trim: true,
+        default: "",
     },
     stock_count: {
         type: Number,

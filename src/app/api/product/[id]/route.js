@@ -12,6 +12,10 @@ import ProductRepository from "@/app/repository/productRepository.js";
 
 const productRepository = new ProductRepository();
 
+// Force Next.js to always fetch fresh data (no caching)
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function PUT(request, context) {
   try {
     await dbConnect();
@@ -99,7 +103,12 @@ export async function GET(request, { params }) {
     };
 
     console.log("GET /product/:id called with params:", result);
-    return NextResponse.json(result.body, { status: result.status });
+    return NextResponse.json(result.body, {
+      status: result.status,
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+      },
+    });
   } catch (err) {
     console.error("GET /product/:id error:", err);
     return NextResponse.json(

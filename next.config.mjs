@@ -6,6 +6,7 @@ const __dirname = dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  transpilePackages: ["gsap"],
   webpack: (config, { isServer, webpack }) => {
     if (!isServer) {
       // Comprehensive fallbacks for Node.js modules

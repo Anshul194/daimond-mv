@@ -2,6 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 
+import ReviewForm from '../ReviewForm'
+
 const ModalReviews = () => {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
@@ -10,9 +12,11 @@ const ModalReviews = () => {
   const [itemsPerView, setItemsPerView] = useState(1)
   const [expandedReviews, setExpandedReviews] = useState({})
   const [maxHeight, setMaxHeight] = useState(240)
+  const [showForm, setShowForm] = useState(false)
   const sliderRef = useRef(null)
   const cardRefs = useRef([])
 
+  /* 
   const reviews = [
     {
       type: 'summary',
@@ -106,6 +110,63 @@ const ModalReviews = () => {
       avatar: 'https://images.unsplash.com/photo-1507591064344-4c6ce005b128?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'
     }
   ]
+  */
+
+  const [reviews, setReviews] = useState([
+    {
+      type: 'summary',
+      googleRating: '5.0',
+      googleReviews: '9727 reviews',
+      trustpilotRating: '5.0',
+    }
+  ]);
+
+  const formatTimeAgo = (dateString) => {
+    const now = new Date();
+    const past = new Date(dateString);
+    const diffInMs = now - past;
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    if (diffInDays === 0) {
+      const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+      if (diffInHours === 0) return 'Just now';
+      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    }
+    if (diffInDays < 7) return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+    if (diffInDays < 30) {
+      const weeks = Math.floor(diffInDays / 7);
+      return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
+    }
+    const months = Math.floor(diffInDays / 30);
+    return `${months} month${months > 1 ? 's' : ''} ago`;
+  };
+
+  const fetchReviews = async () => {
+    try {
+      const response = await fetch('/api/review?limit=20&isWebsiteReview=true');
+      const data = await response.json();
+      
+      if (data.success && data.data.results) {
+        const dynamicReviews = data.data.results.map(rev => ({
+          type: 'review',
+          platform: 'Google',
+          name: rev.user?.name || 'Anonymous',
+          rating: rev.rating,
+          timeAgo: formatTimeAgo(rev.createdAt),
+          review: rev.comment,
+          avatar: rev.user?.profilepic || rev.user?.avatar || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y',
+        }));
+
+        setReviews(prev => [prev[0], ...dynamicReviews]);
+      }
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchReviews();
+  }, []);
 
   // Function to determine items per view based on screen size
   const updateItemsPerView = () => {
@@ -346,7 +407,10 @@ const ModalReviews = () => {
 
                         {/* Action Buttons */}
                         <div className="space-y-3">
-                          <button className="w-full bg-[#004643] text-white py-3 px-4 text-[10px] font-semibold uppercase tracking-wide hover:bg-[#004643]/90 transition-colors">
+                          <button 
+                            onClick={() => setShowForm(true)}
+                            className="w-full bg-[#004643] text-white py-3 px-4 text-[10px] font-semibold uppercase tracking-wide hover:bg-[#004643]/90 transition-colors"
+                          >
                             WRITE A REVIEW
                           </button>
                           <button className="w-full bg-[#004643]/80 text-white py-3 px-4 text-[10px] font-semibold uppercase tracking-wide hover:bg-[#004643] transition-colors">
@@ -395,6 +459,18 @@ const ModalReviews = () => {
               ))}
             </div>
           </div>
+
+          {showForm && (
+            <div className="absolute inset-0 bg-white z-[60] flex items-center justify-center p-4">
+              <ReviewForm 
+                onCancel={() => setShowForm(false)}
+                onSuccess={() => {
+                  setShowForm(false);
+                  fetchReviews();
+                }}
+              />
+            </div>
+          )}
 
           {/* Navigation arrows */}
           {maxSlides > 0 && (

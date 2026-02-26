@@ -7,7 +7,7 @@ import Navbar from "../components/Navbar";
 import PageLoader from "../components/PageLoader";
 import PageTransition from "../components/PageTransition";
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
