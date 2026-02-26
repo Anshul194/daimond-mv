@@ -316,6 +316,9 @@ class ProductService {
           detailData.extra_cost = parseFloat(variantData.extra_cost);
         if (variantData.stock_count !== undefined)
           detailData.stock_count = parseInt(variantData.stock_count);
+        if (variantData.sku !== undefined)
+          detailData.sku = variantData.sku;
+
 
         // Handle image
         if (imageUrl) {

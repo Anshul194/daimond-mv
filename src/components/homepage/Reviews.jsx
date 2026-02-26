@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import ReviewForm from '../ReviewForm';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -14,6 +15,8 @@ const Reviews = () => {
   const [itemsPerView, setItemsPerView] = useState(1);
   const [expandedReviews, setExpandedReviews] = useState({});
   const [maxHeight, setMaxHeight] = useState(240);
+  const [showForm, setShowForm] = useState(false);
+  const [fetchTrigger, setFetchTrigger] = useState(0);
 
   const sliderRef    = useRef(null);
   const cardRefs     = useRef([]);
@@ -23,6 +26,7 @@ const Reviews = () => {
   const sliderWrapRef = useRef(null);
   const navBtnRefs   = useRef([]);
 
+  /* 
   const reviews = [
     {
       type: 'summary',
@@ -40,6 +44,63 @@ const Reviews = () => {
     { type: 'review', platform: 'Google', name: 'OLIVIA DAVIS',   rating: 5, timeAgo: '1 week ago',   review: 'Amazing experience from consultation to delivery. The ring is absolutely perfect and the service was exceptional throughout.', avatar: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80' },
     { type: 'review', platform: 'Google', name: 'RYAN GARCIA',    rating: 5, timeAgo: '1 week ago',   review: "Top-notch service and beautiful jewelry. The team made the entire process easy and enjoyable. Couldn't be happier with our rings. The craftsmanship is outstanding and the customer service exceeded our expectations. We will definitely be returning for future jewelry needs.", readMore: true, avatar: 'https://images.unsplash.com/photo-1507591064344-4c6ce005b128?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80' },
   ];
+  */
+
+  const [reviews, setReviews] = useState([
+    {
+      type: 'summary',
+      googleRating: '5.0',
+      googleReviews: '9727 reviews',
+      trustpilotRating: '5.0',
+    }
+  ]);
+
+  const formatTimeAgo = (dateString) => {
+    const now = new Date();
+    const past = new Date(dateString);
+    const diffInMs = now - past;
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    if (diffInDays === 0) {
+      const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+      if (diffInHours === 0) return 'Just now';
+      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    }
+    if (diffInDays < 7) return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+    if (diffInDays < 30) {
+      const weeks = Math.floor(diffInDays / 7);
+      return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
+    }
+    const months = Math.floor(diffInDays / 30);
+    return `${months} month${months > 1 ? 's' : ''} ago`;
+  };
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await fetch('/api/review?limit=20&isWebsiteReview=true');
+        const data = await response.json();
+        
+        if (data.success && data.data.results) {
+          const dynamicReviews = data.data.results.map(rev => ({
+            type: 'review',
+            platform: 'Google',
+            name: rev.user?.name || 'Anonymous',
+            rating: rev.rating,
+            timeAgo: formatTimeAgo(rev.createdAt),
+            review: rev.comment,
+            avatar: rev.user?.profilepic || rev.user?.avatar || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y', // Fallback avatar
+          }));
+
+          setReviews(prev => [prev[0], ...dynamicReviews]);
+        }
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+      }
+    };
+
+    fetchReviews();
+  }, [fetchTrigger]);
 
   // ── Responsive items-per-view ──
   const updateItemsPerView = () => {
@@ -56,7 +117,7 @@ const Reviews = () => {
     return () => window.removeEventListener('resize', updateItemsPerView);
   }, []);
 
-  useEffect(() => { setCurrentSlide(0); }, [itemsPerView]);
+  useEffect(() => { setCurrentSlide(0); }, [itemsPerView, reviews.length]);
 
   const maxSlides = Math.max(0, reviews.length - itemsPerView);
   const slideWidth = 100 / itemsPerView;
@@ -245,7 +306,10 @@ const Reviews = () => {
                           </div>
                         </div>
                         <div className="space-y-3">
-                          <button className="w-full bg-[#004643] text-white py-3 px-4 text-[10px] font-semibold uppercase tracking-wide hover:bg-[#004643]/90 transition-colors">
+                          <button 
+                            onClick={() => setShowForm(true)}
+                            className="w-full bg-[#004643] text-white py-3 px-4 text-[10px] font-semibold uppercase tracking-wide hover:bg-[#004643]/90 transition-colors"
+                          >
                             WRITE A REVIEW
                           </button>
                           <button className="w-full bg-[#004643]/80 text-white py-3 px-4 text-[10px] font-semibold uppercase tracking-wide hover:bg-[#004643] transition-colors">
@@ -288,6 +352,18 @@ const Reviews = () => {
               ))}
             </div>
           </div>
+
+          {showForm && (
+            <div className="absolute inset-0 bg-white z-[60] flex items-center justify-center p-4">
+              <ReviewForm 
+                onCancel={() => setShowForm(false)}
+                onSuccess={() => {
+                  setShowForm(false);
+                  setFetchTrigger(p => p + 1);
+                }}
+              />
+            </div>
+          )}
 
           {/* ── Navigation Arrows ── */}
           {maxSlides > 0 && (

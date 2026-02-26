@@ -5,7 +5,7 @@ import { ReactLenis, useLenis } from 'lenis/react';
 import Footer from "@/components/Footer";
 import Navbar from "../components/Navbar";
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 

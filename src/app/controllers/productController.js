@@ -358,7 +358,7 @@ export async function createProduct(formData, user = null) {
             carat: caratAttr?.value || null,
             metal_type: metalType,
             additional_price: detail.additional_price,
-            extra_cost: detail.extra_cost,
+            extra_cost: detail.add_cost || detail.extra_cost || 0,
             stock_count: detail.stock_count,
             image: detail.image,
             created_at: detail.created_at,
@@ -466,9 +466,9 @@ async function parseFormData(data) {
   const itemColors = getBracketNotationValues("item_color");
   const itemShapes = getBracketNotationValues("item_shape");
   const itemCarats = getBracketNotationValues("item_carat");
-  const itemExtraCosts = getBracketNotationValues("item_extra_cost").length > 0
-    ? getBracketNotationValues("item_extra_cost")
-    : getBracketNotationValues("item_additional_price");
+  // Read additional_price and extra_cost separately (they are different fields)
+  const itemAdditionalPrices = getBracketNotationValues("item_additional_price");
+  const itemExtraCosts = getBracketNotationValues("item_extra_cost");
   const itemStockCounts = getBracketNotationValues("item_stock_count");
   const itemImages = getBracketNotationValues("item_image");
 
@@ -477,6 +477,7 @@ async function parseFormData(data) {
     itemColors: itemColors.length,
     itemShapes: itemShapes.length,
     itemCarats: itemCarats.length,
+    itemAdditionalPrices: itemAdditionalPrices.length,
     itemExtraCosts: itemExtraCosts.length,
     itemStockCounts: itemStockCounts.length,
     itemImages: itemImages.length
@@ -488,6 +489,7 @@ async function parseFormData(data) {
     itemColors.length,
     itemShapes.length,
     itemCarats.length,
+    itemAdditionalPrices.length,
     itemExtraCosts.length,
     itemStockCounts.length,
     itemImages.length
@@ -501,27 +503,30 @@ async function parseFormData(data) {
     const shapeValue = itemShapes[itemIndex];
     const caratValue = itemCarats[itemIndex];
 
-    // Skip if no variant fields are present
-    if (!size && !color && !shapeValue && !caratValue) {
+    const additionalPrice = itemAdditionalPrices[itemIndex] && !isNaN(parseFloat(itemAdditionalPrices[itemIndex])) ? parseFloat(itemAdditionalPrices[itemIndex]) : 0;
+    const extra_cost = itemExtraCosts[itemIndex] && !isNaN(parseFloat(itemExtraCosts[itemIndex])) ? parseFloat(itemExtraCosts[itemIndex]) : 0;
+    const stock_count = itemStockCounts[itemIndex] && !isNaN(parseInt(itemStockCounts[itemIndex])) ? parseInt(itemStockCounts[itemIndex]) : 0;
+    const image = itemImages[itemIndex];
+
+    // Skip if no meaningful variant fields are present
+    if (!size && !color && !shapeValue && !caratValue && !additionalPrice && !extra_cost && !stock_count && !image) {
       continue;
     }
+
+    // Read variant SKU from form data
+    const sku = data.get(`item_sku[${itemIndex}]`) || "";
 
     const variant = {
       size: size || undefined,
       color: color || undefined,
-      additional_price:
-        itemExtraCosts[itemIndex] && !isNaN(parseFloat(itemExtraCosts[itemIndex]))
-          ? parseFloat(itemExtraCosts[itemIndex])
-          : 0,
-      extra_cost: itemExtraCosts[itemIndex] && !isNaN(parseFloat(itemExtraCosts[itemIndex]))
-        ? parseFloat(itemExtraCosts[itemIndex])
-        : 0,
-      stock_count: itemStockCounts[itemIndex] && !isNaN(parseInt(itemStockCounts[itemIndex]))
-        ? parseInt(itemStockCounts[itemIndex])
-        : 0,
-      image: itemImages[itemIndex] || undefined,
+      sku: sku,
+      additional_price: additionalPrice,
+      extra_cost: extra_cost,
+      stock_count: stock_count,
+      image: image || undefined,
       attributes: [],
     };
+
 
     // Add Shape attribute if present (ensure it's a valid string, not an array)
     if (shapeValue && typeof shapeValue === 'string' && shapeValue.trim() !== '') {
@@ -590,8 +595,9 @@ async function createInventoryDetailsInBatch(
       size: variant.size,
       color: variant.color,
       additional_price: variant.additional_price,
-      extra_cost: variant.extra_cost,
+      add_cost: variant.extra_cost || 0, // Schema field is 'add_cost'
       stock_count: variant.stock_count,
+      sku: variant.sku || "",
       image: variant.processedImageUrl ? [variant.processedImageUrl] : [],
     };
     inventoryDetails.push(detail);
@@ -1044,7 +1050,7 @@ export async function updateProduct(id, formData) {
               carat: caratAttr?.value || null,
               metal_type: metalType,
               additional_price: detail.additional_price,
-              extra_cost: detail.extra_cost,
+              extra_cost: detail.add_cost || detail.extra_cost || 0,
               stock_count: detail.stock_count,
               image: detail.image,
               created_at: detail.created_at,
@@ -1068,31 +1074,41 @@ export async function updateProduct(id, formData) {
 
         // If there are inventory details, save properties as attributes on the first inventory detail
         if (inventoryDetails.length > 0) {
-          // Delete existing property attributes ONLY for the first inventory detail to avoid duplicates
-          await ProductInventoryDetailAttribute.deleteMany({
-            inventory_details_id: inventoryDetails[0]._id,
-            attribute_name: { $in: Object.keys(actualData) },
-            deletedAt: null,
-          });
+          // [FIX] Define attributes that are handled by the variants section to avoid overwriting them here
+          const variantSpecificAttributes = ["shape", "carat", "color", "size", "metal type", "metaltype"];
 
-          const createAttributePromises = Object.keys(actualData).map((key) => {
-            return ProductInventoryDetailAttribute.create({
+          const propertyKeys = Object.keys(actualData).filter(key =>
+            !variantSpecificAttributes.includes(key.toLowerCase())
+          );
+
+          if (propertyKeys.length > 0) {
+            // Delete existing property attributes ONLY for the first inventory detail to avoid duplicates
+            await ProductInventoryDetailAttribute.deleteMany({
               inventory_details_id: inventoryDetails[0]._id,
-              product_id: updatedProduct._id,
-              attribute_name: key,
-              attribute_value: actualData[key],
+              attribute_name: { $in: propertyKeys },
+              deletedAt: null,
             });
-          });
 
-          const createdPropertyAttributes = await Promise.all(createAttributePromises);
+            const createAttributePromises = propertyKeys.map((key) => {
+              return ProductInventoryDetailAttribute.create({
+                inventory_details_id: inventoryDetails[0]._id,
+                product_id: updatedProduct._id,
+                attribute_name: key,
+                attribute_value: actualData[key],
+              });
+            });
 
-          // Add to inventoryDetailAttributes for response
-          inventoryDetailAttributes = [...inventoryDetailAttributes, ...createdPropertyAttributes];
+            const createdPropertyAttributes = await Promise.all(createAttributePromises);
+
+            // Add to inventoryDetailAttributes for response
+            inventoryDetailAttributes = [...inventoryDetailAttributes, ...createdPropertyAttributes];
+          }
         }
       } catch (e) {
         console.error("Error parsing properties:", e);
       }
     }
+
 
     // Fetch all product attributes to include in response
     const allProductAttributes = await ProductInventoryDetailAttribute.find({
@@ -1315,9 +1331,9 @@ async function parseUpdateFormData(data) {
   const itemColors = getBracketNotationValues("item_color");
   const itemShapes = getBracketNotationValues("item_shape");
   const itemCarats = getBracketNotationValues("item_carat");
-  const itemExtraCosts = getBracketNotationValues("item_extra_cost").length > 0
-    ? getBracketNotationValues("item_extra_cost")
-    : getBracketNotationValues("item_additional_price");
+  // Read additional_price and extra_cost separately (they are different fields)
+  const itemAdditionalPrices = getBracketNotationValues("item_additional_price");
+  const itemExtraCosts = getBracketNotationValues("item_extra_cost");
   const itemStockCounts = getBracketNotationValues("item_stock_count").length > 0
     ? getBracketNotationValues("item_stock_count")
     : getBracketNotationValues("item_stock");
@@ -1329,6 +1345,7 @@ async function parseUpdateFormData(data) {
     itemColors: itemColors.length,
     itemShapes: itemShapes.length,
     itemCarats: itemCarats.length,
+    itemAdditionalPrices: itemAdditionalPrices.length,
     itemExtraCosts: itemExtraCosts.length,
     itemStockCounts: itemStockCounts.length,
     itemImages: itemImages.length,
@@ -1341,6 +1358,7 @@ async function parseUpdateFormData(data) {
     itemColors.length,
     itemShapes.length,
     itemCarats.length,
+    itemAdditionalPrices.length,
     itemExtraCosts.length,
     itemStockCounts.length,
     itemImages.length,
@@ -1361,24 +1379,32 @@ async function parseUpdateFormData(data) {
     // However, the current logic seems to rebuild the variant list.
     console.log(`[DEBUG] Parsing update variant ${i}: size=${size}, color=${color}, shape=${shape}, carat=${carat}, id=${inventoryDetailsId}`);
 
-    if (!size && !color && !shape && !carat && !inventoryDetailsId) {
+    const additionalPrice = itemAdditionalPrices[i];
+    const extra_cost = itemExtraCosts[i];
+    const stock_count = itemStockCounts[i];
+    const image = itemImages[i];
+
+    if (!size && !color && !shape && !carat && !inventoryDetailsId && !additionalPrice && !extra_cost && !stock_count && !image) {
       console.log(`[DEBUG] Skipping empty variant at index ${i}`);
       continue;
     }
 
-    const extra_cost = itemExtraCosts[i];
-    const stock_count = itemStockCounts[i];
-    const image = itemImages[i];
+
+    // Read variant SKU from form data
+    const sku = data.get(`item_sku[${i}]`) || "";
 
     const variant = {
       inventoryDetailsId: inventoryDetailsId || undefined,
       size: size || undefined,
       color: color || undefined,
-      additional_price: extra_cost && !isNaN(parseFloat(extra_cost)) ? parseFloat(extra_cost) : undefined,
-      stock_count: stock_count && !isNaN(parseInt(stock_count)) ? parseInt(stock_count) : 0,
+      sku: sku || "",
+      additional_price: additionalPrice !== undefined && !isNaN(parseFloat(additionalPrice)) ? parseFloat(additionalPrice) : 0,
+      extra_cost: extra_cost !== undefined && !isNaN(parseFloat(extra_cost)) ? parseFloat(extra_cost) : 0,
+      stock_count: stock_count !== undefined && !isNaN(parseInt(stock_count)) ? parseInt(stock_count) : 0,
       image: image || undefined,
       attributes: [],
     };
+
 
     // Add Shape attribute if present
     if (shape && typeof shape === 'string' && shape.trim() !== '') {
@@ -1489,14 +1515,23 @@ async function updateInventoryDetailsInBatch(
       stock_count = parseInt(variantData.stock_count);
     }
 
+    // extra_cost is stored in the 'add_cost' field in the schema
+    let extra_cost = 0;
+    if (typeof variantData.extra_cost === "number" && !isNaN(variantData.extra_cost)) {
+      extra_cost = variantData.extra_cost;
+    } else if (typeof variantData.extra_cost === "string" && !isNaN(parseFloat(variantData.extra_cost))) {
+      extra_cost = parseFloat(variantData.extra_cost);
+    }
+
     const detailData = {
       product_id: productId,
       product_inventory_id: inventoryId,
       size: variantData.size || null, // Sanitize empty strings
       color: variantData.color || null,
-      additional_price: variantData.additional_price,
-      add_cost: variantData.additional_price, // Match schema field name 'add_cost'
+      additional_price: variantData.additional_price || 0,
+      add_cost: extra_cost, // Store extra_cost in the 'add_cost' schema field
       stock_count, // always a valid number
+      sku: variantData.sku || "",
       image: imageUrls,
     };
 
@@ -1529,15 +1564,26 @@ async function updateInventoryDetailsInBatch(
       });
 
       if (attributes && attributes.length > 0) {
+        // [FIX] Delete existing attributes for this specific variant to ensure clean update
+        // This prevents duplicates and ensures the latest values are what the GET request finds first
+        if (inventoryDetailsId) {
+          console.log(`[DEBUG] Clearing old attributes for variant ${inventoryDetailsId} before update`);
+          await ProductInventoryDetailAttribute.deleteMany({
+            inventory_details_id: inventoryDetailsId,
+            deletedAt: null
+          });
+        }
+
         const detailAttributes = attributes.map((attr) => ({
-          attribute_name: attr.name || attr.attribute_name,
-          attribute_value: attr.value || attr.attribute_value,
+          attribute_name: (attr.name || attr.attribute_name || "").trim(),
+          attribute_value: (attr.value || attr.attribute_value || "").trim(),
           inventory_details_id: createdDetail._id,
           product_id: productId,
         }));
         console.log(`[DEBUG] Adding ${detailAttributes.length} attributes to allAttributes for variant ${createdDetail._id}`);
         allAttributes.push(...detailAttributes);
       }
+
     }
   }
 
@@ -1550,30 +1596,13 @@ async function updateInventoryDetailsInBatch(
     });
     console.log(`[DEBUG] Found ${existingAttributes.length} existing attributes in DB for these variants`);
 
+    // [FIX] Since we already deleted existing attributes for updated variants above,
+    // we should just create all of them to avoid duplicate checks and logic issues.
     for (const attr of allAttributes) {
-      const attrNameLower = (attr.attribute_name || "").toLowerCase().trim();
-      const variantIdStr = attr.inventory_details_id.toString();
-
-      const existingAttr = existingAttributes.find(
-        (e) =>
-          (e.attribute_name || "").toLowerCase().trim() === attrNameLower &&
-          e.inventory_details_id.toString() === variantIdStr
-      );
-
-      let createdAttr;
-      if (existingAttr) {
-        console.log(`[DEBUG] Updating existing attribute: "${existingAttr.attribute_name}" (ID: ${existingAttr._id}) with new value: "${attr.attribute_value}"`);
-        createdAttr = await productService.updateInventoryDetailsAttributes(
-          existingAttr._id,
-          attr
-        );
-      } else {
-        console.log(`[DEBUG] Creating new attribute: "${attr.attribute_name}" with value: "${attr.attribute_value}" for variant: ${variantIdStr}`);
-        createdAttr = await productService.createInventoryDetailsAttributes(
-          attr
-        );
-      }
+      console.log(`[DEBUG] Creating attribute: "${attr.attribute_name}" with value: "${attr.attribute_value}" for variant: ${attr.inventory_details_id}`);
+      const createdAttr = await productService.createInventoryDetailsAttributes(attr);
       if (createdAttr) {
+
         createdAttributes.push(createdAttr);
         updatedResources.push({ type: "attribute", id: createdAttr._id });
       }
