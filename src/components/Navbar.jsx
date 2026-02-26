@@ -47,6 +47,7 @@ const Navbar = () => {
     []
   );
   const [showMoreDropdown, setShowMoreDropdown] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const dispatch = useDispatch();
 
   const navRef = useRef(null);
@@ -142,6 +143,19 @@ const Navbar = () => {
       getAttribute();
     }
   }, [categories]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const rightNavItems = [
     { name: "EDUCATION", href: "/education", hasDropdown: true },
@@ -445,7 +459,12 @@ const Navbar = () => {
 
 
       {/* Desktop Navbar */}
-      <nav ref={navRef} className="sticky top-0 w-full h-16 lg:h-20 bg-white z-50 border-b border-gray-100">
+      <nav
+        ref={navRef}
+        className={`sticky top-0 w-full h-16 lg:h-20 bg-white z-50 border-b border-gray-100 transition-all duration-300 ${
+          scrolled ? "shadow-md" : ""
+        }`}
+      >
         <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Mobile Menu Button - Left side on mobile */}
