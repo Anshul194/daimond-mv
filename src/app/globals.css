@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fefaf5;
+  --background: #ffffff;
   --foreground: #171717;
 }
 
@@ -101,10 +101,10 @@ button {
 }
 
 .bg {
-  background: #253e2b;
+  background: #00736C;
 }
 .btn {
-  background-color: #236339;
+  background-color: #00736C;
 }
 .cream {
   background-color: #fefaf5;
@@ -118,6 +118,28 @@ button {
   display: none; /* Chrome, Safari, Opera */
 }
 
+/* Lenis smooth scroll essential styles */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
 .hide-scrollbar {
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* Internet Explorer 10+ */
@@ -127,12 +149,13 @@ button {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
-h1{
-  color:black;
+/* Global typography defaults - set headings to black as requested */
+h1, h2, h3, h4, h5, h6 {
+  color: #000000;
 }
 
-p{
-  color:black;
+p {
+  color: #171717;
 }
 
 /* Override all light gray text colors to dark for better readability */

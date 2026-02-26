@@ -42,7 +42,7 @@ const MetalSelector = ({ selectedOptions, onOptionChange }) => {
     <div className="mb-2">
       {/* Header */}
       <div className="text-center mb-6">
-        <div className="text-green-500 text-[10px] font-semibold font-arizona mb-2">
+        <div className="text-[#004643] text-[10px] font-semibold font-arizona mb-2">
           STEP ONE
         </div>
         <h2 className="text-2xl text-gray-800 mb-1">
@@ -66,7 +66,7 @@ const MetalSelector = ({ selectedOptions, onOptionChange }) => {
         {/* Dropdown Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-3/4 max-w-[290px] border border-gray-600  px-4 py-2 flex items-center justify-between hover:bg-green-100 transition-colors"
+          className="w-3/4 max-w-[290px] border border-gray-600  px-4 py-2 flex items-center justify-between hover:bg-[#004643]/10 transition-colors"
         >
           <span className="text-gray-700 font-gintoNormal text-[10px] font-medium">
             {selectedOptions.metalType}
@@ -88,12 +88,12 @@ const MetalSelector = ({ selectedOptions, onOptionChange }) => {
                   key={metal.id}
                   onClick={() => handleSelect(metal)}
                   className={`w-full flex items-center px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 relative ${
-                    isSelected ? "bg-green-50" : ""
+                    isSelected ? "bg-[#004643]/5" : ""
                   }`}
                 >
                   {/* Green Selection Line */}
                   {isSelected && (
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#004643]"></div>
                   )}
 
                   {/* Metal Image */}
@@ -110,7 +110,7 @@ const MetalSelector = ({ selectedOptions, onOptionChange }) => {
 
                   {/* Price */}
                   {metal.price && (
-                    <div className="text-green-600 font-medium text-sm">
+                    <div className="text-[#004643] font-medium text-sm">
                       {metal.price}
                     </div>
                   )}
@@ -137,7 +137,7 @@ const MetalSelectorDemo = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto h-fit p-2 px-4 mt-4 bg-white">
+    <div className="max-w-md mx-auto h-fit p-2 px-4 mt-4 bg-[#FEFAF5]">
       <MetalSelector
         selectedOptions={selectedOptions}
         onOptionChange={handleOptionChange}

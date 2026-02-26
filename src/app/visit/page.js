@@ -66,7 +66,7 @@ const Visit = () => {
               <div
                 className={`relative px-8 py-4 font-medium text-sm transition-colors ${
                   step.active
-                    ? 'bg-green-700 text-white'
+                    ? 'bg-[#004643] text-white'
                     : step.skipped
                     ? 'bg-gray-100 text-gray-400'
                     : 'bg-gray-100 text-gray-500'
@@ -74,7 +74,7 @@ const Visit = () => {
               >
                 {step.label}
               </div>
-              <div className="absolute -right-4 top-0 bottom-0 w-0 h-0 border-t-[2rem] border-b-[1.9rem] border-l-[1rem] border-t-transparent border-b-transparent border-l-green-700 z-10"></div>
+              <div className="absolute -right-4 top-0 bottom-0 w-0 h-0 border-t-[2rem] border-b-[1.9rem] border-l-[1rem] border-t-transparent border-b-transparent border-l-[#004643] z-10"></div>
 
             </div>
           ))}
@@ -104,8 +104,8 @@ const Visit = () => {
         <div className="max-w-2xl mx-auto px-4">
           <div className="bg-white rounded-lg shadow-sm p-8 text-center">
             <div className="mb-6">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 bg-[#004643]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-[#004643]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
@@ -135,7 +135,7 @@ const Visit = () => {
                 setSelectedDateTime(null);
                 setBookingConfirmed(false);
               }}
-              className="bg-green-700 text-white px-6 py-2 rounded-md hover:bg-green-800 transition-colors"
+              className="bg-[#004643] text-white px-6 py-2 rounded-md hover:bg-[#004643]/90 transition-colors"
             >
               Book Another Appointment
             </button>

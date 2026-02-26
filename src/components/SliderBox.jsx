@@ -11,6 +11,7 @@ import {
 import ProductModal from "../../src/components/modal/Modal";
 import Link from "next/link";
 import Image from "next/image";
+import { gsap } from "gsap";
 
 const SliderBox = ({
   type = "styles", // "styles" or "products"
@@ -24,6 +25,7 @@ const SliderBox = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
   const sliderRef = useRef(null);
+  const rootRef = useRef(null);
   const router = useRouter(); // Initialize router for navigation
 
   const dispatch = useDispatch();
@@ -39,6 +41,28 @@ const SliderBox = ({
 
   // Add safety check for undefined state
   const { items = [], loading = false, error = null } = currentState || {};
+
+  useEffect(() => {
+    if (!loading && items.length > 0) {
+      const ctx = gsap.context(() => {
+        gsap.fromTo(".slider-item", 
+          { y: 50, opacity: 0 },
+          { 
+            y: 0, 
+            opacity: 1, 
+            stagger: 0.1, 
+            duration: 0.8, 
+            ease: "back.out(1.7)",
+            scrollTrigger: {
+              trigger: sliderRef.current,
+              start: "top 80%",
+            }
+          }
+        );
+      }, rootRef);
+      return () => ctx.revert();
+    }
+  }, [loading, items]);
 
   // Get selected product data from Redux store
   const selectedProduct = useMemo(() => {
@@ -216,13 +240,13 @@ const SliderBox = ({
 
   return (
     <>
-      <div className="max-w-7xl mx-auto px-4  py-16" {...otherProps}>
+      <div ref={rootRef} className="max-w-7xl mx-auto px-4 py-16" {...otherProps}>
         {/* Header */}
         <div className="text-center pt-16 mb-0">
-          <h1 className="text-2xl md:text-3xl lg:text-3xl font-light font-arizona text-gray-800 mb-4">
+          <h1 className="reveal-text text-2xl md:text-3xl lg:text-3xl font-light font-arizona text-black mb-4">
             {title}
           </h1>
-          <p className="text-gray-700 text-[10px]">{subtitle}</p>
+          <p className="reveal-text text-gray-900 text-[10px]">{subtitle}</p>
         </div>
 
         {/* Slider Container */}
@@ -245,35 +269,12 @@ const SliderBox = ({
                       ? `/${item.category_id?.slug}/${item.slug}`
                       : `/engagement-230?style=${itemData.name.toLowerCase()}`
                   }
-                  className="flex-shrink-0 px-4"
+                  className="slider-item flex-shrink-0 px-4 opacity-0"
                   style={{ width: `${slideWidth}%` }}
                 >
                   <div className="group cursor-pointer">
                     {/* Image Container */}
                     <div className="aspect-[3/4] md:aspect-[4/5] bg-gray-100 overflow-hidden mb-4 relative transition-transform duration-300 ease-in-out hover:scale-105">
-                      {/* <div
-                        className="w-full h-full bg-cover bg-center"
-                        style={{
-                          backgroundImage: `url(${
-                            Array.isArray(itemData.image)
-                              ? itemData.image[0]
-                              : itemData.image
-                          })`,
-                          backgroundPosition: itemData?.backgroundPosition,
-                        }}
-                      /> */}
-
-                      {/* <Image
-                        src={
-                          Array.isArray(itemData.image)
-                            ? itemData.image[0]
-                            : itemData.image
-                        }
-                        alt={itemData.name}
-                        layout="fill"
-                        objectFit="cover"
-                      /> */}
-
                       {Array.isArray(itemData.image) ? (
                         <Image
                           src={itemData.image[0]}

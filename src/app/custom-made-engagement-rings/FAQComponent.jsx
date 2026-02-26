@@ -61,7 +61,7 @@ const FAQComponent = () => {
   return (
     <div className="w-full max-w-full mx-auto">
       {/* Header */}
-      <div className="bg-green-800 text-white py-6 px-4">
+      <div className="bg-[#004643] text-white py-6 px-4">
         <h1 className="text-3xl font-bold text-center">FAQ</h1>
         <div className="flex justify-center mt-2">
           <div className="h-0.5 w-16 bg-yellow-400"></div>

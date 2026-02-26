@@ -228,9 +228,9 @@ const JewelryFilter = ({ Data }) => {
             onClick={() => handleGenderSelect("woman")}
             className={`${
               selectedGender === "woman"
-                ? "bg-[#236339] text-white"
-                : "text-[#236339] "
-            } w-full cursor-pointer h-full flex justify-center items-center border-2 font-semibold text-medium uppercase border-[#236339]`}
+                ? "bg-[#004643] text-white"
+                : "text-[#004643] "
+            } w-full cursor-pointer h-full flex justify-center items-center border-2 font-semibold text-medium uppercase border-[#004643]`}
           >
             Woman
           </div>
@@ -238,9 +238,9 @@ const JewelryFilter = ({ Data }) => {
             onClick={() => handleGenderSelect("man")}
             className={`${
               selectedGender === "man"
-                ? "bg-[#236339] text-white"
-                : "text-[#236339] "
-            } w-full cursor-pointer h-full flex justify-center items-center border-2 font-semibold text-medium uppercase border-l-0 border-[#236339]`}
+                ? "bg-[#004643] text-white"
+                : "text-[#004643] "
+            } w-full cursor-pointer h-full flex justify-center items-center border-2 font-semibold text-medium uppercase border-l-0 border-[#004643]`}
           >
             Man
           </div>
@@ -534,9 +534,9 @@ const JewelryFilter = ({ Data }) => {
           onClick={() => handleGenderSelect("woman")}
           className={`${
             selectedGender === "woman"
-              ? "bg-[#236339] text-white"
-              : "text-[#236339] "
-          } w-full cursor-pointer h-full flex justify-center items-center border-2 font-semibold text-medium uppercase border-[#236339]`}
+              ? "bg-[#004643] text-white"
+              : "text-[#004643] "
+          } w-full cursor-pointer h-full flex justify-center items-center border-2 font-semibold text-medium uppercase border-[#004643]`}
         >
           Woman
         </div>
@@ -544,9 +544,9 @@ const JewelryFilter = ({ Data }) => {
           onClick={() => handleGenderSelect("man")}
           className={`${
             selectedGender === "man"
-              ? "bg-[#236339] text-white"
-              : "text-[#236339] "
-          } w-full cursor-pointer h-full flex justify-center items-center border-2 font-semibold text-medium uppercase border-l-0 border-[#236339]`}
+              ? "bg-[#004643] text-white"
+              : "text-[#004643] "
+          } w-full cursor-pointer h-full flex justify-center items-center border-2 font-semibold text-medium uppercase border-l-0 border-[#004643]`}
         >
           Man
         </div>

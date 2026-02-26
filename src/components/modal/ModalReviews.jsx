@@ -260,12 +260,12 @@ const ModalReviews = () => {
 
   const TrustpilotLogo = () => (
     <div className="inline-flex items-center gap-2">
-      <div className="w-6 h-6 bg-green-600 rounded flex items-center justify-center">
+      <div className="w-6 h-6 bg-[#004643] rounded flex items-center justify-center">
         <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
         </svg>
       </div>
-      <span className="text-green-600 font-semibold text-lg">Trustpilot</span>
+      <span className="text-[#004643] font-semibold text-lg">Trustpilot</span>
     </div>
   )
 
@@ -346,10 +346,10 @@ const ModalReviews = () => {
 
                         {/* Action Buttons */}
                         <div className="space-y-3">
-                          <button className="w-full bg-green-700 text-white py-3 px-4 text-[10px] font-semibold uppercase tracking-wide hover:bg-green-800 transition-colors">
+                          <button className="w-full bg-[#004643] text-white py-3 px-4 text-[10px] font-semibold uppercase tracking-wide hover:bg-[#004643]/90 transition-colors">
                             WRITE A REVIEW
                           </button>
-                          <button className="w-full bg-green-600 text-white py-3 px-4 text-[10px] font-semibold uppercase tracking-wide hover:bg-green-700 transition-colors">
+                          <button className="w-full bg-[#004643]/80 text-white py-3 px-4 text-[10px] font-semibold uppercase tracking-wide hover:bg-[#004643] transition-colors">
                             READ OUR REVIEWS
                           </button>
                         </div>

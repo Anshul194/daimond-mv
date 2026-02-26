@@ -41,8 +41,8 @@ const PaymentSuccessPopup = ({ isOpen, onClose, orderDetails }) => {
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-[#fefaf5] text-black rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl animate-in fade-in duration-300">
         <div className="text-center">
-          <div className="mx-auto mb-6 w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center">
-            <CheckCircle className="text-emerald-400" size={32} />
+          <div className="mx-auto mb-6 w-16 h-16 bg-[#004643]/20 rounded-full flex items-center justify-center">
+            <CheckCircle className="text-[#004643]" size={32} />
           </div>
           <h2 className="text-2xl font-bold  mb-2">Payment Successful!</h2>
           <p className=" mb-6">
@@ -50,7 +50,7 @@ const PaymentSuccessPopup = ({ isOpen, onClose, orderDetails }) => {
             journey!
           </p>
           <div className="bg-white/5 rounded-lg p-4 mb-6 text-left">
-            <h3 className="text-emerald-400 font-semibold mb-3 flex items-center">
+            <h3 className="text-[#004643] font-semibold mb-3 flex items-center">
               <Check className="mr-2" size={16} />
               Order Summary
             </h3>
@@ -73,12 +73,12 @@ const PaymentSuccessPopup = ({ isOpen, onClose, orderDetails }) => {
               </div>
               <div className="flex justify-between">
                 <span>Total Paid:</span>
-                <span className="text-emerald-400 font-semibold">
+                <span className="text-[#004643] font-semibold">
                   ₹{orderDetails?.totalAmount || 0}
                 </span>
               </div>
               {orderDetails?.couponDiscount > 0 && (
-                <div className="flex justify-between text-emerald-400">
+                <div className="flex justify-between text-[#004643]">
                   <span>Coupon Savings:</span>
                   <span>₹{orderDetails.couponDiscount}</span>
                 </div>
@@ -365,13 +365,13 @@ const CheckoutPage = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-[#fefaf5] pt-6">
+      <div className="min-h-screen bg-white pt-6">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold text-black mb-8 text-center">
             Checkout
           </h1>
 
-          <div className="bg-white/10 flex max-sm:flex-col gap-10 backdrop-blur-xl border border-black rounded-lg p-6">
+          <div className="bg-[#FEFAF5] flex max-sm:flex-col gap-10 backdrop-blur-xl border border-black/10 rounded-lg p-6 shadow-sm">
             <div className="w-full flex flex-col gap-4 md:w-1/2 text-black">
               <h2 className="text-xl font-semibold text-black placeholder:text-black mb-6 flex items-center">
                 <ShoppingBag className="mr-2 text-black" size={24} />
@@ -639,7 +639,7 @@ const CheckoutPage = () => {
                     </div>
                     <div className="mt-6">
                       <Link href="/cart">
-                        <button className="inline-flex cursor-pointer items-center text-black hover:text-emerald-400 transition-colors text-sm">
+                        <button className="inline-flex cursor-pointer items-center text-black hover:text-[#004643] transition-colors text-sm">
                           <ArrowLeft className="mr-1" size={16} /> Edit Cart
                           Items
                         </button>
@@ -713,7 +713,7 @@ const CheckoutPage = () => {
                             <h2
                               className={`text-sm mt-1 ml-1 font-medium text-black ${
                                 couponApplied
-                                  ? "text-emerald-400"
+                                  ? "text-[#004643]"
                                   : "text-red-500"
                               }`}
                             >
@@ -779,7 +779,7 @@ const CheckoutPage = () => {
                   <button
                     onClick={handlePayment}
                     disabled={processingPayment}
-                    className="w-full bg-black text-white py-3 rounded-lg font-medium hover:from-emerald-600 hover:to-cyan-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-emerald-500/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    className="w-full bg-black text-white py-3 rounded-lg font-medium hover:bg-[#004643] transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-[#004643]/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
                     {processingPayment ? (
                       <div className="flex items-center justify-center">

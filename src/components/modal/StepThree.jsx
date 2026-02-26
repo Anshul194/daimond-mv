@@ -15,7 +15,7 @@ const EngravingSelector = ({ selectedOptions, onOptionChange }) => {
     <div className="mb-2">
       {/* Header */}
       <div className="text-center mb-6">
-        <div className="text-green-500 text-[10px] font-semibold font-arizona mb-2">
+        <div className="text-[#004643] text-[10px] font-semibold font-arizona mb-2">
           STEP THREE
         </div>
         <h2 className="text-xl text-gray-800 mb-1 font-arizona">
@@ -44,7 +44,7 @@ const EngravingSelector = ({ selectedOptions, onOptionChange }) => {
           value={engravingText}
           onChange={handleTextChange}
           placeholder="Engraving Text (+36.00 USD)"
-          className="w-3/4 max-w-[290px] border border-gray-600 px-4 py-2 text-[10px] font-medium text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+          className="w-3/4 max-w-[290px] border border-gray-600 px-4 py-2 text-[10px] font-medium text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#004643] focus:border-transparent transition-colors"
         />
       </div>
     </div>
@@ -64,7 +64,7 @@ const EngravingSelectorDemo = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto h-fit p-2 px-4 mt-4 bg-white">
+    <div className="max-w-md mx-auto h-fit p-2 px-4 mt-4 bg-[#FEFAF5]">
       <EngravingSelector
         selectedOptions={selectedOptions}
         onOptionChange={handleOptionChange}

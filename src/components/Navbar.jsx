@@ -20,8 +20,10 @@ import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "@/store/slices/categorySlice";
 import axiosInstance from "@/axiosConfig/axiosInstance";
-import { set } from "mongoose";
-import ArdorLogo from "@/public/image/cropped-website-logo-1.webp";
+import ArdorLogo from "@/public/image/cropped-website-logo-1.png";
+
+import { gsap } from "gsap";
+import { useRef } from "react";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -46,23 +48,52 @@ const Navbar = () => {
   const [showMoreDropdown, setShowMoreDropdown] = useState(false);
   const dispatch = useDispatch();
 
+  const navRef = useRef(null);
+  const leftNavRef = useRef(null);
+  const rightNavRef = useRef(null);
+  const logoRef = useRef(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+
+      tl.fromTo(navRef.current, { y: -100, opacity: 0 }, { y: 0, opacity: 1, duration: 1 });
+      
+      tl.fromTo(logoRef.current, { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 1 }, "-=0.5");
+
+      const navElements = [];
+      if (leftNavRef.current) navElements.push(...leftNavRef.current.children);
+      if (rightNavRef.current) navElements.push(...rightNavRef.current.children);
+
+      if (navElements.length > 0) {
+        tl.fromTo(
+          navElements,
+          { y: -20, opacity: 0 },
+          { y: 0, opacity: 1, stagger: 0.05, duration: 0.8 },
+          "-=0.5"
+        );
+      }
+    }, navRef);
+
+    return () => ctx.revert();
+  }, [categories]); // Re-run when categories load to animate them
+
   const navItems = [
     { name: "NEW ARRIVALS", href: "/new-arrivals" },
     ...(categories && categories.length > 0
       ? [...categories].reverse().map((category) => ({
-        name: category.name.toUpperCase(),
-        href: `/${category.slug}`,
-        hasDropdown: true,
-      }))
+          name: category.name.toUpperCase(),
+          href: `/${category.slug}`,
+          hasDropdown: true,
+        }))
       : []),
   ];
 
-
   const visiblePriority = ["WEDDING RINGS", "ENGAGEMENT RINGS", "FINE JEWELLERY"];
 
-  const visibleLeftNavItems = navItems.filter((item) =>
-    visiblePriority.includes(item.name)
-  ).sort((a, b) => visiblePriority.indexOf(a.name) - visiblePriority.indexOf(b.name));
+  const visibleLeftNavItems = navItems
+    .filter((item) => visiblePriority.includes(item.name))
+    .sort((a, b) => visiblePriority.indexOf(a.name) - visiblePriority.indexOf(b.name));
 
   const hiddenLeftNavItems = navItems.filter(
     (item) => !visiblePriority.includes(item.name)
@@ -104,6 +135,7 @@ const Navbar = () => {
       dispatch(fetchCategories());
     }
   }, []);
+
   useEffect(() => {
     if (categories && categories.length > 0) {
       getAttribute();
@@ -113,7 +145,6 @@ const Navbar = () => {
   const rightNavItems = [
     { name: "EDUCATION", href: "/education", hasDropdown: true },
     { name: "CONTACT", href: "/contact", hasDropdown: true },
-    // { name: "VISIT", href: "/visit" },
     {
       name: "MEET WITH US",
       href: "/meet",
@@ -339,79 +370,83 @@ const Navbar = () => {
 
   return (
     <>
-      {showSearch && (
+      <div
+        className={`fixed inset-0 w-full h-screen bg-black/20 z-[9999] transition-all duration-300 ${
+          showSearch
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
+      >
         <div
-          className={`fixed top-0 left-0 w-full h-screen bg-white/40 z-9999`}
+          className={`h-24 max-sm:h-20 max-sm:px-10 px-32 ${
+            showSearch ? "mt-0" : "-mt-24 max-sm:-mt-20"
+          } bg-white flex justify-between items-center transition-all duration-300`}
         >
-          <div
-            className={`h-24 max-sm:h-20 max-sm:px-10 px-32 ${showSearch ? "mt-0" : "-mt-24 max-sm:-mt-20"
-              } bg-white flex justify-between items-center transition-all duration-300`}
-          >
-            <div className="w-2/3 flex gap-4 items-center">
-              <SearchIcon className="text-gray-900" />
-              <input
-                type="text"
-                onChange={(e) => {
-                  setSearchValue(e.target.value);
-                  setShowSearch(true);
-                }}
-                placeholder="Search for products"
-                className="w-full outline-none h-10 pl-8 pr-4 bg-white text-gray-900 placeholder-gray-500 rounded-md  transition-colors duration-200"
-              />
-            </div>
-            <XIcon
-              onClick={() => {
-                setShowSearch(false);
-                setSearchValue("");
-                setSearchResults([]);
-                setSearchLoading(false);
+          <div className="w-2/3 flex gap-4 items-center">
+            <SearchIcon className="text-gray-900" />
+            <input
+              type="text"
+              onChange={(e) => {
+                setSearchValue(e.target.value);
+                setShowSearch(true);
               }}
-              className="cursor-pointer text-gray-900"
+              placeholder="Search for products"
+              className="w-full outline-none h-10 pl-8 pr-4 bg-white text-gray-900 placeholder-gray-500 rounded-md transition-colors duration-200"
             />
           </div>
-
-          <div className="h-fit w-full px-32 pt-10 max-sm:px-10 bg-[#f5f5f5] pb-10">
-            {searchLoading ? (
-              <div className="h-20 w-full bg-[#f5f5f5] flex justify-center items-center text-gray-900">
-                Loading...
-              </div>
-            ) : (
-              <div className="text-gray-900 w-full bg-[#f5f5f5] h-fit grid grid-cols-5 max-md:grid-cols-2 max-sm:grid-cols-2 max-sm:h-[80vh] overflow-y-auto gap-4">
-                {searchResults &&
-                  searchResults?.length > 0 &&
-                  searchResults?.map((result) => (
-                    <Link
-                      href={
-                        result?.coverImage
-                          ? `/blogs/${result?.BlogCategory?._id}/${result?.BlogSubCategory?._id}/${result?._id}`
-                          : `/${result?.category_id?.slug}/${result?.slug}`
-                      }
-                      key={result?._id}
-                    >
-                      <div className="flex cursor-pointer group w-full flex-col items-center">
-                        <Image
-                          src={result?.image?.[0] || result?.coverImage}
-                          alt={result?.name}
-                          width={100}
-                          height={100}
-                          className="w-full h-32 group-hover:scale-105 object-cover mb-2 transition-transform duration-200"
-                        />
-
-                        <h2 className="text-center">
-                          {result?.name || result?.title}
-                        </h2>
-                      </div>
-                    </Link>
-                  ))}
-              </div>
-            )}
-          </div>
+          <XIcon
+            onClick={() => {
+              setShowSearch(false);
+              setSearchValue("");
+              setSearchResults([]);
+              setSearchLoading(false);
+            }}
+            className="cursor-pointer text-gray-900"
+          />
         </div>
-      )}
+
+        <div className="h-fit w-full px-32 pt-10 max-sm:px-10 bg-[#f5f5f5] pb-10">
+          {searchLoading ? (
+            <div className="h-20 w-full bg-[#f5f5f5] flex justify-center items-center text-gray-900">
+              Loading...
+            </div>
+          ) : (
+            <div className="text-gray-900 w-full bg-[#f5f5f5] h-fit grid grid-cols-5 max-md:grid-cols-2 max-sm:grid-cols-2 max-sm:h-[80vh] overflow-y-auto gap-4">
+              {searchResults &&
+                searchResults?.length > 0 &&
+                searchResults?.map((result) => (
+                  <Link
+                    href={
+                      result?.coverImage
+                        ? `/blogs/${result?.BlogCategory?._id}/${result?.BlogSubCategory?._id}/${result?._id}`
+                        : `/${result?.category_id?.slug}/${result?.slug}`
+                    }
+                    key={result?._id}
+                  >
+                    <div className="flex cursor-pointer group w-full flex-col items-center">
+                      <Image
+                        src={result?.image?.[0] || result?.coverImage}
+                        alt={result?.name}
+                        width={100}
+                        height={100}
+                        className="w-full h-32 group-hover:scale-105 object-cover mb-2 transition-transform duration-200"
+                      />
+                      <h2 className="text-center text-black">
+                        {result?.name || result?.title}
+                      </h2>
+                    </div>
+                  </Link>
+                ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+
       {/* Desktop Navbar */}
-      <nav className="sticky top-0 w-full h-16 lg:h-32 bg-[#FEFAF5] z-40">
+      <nav ref={navRef} className="sticky top-0 w-full h-16 lg:h-20 bg-white z-50 border-b border-gray-100">
         <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 lg:h-32">
+          <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Mobile Menu Button - Left side on mobile */}
             <div className="lg:hidden w-12 flex justify-start">
               <button
@@ -423,11 +458,11 @@ const Navbar = () => {
             </div>
 
             {/* Left Navigation Items - Desktop only */}
-            <div className="hidden lg:flex lg:w-[40%] items-center justify-end md:gap-6 xl:gap-12">
+            <div ref={leftNavRef} className="hidden lg:flex lg:w-[40%] items-center justify-end md:gap-6 xl:gap-12">
               {visibleLeftNavItems.map((item) => (
                 <div
                   key={item.name}
-                  className="relative font-cullen"
+                  className="relative font-cullen h-full flex items-center"
                   onMouseEnter={() => {
                     if (item.hasDropdown) {
                       if (item.name === "FINE JEWELLERY") {
@@ -446,13 +481,10 @@ const Navbar = () => {
                     if (item.hasDropdown) {
                       if (item.name === "FINE JEWELLERY") {
                         setShowJewelleryDropdown(false);
-                        // setOpenMenuData(null);
                       } else if (item.name === "WEDDING RINGS") {
                         setShowWeddingDropdown(false);
-                        // setOpenMenuData(null);
                       } else if (item.name === "ENGAGEMENT RINGS") {
                         setShowEngagementDropdown(false);
-                        // setOpenMenuData(null);
                       }
                     }
                   }}
@@ -469,9 +501,10 @@ const Navbar = () => {
                               ? "/rings-945"
                               : item?.href
                     }
-                    className="text-black hover:text-[#236339] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-200"
+                    className="group relative text-black hover:text-[#00736C] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-300"
                   >
                     {item.name}
+                    <span className="absolute -bottom-0.5 left-0 h-[1px] w-0 bg-[#00736C] transition-all duration-300 group-hover:w-full" />
                   </a>
                 </div>
               ))}
@@ -479,17 +512,23 @@ const Navbar = () => {
               {/* MORE Dropdown */}
               {hiddenLeftNavItems.length > 0 && (
                 <div
-                  className="relative font-cullen"
+                  className="relative h-full flex items-center"
                   onMouseEnter={() => setShowMoreDropdown(true)}
                   onMouseLeave={() => setShowMoreDropdown(false)}
                 >
-                  <span className="text-black cursor-pointer hover:text-[#236339] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-200">
+                  <span className="group relative text-black cursor-pointer hover:text-[#00736C] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-300 inline-block">
                     MORE
+                    <span className="absolute -bottom-0.5 left-0 h-[1px] w-0 bg-[#00736C] transition-all duration-300 group-hover:w-full" />
                   </span>
 
-                  {showMoreDropdown && (
-                    <div className="absolute top-full left-0 w-48 bg-[#FEFAF5] shadow-md border border-gray-100 py-2 z-50 flex flex-col mt-2">
-                      <div className="w-full h-full absolute top-[-10px] left-0 bg-transparent"></div>
+                  <div
+                    className={`absolute top-full left-0 w-48 bg-white shadow-md border border-gray-100 py-2 z-50 flex flex-col transition-all duration-300 ease-in-out ${
+                      showMoreDropdown
+                        ? "opacity-100 translate-y-0 pointer-events-auto"
+                        : "opacity-0 -translate-y-2 pointer-events-none"
+                    }`}
+                  >
+                      <div className="w-full h-full absolute top-[-40px] left-0 bg-transparent"></div>
                       {hiddenLeftNavItems.map((item) => (
                         <div
                           key={item.name}
@@ -498,19 +537,13 @@ const Navbar = () => {
                             if (item.hasDropdown) {
                               if (item.name === "FINE JEWELLERY") {
                                 setShowJewelleryDropdown(true);
-                                setOpenMenuData(
-                                  attributesData[item.name] || {}
-                                );
+                                setOpenMenuData(attributesData[item.name] || {});
                               } else if (item.name === "WEDDING RINGS") {
                                 setShowWeddingDropdown(true);
-                                setOpenMenuData(
-                                  attributesData[item.name] || {}
-                                );
+                                setOpenMenuData(attributesData[item.name] || {});
                               } else if (item.name === "ENGAGEMENT RINGS") {
                                 setShowEngagementDropdown(true);
-                                setOpenMenuData(
-                                  attributesData[item.name] || {}
-                                );
+                                setOpenMenuData(attributesData[item.name] || {});
                               }
                             }
                           }}
@@ -518,13 +551,10 @@ const Navbar = () => {
                             if (item.hasDropdown) {
                               if (item.name === "FINE JEWELLERY") {
                                 setShowJewelleryDropdown(false);
-                                // setOpenMenuData(null);
                               } else if (item.name === "WEDDING RINGS") {
                                 setShowWeddingDropdown(false);
-                                // setOpenMenuData(null);
                               } else if (item.name === "ENGAGEMENT RINGS") {
                                 setShowEngagementDropdown(false);
-                                // setOpenMenuData(null);
                               }
                             }
                           }}
@@ -541,28 +571,28 @@ const Navbar = () => {
                                       ? "/rings-945"
                                       : item?.href
                             }
-                            className="text-black hover:text-[#236339] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-200 block"
+                            className="group relative text-black hover:text-[#00736C] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-300 block"
                           >
                             {item.name}
+                            <span className="absolute -bottom-0.5 left-0 h-[1px] w-0 bg-[#00736C] transition-all duration-300 group-hover:w-full" />
                           </a>
                         </div>
                       ))}
                     </div>
-                  )}
                 </div>
               )}
             </div>
 
             {/* Logo - Centered on mobile, normal position on desktop */}
-            <div className="flex-shrink-0 absolute left-1/2 transform -translate-x-1/2">
+            <div ref={logoRef} className="flex-shrink-0 absolute left-1/2 transform -translate-x-1/2 opacity-0">
               <Link href="/">
                 <Image
                   src={ArdorLogo}
                   alt="Ardor Diamonds"
                   width={125}
                   height={50}
-                  className="object-contain w-[60px] md:w-[105px] lg:w-[125px]" // Preserves aspect ratio
-                  priority // Important for LCP
+                  className="object-contain w-[60px] md:w-[105px] lg:w-[125px]"
+                  priority
                 />
               </Link>
             </div>
@@ -570,11 +600,11 @@ const Navbar = () => {
             {/* Right side - Desktop: Navigation + Icons, Mobile: Shopping bag only */}
             <div className="flex lg:w-[40%] w-fit items-center gap-6">
               {/* Desktop Navigation */}
-              <div className="hidden lg:flex items-center justify-start md:gap-6 xl:gap-12 w-full">
+              <div ref={rightNavRef} className="hidden lg:flex items-center justify-start md:gap-6 xl:gap-12 w-full">
                 {rightNavItems.map((item) => (
                   <div
                     key={item.name}
-                    className="relative"
+                    className="relative font-cullen h-full flex items-center"
                     onMouseEnter={() => {
                       if (item.hasDropdown && item.name === "CONTACT") {
                         setShowContactDropdown(true);
@@ -592,12 +622,13 @@ const Navbar = () => {
                       }
                     }}
                   >
-                    <Link
-                      href={item.href}
-                      className="text-black hover:text-[#236339] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-200"
-                    >
-                      {item.name}
-                    </Link>
+                      <Link
+                        href={item.href}
+                        className="group relative text-black hover:text-[#00736C] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-300 inline-block"
+                      >
+                        {item.name}
+                        <span className="absolute -bottom-0.5 left-0 h-[1px] w-0 bg-[#00736C] transition-all duration-300 group-hover:w-full" />
+                      </Link>
                   </div>
                 ))}
 
@@ -607,19 +638,18 @@ const Navbar = () => {
                     onClick={() => setShowSearch(true)}
                     className="text-black hover:text-black transition-colors duration-200"
                   >
-                    <Search size={20} />
+                    <Search className="text-black" size={20} />
                   </button>
                   <Link href={"/cart"}>
-                    <button className="text-black hover:text-black transition-colors duration-200">
-                      <ShoppingBag size={20} />
+                    <button className="text-black hover:text-[#00736C] transition-colors duration-200">
+                      <ShoppingBag className="text-black" size={20} />
                     </button>
                   </Link>
-
                   <button
                     onClick={handelProfileClick}
-                    className="text-black hover:text-black transition-colors duration-200"
+                    className="text-black hover:text-[#00736C] transition-colors duration-200"
                   >
-                    <User size={20} />
+                    <User className="text-black" size={20} />
                   </button>
                 </div>
               </div>
@@ -627,8 +657,8 @@ const Navbar = () => {
               {/* Mobile Shopping Bag Icon */}
               <div className="lg:hidden w-12 flex justify-end">
                 <Link href={"/cart"}>
-                  <button className="text-black hover:text-black transition-colors duration-200">
-                    <ShoppingBag size={20} />
+                  <button className="text-black hover:text-[#00736C] transition-colors duration-200">
+                    <ShoppingBag className="text-black" size={20} />
                   </button>
                 </Link>
               </div>
@@ -639,304 +669,167 @@ const Navbar = () => {
 
       <div>
         {/* Fine Jewellery Dropdown Menu */}
-        {showJewelleryDropdown && (
-          <div
-            className="fixed top-16 left-0 w-full pt-4 border-gray-200 shadow-lg z-50"
-            onMouseEnter={() => setShowJewelleryDropdown(true)}
-            onMouseLeave={() => setShowJewelleryDropdown(false)}
-          >
-            <div className="w-full cream border-gray-200 shadow-lg z-50">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div className="flex gap-12">
-                  {/* Left Side - Text Categories */}
-                  <div className="w-48">
-                    <div>
-                      <h3 className="text-black text-sm font-medium font-gintoNord tracking-wide mb-6">
-                        JEWELLERY
-                      </h3>
-                      <div className="space-y-4">
-                        {fineJewellerSubCategories.map((item, index) => {
-                          if (
-                            item.name.includes("Stacker") ||
-                            item.name.includes("Statement") ||
-                            item.name.includes("Minimal") ||
-                            item.name.includes("Initial Signet")
-                          ) {
-                            return null; // Skip these items
-                          }
-                          return (
-                            <a
-                              key={index}
-                              href={`/fine-jewellery-807?finejewellery=${item._id}`}
-                              className="block capitalize text-black hover:text-[#236339] text-sm font-gintoNormal transition-colors duration-200"
-                            >
-                              {item.name}
-                            </a>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right Side - 2x2 Grid of Ring Categories */}
-                  <div className="flex-1">
-                    <div className="grid grid-cols-2 gap-4 max-w-full">
-                      {/* Statement Rings */}
-                      <a
-                        href={`/fine-jewellery-807?finejewellery=${fineJewellerSubCategories.filter((e) =>
-                          e.name.includes("Statement")
-                        )[0]?._id
-                          }`}
-                      >
-                        <div className="group cursor-pointer">
-                          <div className="relative overflow-hidden lg:mb-2 h-44">
-                            <h3 className="text-black text-sm font-medium tracking-wide group-hover:text-[#236339] font-gintoNord transition-colors duration-200">
-                              STATEMENT RINGS
-                            </h3>
-                            <div className="w-full h-full bg-slate-300 flex items-center justify-center">
-                              <Image
-                                src={
-                                  fineJewellerSubCategories.filter((e) =>
-                                    e.name.includes("Statement")
-                                  )[0]?.image || "/images/statement-ring.webp"
-                                }
-                                width={400}
-                                height={400}
-                                alt="Statement Ring"
-                                className=" h-full w-full object-cover"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </a>
-
-                      {/* Stacker Rings */}
-                      <a
-                        href={`/fine-jewellery-807?finejewellery=${fineJewellerSubCategories.filter((e) =>
-                          e.name.includes("Stacker")
-                        )[0]?._id
-                          }`}
-                      >
-                        <div className="group cursor-pointer">
-                          <div className="relative overflow-hidden lg:mb-2 h-44">
-                            <h3 className="text-black text-sm font-medium tracking-wide group-hover:text-[#236339] font-gintoNord transition-colors duration-200">
-                              STACKER RINGS
-                            </h3>
-                            <div className="w-full h-full bg-yellow-200 flex items-center justify-center">
-                              <Image
-                                src={
-                                  fineJewellerSubCategories.filter((e) =>
-                                    e.name.includes("Stacker")
-                                  )[0]?.image || "/images/stacker-ring.webp"
-                                }
-                                width={400}
-                                height={400}
-                                alt="Statement Ring"
-                                className=" h-full w-full object-cover"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </a>
-
-                      {/* Minimal Rings */}
-                      <a
-                        href={
-                          `/fine-jewellery-807?finejewellery=${fineJewellerSubCategories.filter((e) =>
-                            e.name.includes("Minimal")
-                          )[0]?._id
-                          }` ||
-                          "/fine-jewellery-807?finejewellery=6874b552f2ed2bebef46ccec"
-                        }
-                      >
-                        <div className="group cursor-pointer">
-                          <div className="relative overflow-hidden  lg:mb-2 h-44">
-                            <h3 className="text-black text-sm font-medium tracking-wide group-hover:text-[#236339] font-gintoNord transition-colors duration-200">
-                              MINIMAL RINGS
-                            </h3>
-                            <div className="w-full h-full bg-pink-200 flex items-center justify-center">
-                              <Image
-                                src={
-                                  fineJewellerSubCategories.filter((e) =>
-                                    e.name.includes("Minimal")
-                                  )[0]?.image || "/images/minimal-ring.webp"
-                                }
-                                width={400}
-                                height={400}
-                                alt="Statement Ring"
-                                className=" h-full w-full object-cover"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </a>
-
-                      {/* Initial Signet Ring */}
-                      <a href={`/fine-jewellery-807/initial-signet-ring-317`}>
-                        <div className="group cursor-pointer">
-                          <div className="relative overflow-hidden  lg:mb-2 h-44">
-                            <h3 className="text-black text-sm font-medium tracking-wide group-hover:text-[#236339] font-gintoNord transition-colors duration-200">
-                              INITIAL SIGNET RING
-                            </h3>
-                            <div className="w-full h-full bg-blue-200 flex items-center justify-center">
-                              <Image
-                                src={
-                                  fineJewellerSubCategories.filter((e) =>
-                                    e.name.includes("Initial Signet")
-                                  )[0]?.image || "/images/signet-ring.webp"
-                                }
-                                width={400}
-                                height={400}
-                                alt="Statement Ring"
-                                className=" h-full w-full object-cover"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-      {/* Engagement Rings Dropdown Menu */}
-      {showEngagementDropdown && (
         <div
-          className="fixed top-16 left-0 w-full pt-4 border-gray-200 shadow-lg z-50"
-          onMouseEnter={() => setShowEngagementDropdown(true)}
-          onMouseLeave={() => setShowEngagementDropdown(false)}
+          className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${
+            showJewelleryDropdown
+              ? "opacity-100 translate-y-0 pointer-events-auto"
+              : "opacity-0 -translate-y-2 pointer-events-none"
+          }`}
+          onMouseEnter={() => setShowJewelleryDropdown(true)}
+          onMouseLeave={() => setShowJewelleryDropdown(false)}
         >
-          <div className="w-full bg-[#FEFAF5] border-gray-200 shadow-lg z-50">
+          <div className="absolute top-[-40px] left-0 w-full h-[40px] bg-transparent" />
+          <div className="w-full bg-white border-gray-200 shadow-lg z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
               <div className="flex gap-12">
-                {/* BUILD A RING */}
-                <div className="w-60">
-                  <h3 className="text-black text-sm font-gintoNord font-me-700 font-ge tracking-wide mb-6">
-                    BUILD A RING
-                  </h3>
-                  <div className="space-y-4">
+                {/* Left Side - Text Categories */}
+                <div className="w-48">
+                  <div>
+                    <h3 className="text-black text-sm font-medium font-gintoNord tracking-wide mb-6">
+                      JEWELLERY
+                    </h3>
+                    <div className="space-y-4">
+                      {fineJewellerSubCategories.map((item, index) => {
+                        if (
+                          item.name.includes("Stacker") ||
+                          item.name.includes("Statement") ||
+                          item.name.includes("Minimal") ||
+                          item.name.includes("Initial Signet")
+                        ) {
+                          return null;
+                        }
+                        return (
+                          <a
+                            key={index}
+                            href={`/fine-jewellery-807?finejewellery=${item._id}`}
+                            className="block capitalize text-black hover:text-[#00736C] text-sm font-gintoNormal transition-colors duration-200"
+                          >
+                            {item.name}
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Side - 2x2 Grid of Ring Categories */}
+                <div className="flex-1">
+                  <div className="grid grid-cols-2 gap-4 max-w-full">
+                    {/* Statement Rings */}
                     <a
-                      href="/engagement-rings-334"
-                      className="flex items-center font-gintoNord text-black hover:text-[#236339] text-sm transition-colors duration-200"
+                      href={`/fine-jewellery-807?finejewellery=${
+                        fineJewellerSubCategories.filter((e) =>
+                          e.name.includes("Statement")
+                        )[0]?._id
+                      }`}
                     >
-                      <div className="w-6 h-6 rounded-full border-2 border-gray-400 mr-3 flex items-center justify-center">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                      <div className="group cursor-pointer">
+                        <div className="relative overflow-hidden lg:mb-2 h-44">
+                          <h3 className="text-black text-sm font-medium tracking-wide group-hover:text-[#00736C] font-gintoNord transition-colors duration-200">
+                            STATEMENT RINGS
+                          </h3>
+                          <div className="w-full h-full bg-slate-300 flex items-center justify-center">
+                            <Image
+                              src={
+                                fineJewellerSubCategories.filter((e) =>
+                                  e.name.includes("Statement")
+                                )[0]?.image || "/images/statement-ring.webp"
+                              }
+                              width={400}
+                              height={400}
+                              alt="Statement Ring"
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        </div>
                       </div>
-                      Browse Settings
                     </a>
-                  </div>
 
-                  <Link href="/new-arrivals">
-                    <div className="mt-8">
-                      <h4 className="text-black text-[10px] font-gintoNord font-medium tracking-wide mb-4">
-                        NEW ARRIVALS
-                      </h4>
-                    </div>
-                  </Link>
+                    {/* Stacker Rings */}
+                    <a
+                      href={`/fine-jewellery-807?finejewellery=${
+                        fineJewellerSubCategories.filter((e) =>
+                          e.name.includes("Stacker")
+                        )[0]?._id
+                      }`}
+                    >
+                      <div className="group cursor-pointer">
+                        <div className="relative overflow-hidden lg:mb-2 h-44">
+                          <h3 className="text-black text-sm font-medium tracking-wide group-hover:text-[#00736C] font-gintoNord transition-colors duration-200">
+                            STACKER RINGS
+                          </h3>
+                          <div className="w-full h-full bg-yellow-200 flex items-center justify-center">
+                            <Image
+                              src={
+                                fineJewellerSubCategories.filter((e) =>
+                                  e.name.includes("Stacker")
+                                )[0]?.image || "/images/stacker-ring.webp"
+                              }
+                              width={400}
+                              height={400}
+                              alt="Stacker Ring"
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </a>
 
-                  <Link href="/custom-made-engagement-rings">
-                    <div className="mt-3">
-                      <h4 className="text-black text-[10px] font-gintoNord font-medium tracking-wide mb-4">
-                        CUSTOM-MADE RINGS
-                      </h4>
-                    </div>
-                  </Link>
-                </div>
+                    {/* Minimal Rings */}
+                    <a
+                      href={
+                        `/fine-jewellery-807?finejewellery=${
+                          fineJewellerSubCategories.filter((e) =>
+                            e.name.includes("Minimal")
+                          )[0]?._id
+                        }` ||
+                        "/fine-jewellery-807?finejewellery=6874b552f2ed2bebef46ccec"
+                      }
+                    >
+                      <div className="group cursor-pointer">
+                        <div className="relative overflow-hidden lg:mb-2 h-44">
+                          <h3 className="text-black text-sm font-medium tracking-wide group-hover:text-[#00736C] font-gintoNord transition-colors duration-200">
+                            MINIMAL RINGS
+                          </h3>
+                          <div className="w-full h-full bg-pink-200 flex items-center justify-center">
+                            <Image
+                              src={
+                                fineJewellerSubCategories.filter((e) =>
+                                  e.name.includes("Minimal")
+                                )[0]?.image || "/images/minimal-ring.webp"
+                              }
+                              width={400}
+                              height={400}
+                              alt="Minimal Ring"
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </a>
 
-                {/* SHOP BY METAL */}
-                <div className="w-60">
-                  <h3 className="text-black font-gintoNord text-sm font-medium tracking-wide mb-6">
-                    SHOP BY METAL
-                  </h3>
-                  <div className="space-y-4">
-                    {openMenuData &&
-                      openMenuData["METAL TYPE"]?.map((metal, index) => (
-                        <a
-                          key={index}
-                          href={`/engagement-rings-334?metal=${metal.value.toLowerCase()}`}
-                          className="flex gap-2 items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
-                        >
-                          <Image
-                            height={24}
-                            width={24}
-                            src={metal.image}
-                            alt={metal.value}
-                          />
-                          {metal.value}
-                        </a>
-                      ))}
-                  </div>
-                </div>
-
-                {/* SHOP BY STYLE */}
-                <div className="w-60">
-                  <h3 className="text-black font-gintoNord text-sm font-medium tracking-wide mb-6">
-                    SHOP BY STYLE
-                  </h3>
-                  <div className="space-y-4">
-                    {openMenuData &&
-                      openMenuData["Style"]?.map((style, index) => (
-                        <a
-                          href={`/engagement-rings-334?style=${style.value.toLowerCase()}`}
-                          className="flex gap-4 items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
-                        >
-                          <Image
-                            height={32}
-                            width={40}
-                            src={style.image}
-                            alt={style.value}
-                            className="object-contain brightness-0"
-                          />
-                          {style.value}
-                        </a>
-                      ))}
-                  </div>
-                </div>
-
-                {/* ENGAGEMENT RING GUIDANCE */}
-                <div className="w-60">
-                  <h3 className="text-black tex-700 font-gintoNord font-medium tracking-wide mb-6">
-                    ENGAGEMENT RING GUIDANCE
-                  </h3>
-                  <div className="space-y-4">
-                    <a
-                      href="/engagement-rings/build-rings"
-                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
-                    >
-                      Design Basics
-                    </a>
-                    <a
-                      href="/engagement-rings/build-rings"
-                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
-                    >
-                      Engagement Ring Guide
-                    </a>
-                    <a
-                      href="/engagement-rings/build-rings"
-                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
-                    >
-                      Find Your Ring Size
-                    </a>
-                    <a
-                      href="/engagement-rings/build-rings"
-                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
-                    >
-                      Precious Metals Guide
-                    </a>
-                    <a
-                      href="/engagement-rings/build-rings"
-                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
-                    >
-                      Our Crafting Process
-                    </a>
-                    <a
-                      href="/engagement-rings/build-rings"
-                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
-                    >
-                      Ring Care Guide
+                    {/* Initial Signet Ring */}
+                    <a href={`/fine-jewellery-807/initial-signet-ring-317`}>
+                      <div className="group cursor-pointer">
+                        <div className="relative overflow-hidden lg:mb-2 h-44">
+                          <h3 className="text-black text-sm font-medium tracking-wide group-hover:text-[#00736C] font-gintoNord transition-colors duration-200">
+                            INITIAL SIGNET RING
+                          </h3>
+                          <div className="w-full h-full bg-blue-200 flex items-center justify-center">
+                            <Image
+                              src={
+                                fineJewellerSubCategories.filter((e) =>
+                                  e.name.includes("Initial Signet")
+                                )[0]?.image || "/images/signet-ring.webp"
+                              }
+                              width={400}
+                              height={400}
+                              alt="Initial Signet Ring"
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </a>
                   </div>
                 </div>
@@ -944,25 +837,180 @@ const Navbar = () => {
             </div>
           </div>
         </div>
-      )}
-      {showWeddingDropdown && (
+      </div>
+
+      {/* Engagement Rings Dropdown Menu */}
+      <div
+        className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${
+          showEngagementDropdown
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 -translate-y-2 pointer-events-none"
+        }`}
+        onMouseEnter={() => setShowEngagementDropdown(true)}
+        onMouseLeave={() => setShowEngagementDropdown(false)}
+      >
+        <div className="absolute top-[-40px] left-0 w-full h-[40px] bg-transparent" />
+        <div className="w-full bg-white border-gray-100 shadow-lg z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="flex gap-12">
+              {/* BUILD A RING */}
+              <div className="w-60">
+                <h3 className="text-black text-sm font-gintoNord font-bold tracking-wide mb-6">
+                  BUILD A RING
+                </h3>
+                <div className="space-y-4">
+                  <a
+                    href="/engagement-230"
+                    className="flex items-center font-gintoNord text-black hover:text-[#00736C] text-sm transition-colors duration-200"
+                  >
+                    <div className="w-6 h-6 rounded-full border-2 border-gray-400 mr-3 flex items-center justify-center">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                    </div>
+                    Browse Settings
+                  </a>
+                </div>
+
+                <Link href="/new-arrivals">
+                  <div className="mt-8">
+                    <h4 className="text-black text-[10px] font-gintoNord font-medium tracking-wide mb-4">
+                      NEW ARRIVALS
+                    </h4>
+                  </div>
+                </Link>
+
+                <Link href="/custom-made-engagement-rings">
+                  <div className="mt-3">
+                    <h4 className="text-black text-[10px] font-gintoNord font-medium tracking-wide mb-4">
+                      CUSTOM-MADE RINGS
+                    </h4>
+                  </div>
+                </Link>
+              </div>
+
+              {/* SHOP BY METAL */}
+              <div className="w-60">
+                <h3 className="text-black font-gintoNord text-sm font-medium tracking-wide mb-6">
+                  SHOP BY METAL
+                </h3>
+                <div className="space-y-4">
+                  {openMenuData &&
+                    openMenuData["METAL TYPE"]?.map((metal, index) => (
+                      <a
+                        key={index}
+                        href={`/engagement-230?metal=${metal.value.toLowerCase()}`}
+                        className="flex gap-2 items-center text-black hover:text-[#00736C] text-sm transition-colors duration-200 font-gintoNormal"
+                      >
+                        <Image
+                          height={24}
+                          width={24}
+                          src={metal.image}
+                          alt={metal.value}
+                        />
+                        {metal.value}
+                      </a>
+                    ))}
+                </div>
+              </div>
+
+              {/* SHOP BY STYLE */}
+              <div className="w-60">
+                <h3 className="text-black font-gintoNord text-sm font-medium tracking-wide mb-6">
+                  SHOP BY STYLE
+                </h3>
+                <div className="space-y-4">
+                  {openMenuData &&
+                    openMenuData["Style"]?.map((style, index) => (
+                      <a
+                        key={index}
+                        href={`/engagement-230?style=${style.value.toLowerCase()}`}
+                        className="flex gap-4 items-center text-black hover:text-[#00736C] text-sm transition-colors duration-200 font-gintoNormal"
+                      >
+                        <Image
+                          height={32}
+                          width={40}
+                          src={style.image}
+                          alt={style.value}
+                          className="object-contain brightness-0"
+                        />
+                        {style.value}
+                      </a>
+                    ))}
+                </div>
+              </div>
+
+              {/* ENGAGEMENT RING GUIDANCE */}
+              <div className="w-60">
+                <h3 className="text-black font-bold font-gintoNord font-medium tracking-wide mb-6">
+                  ENGAGEMENT RING GUIDANCE
+                </h3>
+                <div className="space-y-4">
+                  <a
+                    href="/engagement-rings/build-rings"
+                    className="block text-black hover:text-[#00736C] text-sm transition-colors duration-200 font-gintoNormal"
+                  >
+                    Design Basics
+                  </a>
+                  <a
+                    href="/engagement-rings/build-rings"
+                    className="block text-black hover:text-[#00736C] text-sm transition-colors duration-200 font-gintoNormal"
+                  >
+                    Engagement Ring Guide
+                  </a>
+                  <a
+                    href="/engagement-rings/build-rings"
+                    className="block text-black hover:text-[#00736C] text-sm transition-colors duration-200 font-gintoNormal"
+                  >
+                    Find Your Ring Size
+                  </a>
+                  <a
+                    href="/engagement-rings/build-rings"
+                    className="block text-black hover:text-[#00736C] text-sm transition-colors duration-200 font-gintoNormal"
+                  >
+                    Precious Metals Guide
+                  </a>
+                  <a
+                    href="/engagement-rings/build-rings"
+                    className="block text-black hover:text-[#00736C] text-sm transition-colors duration-200 font-gintoNormal"
+                  >
+                    Our Crafting Process
+                  </a>
+                  <a
+                    href="/engagement-rings/build-rings"
+                    className="block text-black hover:text-[#00736C] text-sm transition-colors duration-200 font-gintoNormal"
+                  >
+                    Ring Care Guide
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        {/* Wedding Rings Dropdown Menu */}
         <div
-          className="fixed top-16 left-0 w-full pt-4 border-gray-200 shadow-lg z-50"
+          className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${
+            showWeddingDropdown
+              ? "opacity-100 translate-y-0 pointer-events-auto"
+              : "opacity-0 -translate-y-2 pointer-events-none"
+          }`}
           onMouseEnter={() => setShowWeddingDropdown(true)}
           onMouseLeave={() => setShowWeddingDropdown(false)}
         >
-          <div className=" bg-[#FEFAF5] border-gray-200 shadow-lg z-50">
+          <div className="absolute top-[-40px] left-0 w-full h-[40px] bg-transparent" />
+          <div className="bg-white border-gray-100 shadow-lg z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
               <div className="flex gap-12">
                 {/* Left Side - Women's Section */}
                 <div className="w-60">
-                  <h3 className="text-black text-sm font-medium tracking-wide mb-6 font-gintoNord ">
+                  <h3 className="text-black text-sm font-medium tracking-wide mb-6 font-gintoNord">
                     WOMEN
                   </h3>
                   <div className="space-y-4">
                     <a
-                      href="/wedding-rings-105?gender=woman"
-                      className="block text-gray-900  hover:text-[#236339] font-gintoNormal text-sm transition-colors duration-200"
+                      href="/wedding-rings-873?gender=woman"
+                      className="block text-black hover:text-[#00736C] font-gintoNormal text-sm transition-colors duration-200"
                     >
                       All Women's Wedding Rings
                     </a>
@@ -970,8 +1018,8 @@ const Navbar = () => {
                       openMenuData["Style"]?.map((band, index) => (
                         <a
                           key={index}
-                          href={`/wedding-rings-105?gender=woman&style=${band.value.toLowerCase()}`}
-                          className="block text-black hover:text-[#236339] text-sm font-gintoNormal transition-colors duration-200"
+                          href={`/wedding-rings-873?gender=woman&style=${band.value.toLowerCase()}`}
+                          className="block text-black hover:text-[#00736C] text-sm font-gintoNormal transition-colors duration-200"
                         >
                           {band.value} Women's Wedding Rings
                         </a>
@@ -979,9 +1027,9 @@ const Navbar = () => {
                   </div>
                 </div>
 
-                {/* Middle - Women's by Metal */}
+                {/* Middle - Rings by Metal */}
                 <div className="w-60">
-                  <h3 className="text-black text-sm font-medium tracking-wide mb-6 font-gintoNord ">
+                  <h3 className="text-black text-sm font-medium tracking-wide mb-6 font-gintoNord">
                     RINGS BY METAL
                   </h3>
                   <div className="space-y-4">
@@ -989,8 +1037,8 @@ const Navbar = () => {
                       openMenuData["METAL TYPE"]?.map((metal, index) => (
                         <a
                           key={index}
-                          href={`/engagement-rings-334?metal=${metal.value.toLowerCase()}`}
-                          className="flex gap-2 items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                          href={`/engagement-230?metal=${metal.value.toLowerCase()}`}
+                          className="flex gap-2 items-center text-black hover:text-[#00736C] text-sm transition-colors duration-200 font-gintoNormal"
                         >
                           <Image
                             height={24}
@@ -1006,13 +1054,13 @@ const Navbar = () => {
 
                 {/* Right Side - Men's Section */}
                 <div className="w-60">
-                  <h3 className="text-black text-sm font-medium tracking-wide mb-6 font-gintoNord ">
+                  <h3 className="text-black text-sm font-medium tracking-wide mb-6 font-gintoNord">
                     MEN
                   </h3>
                   <div className="space-y-4">
                     <a
-                      href="/wedding-rings-105?gender=man"
-                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      href="/wedding-rings-873?gender=man"
+                      className="block text-black hover:text-[#00736C] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       All Men's Wedding Rings
                     </a>
@@ -1021,7 +1069,7 @@ const Navbar = () => {
                         <a
                           key={index}
                           href={`/wedding-rings-873?gender=man&style=${band.value.toLowerCase()}`}
-                          className="block text-black hover:text-[#236339] text-sm font-gintoNormal transition-colors duration-200"
+                          className="block text-black hover:text-[#00736C] text-sm font-gintoNormal transition-colors duration-200"
                         >
                           {band.value} Man's Wedding Rings
                         </a>
@@ -1029,97 +1077,39 @@ const Navbar = () => {
                   </div>
                 </div>
 
-                {/* Far Right - Men's by Metal */}
-                {/* <div className="w-60">
-                  <h3 className="text-black text-sm font-medium tracking-wide mb-6 font-gintoNord ">
-                    MEN'S BY METAL
-                  </h3>
-                  <div className="space-y-4">
-                    <a
-                      href="/wedding-rings/women"
-                      className="flex items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
-                    >
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 mr-3"></div>
-                      Platinum
-                    </a>
-                    <a
-                      href="/wedding-rings/women"
-                      className="flex items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
-                    >
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-500 mr-3"></div>
-                      Yellow Gold
-                    </a>
-                    <a
-                      href="/wedding-rings/women"
-                      className="flex items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
-                    >
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-300 to-rose-400 mr-3"></div>
-                      Rose Gold
-                    </a>
-                    <a
-                      href="/wedding-rings/women"
-                      className="flex items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
-                    >
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-100 to-gray-300 mr-3"></div>
-                      White Gold
-                    </a>
-                    <a
-                      href="/wedding-rings/women"
-                      className="flex items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
-                    >
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 mr-3"></div>
-                      Titanium
-                    </a>
-                    <a
-                      href="/wedding-rings/women"
-                      className="flex items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
-                    >
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 mr-3"></div>
-                      Tantalum
-                    </a>
-                    <a
-                      href="/wedding-rings/women"
-                      className="flex items-center text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
-                    >
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-900 to-black mr-3"></div>
-                      Carbon Fibre
-                    </a>
-                  </div>
-                </div> */}
-
                 {/* Wedding Ring Guidance */}
                 <div className="w-60">
-                  <h3 className="text-black text-sm font-medium tracking-wide mb-6 font-gintoNord ">
+                  <h3 className="text-black text-sm font-medium tracking-wide mb-6 font-gintoNord">
                     WEDDING RING GUIDANCE
                   </h3>
                   <div className="space-y-4">
                     <a
                       href="/wedding-rings/women"
-                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="block text-black hover:text-[#00736C] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       Wedding Ring Guide
                     </a>
                     <a
                       href="/wedding-rings/women"
-                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="block text-black hover:text-[#00736C] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       Design Basics
                     </a>
                     <a
                       href="/wedding-rings/women"
-                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="block text-black hover:text-[#00736C] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       Find Your Ring Size
                     </a>
                     <a
                       href="/precious-metals-guide"
-                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="block text-black hover:text-[#00736C] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       Precious Metals Guide
                     </a>
                     <a
                       href="/crafting-process"
-                      className="block text-black hover:text-[#236339] text-sm transition-colors duration-200 font-gintoNormal"
+                      className="block text-black hover:text-[#00736C] text-sm transition-colors duration-200 font-gintoNormal"
                     >
                       Our Crafting Process
                     </a>
@@ -1129,82 +1119,86 @@ const Navbar = () => {
             </div>
           </div>
         </div>
-      )}
+      </div>
+
       {/* Contact Dropdown Menu */}
-      {showContactDropdown && (
-        <div
-          className="fixed top-16 left-0 w-full pt-4 border-gray-200 shadow-lg z-50"
-          onMouseEnter={() => setShowContactDropdown(true)}
-          onMouseLeave={() => setShowContactDropdown(false)}
-        >
-          <div className="w-full bg-[#FEFAF5] border-gray-200 shadow-lg z-50">
-            <div className="max-w-5xl p-4 mx-auto px-4 sm:px-6 lg:px-8 pt-12">
-              <div className="flex gap-12">
-                {/* Left Side - Contact Options */}
-                <div className="w-48 lg:w-[30%]">
+      <div
+        className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${
+          showContactDropdown
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 -translate-y-2 pointer-events-none"
+        }`}
+        onMouseEnter={() => setShowContactDropdown(true)}
+        onMouseLeave={() => setShowContactDropdown(false)}
+      >
+        <div className="absolute top-[-40px] left-0 w-full h-[40px] bg-transparent" />
+        <div className="w-full bg-white border-gray-100 shadow-lg z-50">
+          <div className="max-w-5xl p-4 mx-auto px-4 sm:px-6 lg:px-8 pt-12">
+            <div className="flex gap-12">
+              {/* Left Side - Contact Options */}
+              <div className="w-48 lg:w-[30%]">
+                <div>
+                  <h3 className="text-black text-sm font-medium font-gintoNord tracking-wide mb-6">
+                    CONTACT US
+                  </h3>
                   <div>
-                    <h3 className="text-black text-sm font-medium font-gintoNord tracking-wide mb-6">
-                      CONTACT US
-                    </h3>
-                    <div>
-                      <a
-                        href="/contact"
-                        className="block text-black hover:bg-[#fff4e6] py-3 px-1 text-sm font-gintoNormal transition-colors duration-200"
-                      >
-                        Get In Touch
-                      </a>
-                      <a
-                        href="/meet"
-                        className="block text-black hover:bg-[#fff4e6] py-3 px-1 text-sm font-gintoNormal transition-colors duration-200"
-                      >
-                        Book an Appointment
-                      </a>
-                      <a
-                        href="/faqs"
-                        className="block text-black hover:bg-[#fff4e6] py-3 px-1 text-sm font-gintoNormal transition-colors duration-200"
-                      >
-                        FAQs
-                      </a>
-                    </div>
+                    <a
+                      href="/contact"
+                      className="block text-black hover:bg-[#00736C]/5 py-3 px-1 text-sm font-gintoNormal transition-colors duration-200"
+                    >
+                      Get In Touch
+                    </a>
+                    <a
+                      href="/meet"
+                      className="block text-black hover:bg-[#00736C]/5 py-3 px-1 text-sm font-gintoNormal transition-colors duration-200"
+                    >
+                      Book an Appointment
+                    </a>
+                    <a
+                      href="/faqs"
+                      className="block text-black hover:bg-[#00736C]/5 py-3 px-1 text-sm font-gintoNormal transition-colors duration-200"
+                    >
+                      FAQs
+                    </a>
                   </div>
                 </div>
+              </div>
 
-                {/* Right Side - 2x2 Grid similar to jewellery */}
-                <div className="flex-1 lg:w-[70%]">
-                  <div className="grid grid-cols-1 gap-4 ">
-                    {/* Get In Touch */}
-                    <div className="group cursor-pointer">
-                      <div className="relative overflow-hidden lg:mb-2 h-44">
-                        <h3 className="text-black text-sm font-medium tracking-wide  group-hover:text-[#236339] font-gintoNord transition-colors duration-200">
-                          GET IN TOUCH
-                        </h3>
-                        <div className="w-full h-full bg-slate-300 flex items-center justify-center">
-                          <Image
-                            src="/images/getintouch.webp"
-                            width={400}
-                            height={400}
-                            alt="Statement Ring"
-                            className=" h-full w-full object-cover"
-                          />
-                        </div>
+              {/* Right Side - Images */}
+              <div className="flex-1 lg:w-[70%]">
+                <div className="grid grid-cols-1 gap-4">
+                  {/* Get In Touch */}
+                  <div className="group cursor-pointer">
+                    <div className="relative overflow-hidden lg:mb-2 h-44">
+                      <h3 className="text-black text-sm font-medium tracking-wide group-hover:text-[#00736C] font-gintoNord transition-colors duration-200">
+                        GET IN TOUCH
+                      </h3>
+                      <div className="w-full h-full bg-slate-300 flex items-center justify-center">
+                        <Image
+                          src="/images/getintouch.webp"
+                          width={400}
+                          height={400}
+                          alt="Get In Touch"
+                          className="h-full w-full object-cover"
+                        />
                       </div>
                     </div>
+                  </div>
 
-                    {/* Book Appointment */}
-                    <div className="group cursor-pointer">
-                      <div className="relative overflow-hidden lg:mb-2 h-44">
-                        <h3 className="text-black text-sm font-medium tracking-wide group-hover:text-[#236339] font-gintoNord transition-colors duration-200">
-                          BOOK AN APPOINTMENT
-                        </h3>
-                        <div className="w-full h-full bg-yellow-200 flex items-center justify-center">
-                          <Image
-                            src="/images/appointment.webp"
-                            width={400}
-                            height={400}
-                            alt="Statement Ring"
-                            className=" h-full w-full object-cover"
-                          />
-                        </div>
+                  {/* Book Appointment */}
+                  <div className="group cursor-pointer">
+                    <div className="relative overflow-hidden lg:mb-2 h-44">
+                      <h3 className="text-black text-sm font-medium tracking-wide group-hover:text-[#00736C] font-gintoNord transition-colors duration-200">
+                        BOOK AN APPOINTMENT
+                      </h3>
+                      <div className="w-full h-full bg-yellow-200 flex items-center justify-center">
+                        <Image
+                          src="/images/appointment.webp"
+                          width={400}
+                          height={400}
+                          alt="Book Appointment"
+                          className="h-full w-full object-cover"
+                        />
                       </div>
                     </div>
                   </div>
@@ -1213,260 +1207,267 @@ const Navbar = () => {
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Education Dropdown Menu */}
-      {showEducationDropdown && (
-        <div
-          className="fixed top-16 left-0 w-full pt-4 border-gray-200 shadow-lg z-50"
-          onMouseEnter={() => setShowEducationDropdown(true)}
-          onMouseLeave={() => setShowEducationDropdown(false)}
-        >
-          <div className="w-full bg-[#FEFAF5] border-gray-200 shadow-lg z-50">
-            <div className="max-w-7xl p-4 mx-auto px-4 sm:px-6 lg:px-8 pt-12">
-              <div className="grid grid-cols-4 space-x-10 space-y-4">
-                {educationCategories?.map((category, index) => (
-                  <div className="" key={index}>
+      <div
+        className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${
+          showEducationDropdown
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 -translate-y-2 pointer-events-none"
+        }`}
+        onMouseEnter={() => setShowEducationDropdown(true)}
+        onMouseLeave={() => setShowEducationDropdown(false)}
+      >
+        <div className="absolute top-[-40px] left-0 w-full h-[40px] bg-transparent" />
+        <div className="w-full bg-white border-gray-100 shadow-lg z-50">
+          <div className="max-w-7xl p-4 mx-auto px-4 sm:px-6 lg:px-8 pt-12">
+            <div className="grid grid-cols-4 space-x-10 space-y-4">
+              {educationCategories?.map((category, index) => (
+                <div className="" key={index}>
+                  <Link
+                    href={
+                      "/blogs/" +
+                      "6878cbb596dfc8337a3359b4/" +
+                      category.subCategory._id
+                    }
+                  >
+                    <h2 className="block w-full text-black hover:bg-[#00736C]/5 py-2 px-2 text-lg font-medium font-gintoNormal transition-colors duration-200">
+                      {category.subCategory.name}
+                    </h2>
+                  </Link>
+                  {category.blogs.slice(0, 2).map((blog) => (
                     <Link
                       href={
                         "/blogs/" +
                         "6878cbb596dfc8337a3359b4/" +
-                        category.subCategory._id
+                        category.subCategory._id +
+                        "/" +
+                        blog._id
                       }
+                      key={blog._id}
                     >
-                      {" "}
-                      <h2 className="block w-full text-black hover:bg-slate-500/5 py-2  px-2 text-lg font-medium font-gintoNormal transition-colors duration-200">
-                        {category.subCategory.name}
+                      <h2 className="block w-full text-black/60 hover:bg-[#00736C]/5 py-2 ml-4 px-2 text-sm font-medium font-gintoNormal transition-colors duration-200">
+                        {blog.title}
                       </h2>
                     </Link>
-                    {category.blogs.slice(0, 2).map((blog) => (
-                      <Link
-                        href={
-                          "/blogs/" +
-                          "6878cbb596dfc8337a3359b4/" +
-                          category.subCategory._id +
-                          "/" +
-                          blog._id
-                        }
-                        key={blog._id}
-                      >
-                        {" "}
-                        <h2 className="block w-full text-black hover:bg-slate-500/5 py-2 ml-4 px-2 text-sm font-medium font-gintoNormal transition-colors duration-200">
-                          {" "}
-                          {blog.title}
-                        </h2>
-                      </Link>
-                    ))}
-
-                    <Link
-                      href={"#"}
-                      className="block w-full text-black hover:bg-slate-500/5 py-2 ml-4 px-2 text-sm font-medium italic underline transition-colors duration-200"
-                    >
-                      View more
-                    </Link>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                  <Link
+                    href={"#"}
+                    className="block w-full text-black/40 hover:text-[#00736C] py-2 ml-4 px-2 text-sm font-medium italic underline transition-colors duration-200"
+                  >
+                    View more
+                  </Link>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-[9999] bg-[#fefaf57e] overflow-hidden">
-          <div className="h-full w-[80%] max-w-[240px] bg-[#FEFAF5] flex flex-col">
-            {/* Header with close button */}
-            <div className="flex items-center justify-between px-4 h-16 border-b border-gray-200 bg-[#FEFAF5] relative z-[10000]">
-              {/* <div className="w-6"></div>  */}
-              <button
-                onClick={() => {
-                  setShowSearch(true);
-                  setIsMobileMenuOpen(false);
-                }}
-                className="text-black hover:text-black transition-colors duration-200"
-              >
-                <Search size={20} />
-              </button>
-              <button
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="text-black hover:text-black transition-colors duration-200"
-              >
-                <X size={24} />
-              </button>
-            </div>
+      <div
+        className={`lg:hidden fixed inset-0 z-[9999] overflow-hidden transition-all duration-300 ${
+          isMobileMenuOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        } bg-black/50`}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) setIsMobileMenuOpen(false);
+        }}
+      >
+        <div
+          className={`h-full w-[80%] max-w-[240px] bg-white flex flex-col transition-transform duration-300 ease-in-out ${
+            isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          {/* Header with close button */}
+          <div className="flex items-center justify-between px-4 h-16 border-b border-gray-200 bg-white relative z-[10000]">
+            <button
+              onClick={() => {
+                setShowSearch(true);
+                setIsMobileMenuOpen(false);
+              }}
+              className="text-black hover:text-[#00736C] transition-colors duration-200"
+            >
+              <Search size={20} />
+            </button>
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-black hover:text-[#00736C] transition-colors duration-200"
+            >
+              <X size={24} />
+            </button>
+          </div>
 
-            {/* Navigation Items */}
-            <div className="flex-1 px-4 py-8 overflow-y-auto">
-              <div className="space-y-6">
-                {/* Hidden items from desktop (More dropdown) */}
-                {hiddenLeftNavItems.map((item) => (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    className="block text-black hover:text-black text-[10px] font-medium tracking-wide transition-colors duration-200"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {item.name}
-                  </a>
-                ))}
-
-                {/* Accordion for Fine Jewellery */}
-                {mobileAccordionItems.map((accordionItem, index) => (
-                  <div
-                    key={accordionItem.title}
-                    className="border-b border-gray-200"
-                  >
-                    <button
-                      onClick={() => toggleAccordion(index)}
-                      className="flex items-center justify-between w-full text-left text-black hover:text-black text-[10px] font-medium tracking-wide transition-colors duration-200"
-                    >
-                      <span>{accordionItem.title}</span>
-                      {expandedAccordion === index ? (
-                        <ChevronUp size={16} />
-                      ) : (
-                        <ChevronDown size={16} />
-                      )}
-                    </button>
-
-                    {expandedAccordion === index && (
-                      <div className="mt-4 ml-4 space-y-3 animate-in slide-in-from-top-2 duration-200">
-                        {accordionItem.subcategories.map((subcat, subIndex) => (
-                          <div key={subIndex}>
-                            {subcat.items ? (
-                              // If subcategory has items, show as a submenu
-                              <div>
-                                <div className="text-black text-[10px] font-medium tracking-wide mb-2">
-                                  {subcat.name}
-                                </div>
-                                <div className="ml-3 space-y-2">
-                                  {subcat.items.map((item) => (
-                                    <a
-                                      key={item.name}
-                                      href={item.href}
-                                      className="block text-black hover:text-[#236339] text-[10px] transition-colors duration-200"
-                                      onClick={() => setIsMobileMenuOpen(false)}
-                                    >
-                                      {item.name}
-                                    </a>
-                                  ))}
-                                </div>
-                              </div>
-                            ) : (
-                              // If subcategory has no items, show as direct link
-                              <a
-                                href={subcat.href}
-                                className="block text-black hover:text-[#236339] text-[10px] transition-colors duration-200"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                              >
-                                {subcat.name}
-                              </a>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-
-                {/* Right nav items */}
-                {rightNavItems.map((item) => (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    className="block text-black hover:text-black text-[10px] font-medium tracking-wide transition-colors duration-200"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {item.name}
-                  </a>
-                ))}
-
-                {/* Book Appointment - Special styling */}
+          {/* Navigation Items */}
+          <div className="flex-1 px-4 py-8 overflow-y-auto">
+            <div className="space-y-6">
+              {/* Hidden items from desktop (More dropdown) */}
+              {hiddenLeftNavItems.map((item) => (
                 <a
-                  href="/book-appointment"
-                  className="block text-black hover:text-black text-lg font-medium tracking-wide transition-colors duration-200 pt-4"
+                  key={item.name}
+                  href={item.href}
+                  className="block text-black hover:text-[#00736C] text-[10px] font-medium tracking-wide transition-colors duration-200"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  BOOK APPOINTMENT
+                  {item.name}
                 </a>
-              </div>
+              ))}
+
+              {/* Accordion for Fine Jewellery */}
+              {mobileAccordionItems.map((accordionItem, index) => (
+                <div
+                  key={accordionItem.title}
+                  className="border-b border-gray-200"
+                >
+                  <button
+                    onClick={() => toggleAccordion(index)}
+                    className="flex items-center justify-between w-full text-left text-black hover:text-[#00736C] text-[10px] font-medium tracking-wide transition-colors duration-200"
+                  >
+                    <span>{accordionItem.title}</span>
+                    {expandedAccordion === index ? (
+                      <ChevronUp size={16} />
+                    ) : (
+                      <ChevronDown size={16} />
+                    )}
+                  </button>
+
+                  {expandedAccordion === index && (
+                    <div className="mt-4 ml-4 space-y-3 animate-in slide-in-from-top-2 duration-200">
+                      {accordionItem.subcategories.map((subcat, subIndex) => (
+                        <div key={subIndex}>
+                          {subcat.items ? (
+                            <div>
+                              <div className="text-black text-[10px] font-medium tracking-wide mb-2">
+                                {subcat.name}
+                              </div>
+                              <div className="ml-3 space-y-2">
+                                {subcat.items.map((item) => (
+                                  <a
+                                    key={item.name}
+                                    href={item.href}
+                                    className="block text-black hover:text-[#00736C] text-[10px] transition-colors duration-200"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                  >
+                                    {item.name}
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          ) : (
+                            <a
+                              href={subcat.href}
+                              className="block text-black hover:text-[#236339] text-[10px] transition-colors duration-200"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              {subcat.name}
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Right nav items */}
+              {rightNavItems.map((item) => (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  className="block text-black hover:text-[#00736C] text-[10px] font-medium tracking-wide transition-colors duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {item.name}
+                </a>
+              ))}
+
+              {/* Book Appointment */}
+              <a
+                href="/book-appointment"
+                className="block text-black hover:text-[#00736C] text-lg font-medium tracking-wide transition-colors duration-200 pt-4"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                BOOK APPOINTMENT
+              </a>
+            </div>
+          </div>
+
+          {/* Bottom Section */}
+          <div className="px-4 pb-8">
+            {/* Currency Selector */}
+            <div className="mb-8">
+              <select className="text-black text-sm font-medium tracking-wide bg-transparent border-none outline-none">
+                <option>IN (USD $)</option>
+                <option>IN (EUR €)</option>
+                <option>IN (GBP £)</option>
+              </select>
             </div>
 
-            {/* Bottom Section */}
-            <div className="px-4 pb-8">
-              {/* Currency Selector */}
-              <div className="mb-8">
-                <select className="text-black text-sm font-medium tracking-wide bg-transparent border-none outline-none">
-                  <option>IN (USD $)</option>
-                  <option>IN (EUR €)</option>
-                  <option>IN (GBP £)</option>
-                </select>
-              </div>
-
-              {/* Social Media Icons */}
-              <div className="flex items-center space-x-6 flex-wrap gap-2">
-                <a
-                  href="#"
-                  className="text-black hover:text-black transition-colors duration-200"
+            {/* Social Media Icons */}
+            <div className="flex items-center space-x-6 flex-wrap gap-2">
+              <a
+                href="#"
+                className="text-black hover:text-[#00736C] transition-colors duration-200"
+              >
+                <Instagram size={20} />
+              </a>
+              <a
+                href="#"
+                className="text-black hover:text-[#00736C] transition-colors duration-200"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
                 >
-                  <Instagram size={20} />
-                </a>
-                <a
-                  href="#"
-                  className="text-black hover:text-black transition-colors duration-200"
+                  <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+                </svg>
+              </a>
+              <a
+                href="#"
+                className="text-black hover:text-[#00736C] transition-colors duration-200"
+              >
+                <Facebook size={20} />
+              </a>
+              <a
+                href="#"
+                className="text-black hover:text-[#00736C] transition-colors duration-200"
+              >
+                <Youtube size={20} />
+              </a>
+              <a
+                href="#"
+                className="text-black hover:text-[#00736C] transition-colors duration-200"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
                 >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
-                  </svg>
-                </a>
-                <a
-                  href="#"
-                  className="text-black hover:text-black transition-colors duration-200"
+                  <path d="M12 0C5.374 0 0 5.373 0 12s5.374 12 12 12 12-5.373 12-12S18.626 0 12 0zm5.568 8.16c-.169 1.858-.896 3.423-2.001 4.536-1.194 1.188-2.819 1.844-4.67 1.844-.598 0-1.174-.085-1.727-.247-.264-.078-.526-.171-.782-.278-.348-.146-.68-.317-.993-.513-.793-.495-1.485-1.211-1.957-2.085-.332-.614-.52-1.295-.52-2.01 0-.717.188-1.398.52-2.01.472-.874 1.164-1.59 1.957-2.085.313-.196.645-.367.993-.513.256-.107.518-.2.782-.278.553-.162 1.129-.247 1.727-.247 1.851 0 3.476.656 4.67 1.844 1.105 1.113 1.832 2.678 2.001 4.536z" />
+                </svg>
+              </a>
+              <a
+                href="#"
+                className="text-black hover:text-[#00736C] transition-colors duration-200"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
                 >
-                  <Facebook size={20} />
-                </a>
-                <a
-                  href="#"
-                  className="text-black hover:text-black transition-colors duration-200"
-                >
-                  <Youtube size={20} />
-                </a>
-                <a
-                  href="#"
-                  className="text-black hover:text-black transition-colors duration-200"
-                >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M12 0C5.374 0 0 5.373 0 12s5.374 12 12 12 12-5.373 12-12S18.626 0 12 0zm5.568 8.16c-.169 1.858-.896 3.423-2.001 4.536-1.194 1.188-2.819 1.844-4.67 1.844-.598 0-1.174-.085-1.727-.247-.264-.078-.526-.171-.782-.278-.348-.146-.68-.317-.993-.513-.793-.495-1.485-1.211-1.957-2.085-.332-.614-.52-1.295-.52-2.01 0-.717.188-1.398.52-2.01.472-.874 1.164-1.59 1.957-2.085.313-.196.645-.367.993-.513.256-.107.518-.2.782-.278.553-.162 1.129-.247 1.727-.247 1.851 0 3.476.656 4.67 1.844 1.105 1.113 1.832 2.678 2.001 4.536z" />
-                  </svg>
-                </a>
-                <a
-                  href="#"
-                  className="text-black hover:text-black transition-colors duration-200"
-                >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                  </svg>
-                </a>
-              </div>
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                </svg>
+              </a>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </>
   );
 };

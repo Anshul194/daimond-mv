@@ -42,7 +42,7 @@ const RingFinderFAQ = () => {
             book a virtual appointment no matter where you are!
           </p>
           
-          <button className="bg-green-700 text-white px-8 py-4 text-sm font-medium hover:bg-green-800 transition-colors font-gintoNormal tracking-wider">
+          <button className="bg-[#004643] text-white px-8 py-4 text-sm font-medium hover:bg-[#004643]/90 transition-colors font-gintoNormal tracking-wider">
             BOOK APPOINTMENT
           </button>
         </div>
@@ -67,14 +67,14 @@ const RingFinderFAQ = () => {
             {faqs.map((faq, index) => (
               <div 
                 key={index}
-                className="bg-white border-b border-green-700"
+                className="bg-white border-b border-[#004643]"
               >
                 <button
                   onClick={() => toggleFAQ(index)}
                   className="w-full text-left p-3 flex justify-between items-center hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-center">
-                    <span className="text-green-700 text-xl font-light mr-4">
+                    <span className="text-[#004643] text-xl font-light mr-4">
                       {openFAQ === index ? '−' : '+'}
                     </span>
                     <span className="font-gintoNormal text-sm font-medium text-gray-800">

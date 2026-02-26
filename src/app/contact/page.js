@@ -167,7 +167,7 @@ const Page = () => {
               <input
                 type="checkbox"
                 id="subscribe"
-                className="mt-1 h-4 w-4 text-green-600 border-gray-300 focus:ring-green-500"
+                className="mt-1 h-4 w-4 text-[#004643] border-gray-300 focus:ring-[#004643]"
               />
               <label htmlFor="subscribe" className="text-gray-700 text-sm">
                 Subscribe to our mailing list
@@ -180,14 +180,14 @@ const Page = () => {
                 <button
                   type="submit"
                   disabled
-                  className="bg-green-700 hover:bg-green-800 text-white font-medium py-3 px-8 uppercase tracking-wide transition-colors duration-200"
+                  className="bg-[#004643] hover:bg-[#004643]/90 text-white font-medium py-3 px-8 uppercase tracking-wide transition-colors duration-200"
                 >
                   Sending...
                 </button>
               ) : (
                 <button
                   type="submit"
-                  className="bg-green-700 hover:bg-green-800 text-white font-medium py-3 px-8 uppercase tracking-wide transition-colors duration-200"
+                  className="bg-[#004643] hover:bg-[#004643]/90 text-white font-medium py-3 px-8 uppercase tracking-wide transition-colors duration-200"
                 >
                   SUBMIT
                 </button>

@@ -288,7 +288,7 @@ const ProductOptions = ({
   }, [availableOptions, globalSizes]);
 
   return (
-    <div className="max-w-md mx-auto space-y-6 bg-white p-6 ">
+    <div className="max-w-md mx-auto space-y-6 bg-[#FEFAF5] p-6 ">
       <div className="text-center mb-6">
         <div className="text-green-500 text-[10px] font-semibold font-arizona mb-2">
           STEP ONE
@@ -915,7 +915,7 @@ const ProductModal = ({ onClose, loading }) => {
         />
 
         {/* <div className="w-2/3 max-sm:w-full max-sm:-bottom-32 -bottom-28 pt-6 flex flex-wrap justify-center mx-auto  gap-2  p-2 rounded-lg"> */}
-        <div className="md:block relative w-full px-16 xl:px-40 max-sm:px-4 max-sm:pb-10 pb-40 md:px-20 h-fit  md:mx-auto bg-[#fefaf5] shadow-xl overflow-scroll">
+        <div className="md:block relative w-full px-16 xl:px-40 max-sm:px-4 max-sm:pb-10 pb-40 md:px-20 h-fit  md:mx-auto bg-[#FEFAF5] shadow-xl overflow-scroll">
           <ModalHeader onClose={onClose} />
 
           <div

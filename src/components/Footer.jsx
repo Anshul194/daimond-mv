@@ -130,30 +130,30 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className="bg-[#236339] text-white">
+    <footer className="bg-[#00736C] !text-white">
       {/* Top Features Section */}
-      <div className="border-b border-emerald-800 py-12">
+      <div className="border-b border-white/10 py-12">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 font-gintoNord lg:grid-cols-4 gap-8">
             <div className="text-center flex flex-col  items-center">
               <ShippingIcon />
-              <h3 className="font-bold text-sm mb-1">WORLDWIDE</h3>
-              <h3 className="font-bold text-sm">EXPRESS SHIPPING</h3>
+              <h3 className="!text-white font-bold text-sm mb-1">WORLDWIDE</h3>
+              <h3 className="!text-white font-bold text-sm">EXPRESS SHIPPING</h3>
             </div>
             <div className="text-center flex flex-col items-center">
               <ResizingIcon />
-              <h3 className="font-bold text-sm mb-1">FREE</h3>
-              <h3 className="font-bold text-sm">RESIZING</h3>
+              <h3 className="!text-white font-bold text-sm mb-1">FREE</h3>
+              <h3 className="!text-white font-bold text-sm">RESIZING</h3>
             </div>
             <div className="text-center flex flex-col items-center">
               <WarrantyIcon />
-              <h3 className="font-bold text-sm mb-1">LIFETIME</h3>
-              <h3 className="font-bold text-sm">WARRANTY</h3>
+              <h3 className="!text-white font-bold text-sm mb-1">LIFETIME</h3>
+              <h3 className="!text-white font-bold text-sm">WARRANTY</h3>
             </div>
             <div className="text-center flex flex-col items-center">
               <CustomizationIcon />
-              <h3 className="font-bold text-sm mb-1">FREE RING</h3>
-              <h3 className="font-bold text-sm">CUSTOMISATION</h3>
+              <h3 className="!text-white font-bold text-sm mb-1">FREE RING</h3>
+              <h3 className="!text-white font-bold text-sm">CUSTOMISATION</h3>
             </div>
           </div>
         </div>
@@ -167,12 +167,12 @@ export default function Footer() {
             <div>
               {/* Desktop/Large tablet view */}
               <div className="hidden lg:block">
-                <h3 className="font-bold text-sm mb-3">QUICK LINKS</h3>
+                <h3 className="!text-white font-bold text-sm mb-3">QUICK LINKS</h3>
                 <ul className="space-y-1">
                   <li>
                     <Link
                       href="/new-arrivals"
-                      className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                      className="text-[10px] hover:text-white/60 transition-colors font-gintoNord"
                     >
                       New Arrivals
                     </Link>
@@ -180,7 +180,7 @@ export default function Footer() {
                   <li>
                     <Link
                       href="/engagement-230"
-                      className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                      className="text-[10px] hover:text-white/60 transition-colors font-gintoNord"
                     >
                       Engagement Rings
                     </Link>
@@ -188,7 +188,7 @@ export default function Footer() {
                   <li>
                     <Link
                       href="/wedding-rings-873"
-                      className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                      className="text-[10px] hover:text-white/60 transition-colors font-gintoNord"
                     >
                       Wedding Rings
                     </Link>
@@ -196,7 +196,7 @@ export default function Footer() {
                   <li>
                     <Link
                       href="/fine-jewellery-807?finejewellery=6874b552f2ed2bebef46ccec"
-                      className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                      className="text-[10px] hover:text-white/60 transition-colors font-gintoNord"
                     >
                       Fine Jewelry
                     </Link>
@@ -204,7 +204,7 @@ export default function Footer() {
                   <li>
                     <Link
                       href="/wedding-rings-873?gender=woman"
-                      className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                      className="text-[10px] hover:text-white/60 transition-colors font-gintoNord"
                     >
                       Women's Wedding Rings
                     </Link>
@@ -212,7 +212,7 @@ export default function Footer() {
                   <li>
                     <Link
                       href="/wedding-rings-873?gender=man"
-                      className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                      className="text-[10px] hover:text-white/60 transition-colors font-gintoNord"
                     >
                       Men's Wedding Rings
                     </Link>
@@ -220,7 +220,7 @@ export default function Footer() {
                   <li>
                     <Link
                       href="#"
-                      className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                      className="text-[10px] hover:text-white/60 transition-colors font-gintoNord"
                     >
                       Education
                     </Link>
@@ -232,9 +232,9 @@ export default function Footer() {
               <div className="lg:hidden">
                 <button
                   onClick={() => toggleAccordion("quickLinks")}
-                  className="w-full flex justify-between items-center py-3 border-b border-emerald-800"
+                  className="w-full flex justify-between items-center py-3 border-b border-white/10"
                 >
-                  <h3 className="font-bold text-sm">QUICK LINKS</h3>
+                  <h3 className="!text-white font-bold text-sm">QUICK LINKS</h3>
                   {openAccordions.quickLinks ? (
                     <ChevronUp className="w-4 h-4" />
                   ) : (
@@ -308,7 +308,7 @@ export default function Footer() {
             <div>
               {/* Desktop/Large tablet view */}
               <div className="hidden lg:block">
-                <h3 className="font-bold text-sm mb-3 uppercase">
+                <h3 className="!text-white font-bold text-sm mb-3 uppercase">
                   other category's
                 </h3>
                 <ul className="space-y-1">
@@ -335,9 +335,9 @@ export default function Footer() {
               <div className="lg:hidden">
                 <button
                   onClick={() => toggleAccordion("aboutUs")}
-                  className="w-full flex justify-between items-center py-3 border-b border-emerald-800"
+                  className="w-full flex justify-between items-center py-3 border-b border-white/10"
                 >
-                  <h3 className="font-bold text-sm uppercase">
+                  <h3 className="!text-white font-bold text-sm uppercase">
                     Other Categories
                   </h3>
                   {openAccordions.aboutUs ? (
@@ -373,12 +373,12 @@ export default function Footer() {
             <div>
               {/* Desktop/Large tablet view */}
               <div className="hidden lg:block">
-                <h3 className="font-bold text-sm mb-3">CLIENT CARE</h3>
+                <h3 className="!text-white font-bold text-sm mb-3">CLIENT CARE</h3>
                 <ul className="space-y-1">
                   <li>
                     <Link
                       href="#"
-                      className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                      className="text-[10px] hover:text-white/60 transition-colors font-gintoNord"
                     >
                       FAQs
                     </Link>
@@ -386,7 +386,7 @@ export default function Footer() {
                   <li>
                     <Link
                       href="#"
-                      className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                      className="text-[10px] hover:text-white/60 transition-colors font-gintoNord"
                     >
                       Blogs
                     </Link>
@@ -394,7 +394,7 @@ export default function Footer() {
                   <li>
                     <Link
                       href="#"
-                      className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                      className="text-[10px] hover:text-white/60 transition-colors font-gintoNord"
                     >
                       Education
                     </Link>
@@ -402,7 +402,7 @@ export default function Footer() {
                   <li>
                     <Link
                       href="#"
-                      className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                      className="text-[10px] hover:text-white/60 transition-colors font-gintoNord"
                     >
                       Size Guide
                     </Link>
@@ -410,7 +410,7 @@ export default function Footer() {
                   <li>
                     <Link
                       href="#"
-                      className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                      className="text-[10px] hover:text-white/60 transition-colors font-gintoNord"
                     >
                       Book Appointment
                     </Link>
@@ -418,7 +418,7 @@ export default function Footer() {
                   <li>
                     <Link
                       href="#"
-                      className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                      className="text-[10px] hover:text-white/60 transition-colors font-gintoNord"
                     >
                       Order Status
                     </Link>
@@ -430,9 +430,9 @@ export default function Footer() {
               <div className="lg:hidden">
                 <button
                   onClick={() => toggleAccordion("clientCare")}
-                  className="w-full flex justify-between items-center py-3 border-b border-emerald-800"
+                  className="w-full flex justify-between items-center py-3 border-b border-white/10"
                 >
-                  <h3 className="font-bold text-sm">CLIENT CARE</h3>
+                  <h3 className="!text-white font-bold text-sm">CLIENT CARE</h3>
                   {openAccordions.clientCare ? (
                     <ChevronUp className="w-4 h-4" />
                   ) : (
@@ -444,7 +444,7 @@ export default function Footer() {
                     <li>
                       <Link
                         href="#"
-                        className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                        className="text-[10px] hover:text-white/60 transition-colors font-gintoNord"
                       >
                         FAQs
                       </Link>
@@ -452,7 +452,7 @@ export default function Footer() {
                     <li>
                       <Link
                         href="#"
-                        className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                        className="text-[10px] hover:text-white/60 transition-colors font-gintoNord"
                       >
                         Blogs
                       </Link>
@@ -460,7 +460,7 @@ export default function Footer() {
                     <li>
                       <Link
                         href="#"
-                        className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                        className="text-[10px] hover:text-white/60 transition-colors font-gintoNord"
                       >
                         Education
                       </Link>
@@ -468,7 +468,7 @@ export default function Footer() {
                     <li>
                       <Link
                         href="#"
-                        className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                        className="text-[10px] hover:text-white/60 transition-colors font-gintoNord"
                       >
                         Size Guide
                       </Link>
@@ -476,7 +476,7 @@ export default function Footer() {
                     <li>
                       <Link
                         href="#"
-                        className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                        className="text-[10px] hover:text-white/60 transition-colors font-gintoNord"
                       >
                         Book Appointment
                       </Link>
@@ -484,7 +484,7 @@ export default function Footer() {
                     <li>
                       <Link
                         href="#"
-                        className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                        className="text-[10px] hover:text-white/60 transition-colors font-gintoNord"
                       >
                         Order Status
                       </Link>
@@ -496,28 +496,28 @@ export default function Footer() {
 
             {/* Contact Us - Always visible, no accordion */}
             <div>
-              <h3 className="font-bold text-sm mb-3">CONTACT US</h3>
+              <h3 className="!text-white font-bold text-sm mb-3">CONTACT US</h3>
               <div className="space-y-1">
                 <div className="flex items-center">
-                  <span className="text-sm">📞 +61 1300 977 619</span>
+                  <span className="text-sm font-light">📞 +61 1300 977 619</span>
                 </div>
                 <div className="flex items-center">
-                  <span className="text-sm">✉ sales@cullenjewellery.com</span>
+                  <span className="text-sm font-light">✉ sales@cullenjewellery.com</span>
                 </div>
-                <div className="text-sm">
+                <div className="text-sm font-light">
                   <span>📅 Appointment Only</span>
                 </div>
-                <div className="text-sm">
-                  <div className="font-bold mb-1">CONTACT HOURS</div>
-                  <div>MON-WED: 4:30 AM - 12:30 PM</div>
-                  <div>THU-FRI: 4:30 AM - 2:30 PM</div>
-                  <div>SAT: 3:30 AM - 11:30 AM</div>
+                <div className="text-white mt-4">
+                  <div className="font-bold text-[10px] mb-2 tracking-widest text-white">CONTACT HOURS (AEST)</div>
+                  <div className="text-[10px] font-light opacity-80 text-white">MON-WED: 4:30 AM - 12:30 PM</div>
+                  <div className="text-[10px] font-light opacity-80 text-white">THU-FRI: 4:30 AM - 2:30 PM</div>
+                  <div className="text-[10px] font-light opacity-80 text-white">SAT: 3:30 AM - 11:30 AM</div>
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-1 pt-4">
                   <div>
                     <a
                       href="#"
-                      className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                      className="text-[10px] hover:text-white/60 transition-colors font-gintoNord underline underline-offset-4"
                     >
                       Get In Touch
                     </a>
@@ -525,7 +525,7 @@ export default function Footer() {
                   <div>
                     <a
                       href="#"
-                      className="text-[10px] hover:text-emerald-300 transition-colors font-gintoNord"
+                      className="text-[10px] hover:text-white/60 transition-colors font-gintoNord underline underline-offset-4"
                     >
                       Feedback
                     </a>
@@ -538,18 +538,18 @@ export default function Footer() {
       </div>
 
       {/* Newsletter Section */}
-      <div className="border-t border-emerald-800 py-8">
+      <div className="border-t border-white/10 py-16">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h3 className="text-lg font-normal mb-4">
+          <h3 className="!text-white text-xl font-arizona mb-8 tracking-wider">
             RING ADVICE, STRAIGHT TO YOUR INBOX
           </h3>
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-0 max-w-md mx-auto">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-0 max-w-md mx-auto border border-white/20">
             <input
               type="email"
               placeholder="Your email address"
-              className="w-full sm:w-auto flex-1 px-4 py-3 text-gray-900 bg-white border-0 focus:outline-none focus:ring-2 focus:ring-emerald-600"
+              className="w-full sm:w-auto flex-1 px-6 py-4 text-white bg-transparent border-0 focus:outline-none placeholder:text-white/40 font-light"
             />
-            <button className="w-full sm:w-auto px-6 py-3 bg-emerald-700 text-white font-medium hover:bg-emerald-600 transition-colors font-gintoNord">
+            <button className="w-full sm:w-auto px-10 py-4 bg-white text-[#00736C] font-semibold hover:bg-white/90 transition-all font-gintoNord uppercase text-xs tracking-widest">
               SUBMIT
             </button>
           </div>
@@ -557,159 +557,80 @@ export default function Footer() {
       </div>
 
       {/* Bottom Section */}
-      <div className="border-t border-emerald-800 py-8">
+      <div className="border-t border-white/10 py-12">
         <div className="max-w-7xl mx-auto px-4">
           {/* Certifications and Social */}
-          <div className="flex lg:flex-row justify-between items-center mb-8">
+          <div className="flex flex-col lg:flex-row justify-between items-center mb-12 gap-8">
             {/* Left: Certifications */}
-            <div className="flex items-center space-x-4 mb-4 lg:mb-0">
-              <div className="text-[10px]">
+            <div className="flex items-center space-x-8">
+              <div className="text-[10px] opacity-70">
                 <div>Proudly endorsed by</div>
                 <div className="font-bold">DQA</div>
                 <div>Design Institute</div>
                 <div>of Australia</div>
               </div>
-              <div className="w-12 h-12 bg-emerald-700 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-lg">IGI</span>
+              <div className="w-16 h-16 border border-white/20 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-xl tracking-tighter">IGI</span>
               </div>
             </div>
 
+            {/* Right: Social Media Icons */}
+            <div className="flex items-center space-x-8 text-white">
+              <a href="#" className="hover:text-white/60 transition-all transform hover:scale-110">
+                <Instagram className="w-5 h-5" />
+              </a>
+              <a href="#" className="hover:text-white/60 transition-all transform hover:scale-110">
+                <TikTokIcon />
+              </a>
+              <a href="#" className="hover:text-white/60 transition-all transform hover:scale-110">
+                <Facebook className="w-5 h-5" />
+              </a>
+              <a href="#" className="hover:text-white/60 transition-all transform hover:scale-110">
+                <Youtube className="w-5 h-5" />
+              </a>
+              <a href="#" className="hover:text-white/60 transition-all transform hover:scale-110">
+                <PinterestIcon />
+              </a>
+              <a href="#" className="hover:text-white/60 transition-all transform hover:scale-110">
+                <LinkedInIcon />
+              </a>
+            </div>
+
             {/* Right: Clear Neutral Badge */}
-            <div className="bg-yellow-600 text-white px-4 py-2 rounded-md text-center">
-              <div className="text-[10px] font-bold">CLEAR</div>
-              <div className="text-[10px] font-bold">NEUTRAL</div>
-              <div className="text-[10px]">CERTIFIED</div>
+            <div className="bg-[#B8860B] text-white px-6 py-3 rounded-sm text-center border border-white/10">
+              <div className="text-[10px] font-bold tracking-widest">CLEAR NEUTRAL</div>
+              <div className="text-[10px] opacity-80">CERTIFIED</div>
             </div>
           </div>
 
-          {/* Social Media Icons */}
-          <div className="flex justify-center space-x-6 mb-3">
-            <a
-              href="#"
-              className="hover:text-emerald-300 transition-colors font-gintoNord"
-            >
-              <Instagram className="w-6 h-6" />
-            </a>
-            <a
-              href="#"
-              className="hover:text-emerald-300 transition-colors font-gintoNord"
-            >
-              <TikTokIcon />
-            </a>
-            <a
-              href="#"
-              className="hover:text-emerald-300 transition-colors font-gintoNord"
-            >
-              <Facebook className="w-6 h-6" />
-            </a>
-            <a
-              href="#"
-              className="hover:text-emerald-300 transition-colors font-gintoNord"
-            >
-              <Youtube className="w-6 h-6" />
-            </a>
-            <a
-              href="#"
-              className="hover:text-emerald-300 transition-colors font-gintoNord"
-            >
-              <PinterestIcon />
-            </a>
-            <a
-              href="#"
-              className="hover:text-emerald-300 transition-colors font-gintoNord"
-            >
-              <LinkedInIcon />
-            </a>
-          </div>
-
           {/* Legal Links */}
-          <div className="text-center text-[10px] mb-4">
-            <div className="flex flex-wrap justify-center items-center space-x-1">
-              <a
-                href="#"
-                className="hover:text-emerald-300 transition-colors font-gintoNord"
-              >
-                Terms and Conditions
-              </a>
-              <span>|</span>
-              <a
-                href="#"
-                className="hover:text-emerald-300 transition-colors font-gintoNord"
-              >
-                Terms of Sale
-              </a>
-              <span>|</span>
-              <a
-                href="#"
-                className="hover:text-emerald-300 transition-colors font-gintoNord"
-              >
-                Privacy
-              </a>
-              <span>|</span>
-              <a
-                href="#"
-                className="hover:text-emerald-300 transition-colors font-gintoNord"
-              >
-                Returns
-              </a>
-              <span>|</span>
-              <a
-                href="#"
-                className="hover:text-emerald-300 transition-colors font-gintoNord"
-              >
-                Site Map
-              </a>
-              <span>|</span>
-              <a
-                href="#"
-                className="hover:text-emerald-300 transition-colors font-gintoNord"
-              >
-                Engagement Rings
-              </a>
+          <div className="text-center text-[10px] mb-8 opacity-60 text-white">
+            <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-white">
+              <a href="#" className="hover:text-white transition-colors">Terms and Conditions</a>
+              <a href="#" className="hover:text-white transition-colors">Terms of Sale</a>
+              <a href="#" className="hover:text-white transition-colors">Privacy</a>
+              <a href="#" className="hover:text-white transition-colors">Returns</a>
+              <a href="#" className="hover:text-white transition-colors">Site Map</a>
+              <a href="#" className="hover:text-white transition-colors">Engagement Rings</a>
             </div>
           </div>
 
           {/* Security Text */}
-          <div className="text-center text-[10px] mb-4">
+          <div className="text-center text-[10px] mb-8 opacity-40 uppercase tracking-[0.2em] text-white">
             All payments are 256-bit SSL secure and encrypted.
           </div>
 
           {/* Payment Methods */}
-          <div className="flex justify-center items-center space-x-2 mb-4 flex-wrap gap-2">
-            <div className="bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-bold">
-              AMEX
-            </div>
-            <div className="bg-black text-white px-2 py-1 rounded text-[10px] font-bold">
-              Apple Pay
-            </div>
-            <div className="bg-gray-600 text-white px-2 py-1 rounded text-[10px] font-bold">
-              Generic
-            </div>
-            <div className="bg-green-600 text-white px-2 py-1 rounded text-[10px] font-bold">
-              G Pay
-            </div>
-            <div className="bg-orange-600 text-white px-2 py-1 rounded text-[10px] font-bold">
-              Discover
-            </div>
-            <div className="bg-red-600 text-white px-2 py-1 rounded text-[10px] font-bold">
-              MC
-            </div>
-            <div className="bg-blue-800 text-white px-2 py-1 rounded text-[10px] font-bold">
-              PayPal
-            </div>
-            <div className="bg-purple-600 text-white px-2 py-1 rounded text-[10px] font-bold">
-              Shop Pay
-            </div>
-            <div className="bg-blue-700 text-white px-2 py-1 rounded text-[10px] font-bold">
-              Visa
-            </div>
-            <div className="bg-gray-700 text-white px-2 py-1 rounded text-[10px] font-bold">
-              Zip
-            </div>
+          <div className="flex justify-center items-center gap-3 mb-8 flex-wrap">
+            {['AMEX', 'Apple Pay', 'G Pay', 'Discover', 'MC', 'PayPal', 'Shop Pay', 'Visa', 'Zip'].map((method) => (
+              <div key={method} className="border border-white/10 px-3 py-1.5 rounded-sm text-[8px] font-bold uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity text-white">
+                {method}
+              </div>
+            ))}
           </div>
 
           {/* Copyright */}
-          <div className="text-center text-[10px]">© 2025 Cullen Jewellery</div>
+          <div className="text-center text-[10px] opacity-40 tracking-widest uppercase text-white">© 2025 Cullen Jewellery</div>
         </div>
       </div>
     </footer>

@@ -202,10 +202,10 @@ const StepTwo = ({ handelSelectDiamond, selectedDiamond }) => {
         ref={modalRef}
       />
 
-      <div className="max-w-md mx-auto h-fit p-2 px-4 bg-white mt-4">
+      <div className="max-w-md mx-auto h-fit p-2 px-4 bg-[#FEFAF5] mt-4">
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="text-green-500 text-[10px] font-semibold font-arizona mb-2">
+          <div className="text-[#004643] text-[10px] font-semibold font-arizona mb-2">
             STEP TWO
           </div>
           <h2 className="text-2xl text-gray-800 mb-1">
@@ -329,7 +329,7 @@ const StepTwo = ({ handelSelectDiamond, selectedDiamond }) => {
                 setShowDiamond(true);
                 handelSelectDiamond(null);
               }}
-              className="btn hover:bg-green-900 text-white text-[10px] font-bold px-8 py-3 font-arizona transition-colors"
+              className="btn hover:bg-[#004643]/90 text-white text-[10px] font-bold px-8 py-3 font-arizona transition-colors"
             >
               VIEW MORE OPTIONS
             </button>

@@ -50,7 +50,7 @@ export default async function generateInvoicePdf(data) {
         }
 
         .header {
-            background-color: #236339;
+            background-color: #004643;
             color: #fff;
             padding: 30px;
             text-align: center;
@@ -81,7 +81,7 @@ export default async function generateInvoicePdf(data) {
         .customer-details, .invoice-details {
             flex: 1;
             padding: 20px;
-            border: 2px solid #236339;
+            border: 2px solid #004643;
             border-radius: 8px;
             background-color: #fefaf5;
         }
@@ -89,9 +89,9 @@ export default async function generateInvoicePdf(data) {
         .section-title {
             font-size: 16px;
             font-weight: bold;
-            color: #236339;
+            color: #004643;
             margin-bottom: 15px;
-            border-bottom: 2px solid #236339;
+            border-bottom: 2px solid #004643;
             padding-bottom: 5px;
         }
 
@@ -103,7 +103,7 @@ export default async function generateInvoicePdf(data) {
 
         .detail-label {
             font-weight: bold;
-            color: #236339;
+            color: #004643;
         }
 
         .product-table {
@@ -116,7 +116,7 @@ export default async function generateInvoicePdf(data) {
         }
 
         .product-table th {
-            background-color: #236339;
+            background-color: #004643;
             color: #fff;
             padding: 15px;
             text-align: left;
@@ -154,7 +154,7 @@ export default async function generateInvoicePdf(data) {
 
         .totals-table .label {
             font-weight: bold;
-            color: #236339;
+            color: #004643;
             text-align: right;
         }
 
@@ -164,14 +164,14 @@ export default async function generateInvoicePdf(data) {
         }
 
         .total-row {
-            background-color: #236339;
+            background-color: #004643;
             color: #fff;
             font-size: 18px;
         }
 
         .shipping-address {
             padding: 20px;
-            border: 2px solid #236339;
+            border: 2px solid #004643;
             border-radius: 8px;
             background-color: #fefaf5;
         }
@@ -179,9 +179,9 @@ export default async function generateInvoicePdf(data) {
         .address-title {
             font-size: 16px;
             font-weight: bold;
-            color: #236339;
+            color: #004643;
             margin-bottom: 15px;
-            border-bottom: 2px solid #236339;
+            border-bottom: 2px solid #004643;
             padding-bottom: 5px;
         }
 

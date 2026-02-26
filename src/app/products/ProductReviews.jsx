@@ -42,7 +42,7 @@ const ProductReviews = () => {
   return (
     <div className="w-full pb-6">
       {/* Header Section */}
-      <div className="bg-[#236339] text-white py-8 px-4">
+      <div className="bg-[#004643] text-white py-8 px-4">
         <div className="w-full mx-auto text-center">
           <h1 className="text-2xl md:text-3xl font-light tracking-wide">
             Women's Wedding FAQs
@@ -60,11 +60,11 @@ const ProductReviews = () => {
             <div key={index} className="border-b border-gray-200">
               <button
                 onClick={() => toggleFAQ(index)}
-                className="w-full py-2 flex items-center text-left hover:text-[#236339] transition-colors duration-300 group"
+                className="w-full py-2 flex items-center text-left hover:text-[#004643] transition-colors duration-300 group"
               >
                 <div className="flex-shrink-0 mr-4 transition-transform duration-300 group-hover:scale-110">
                   {expandedFAQ === index ? (
-                    <ChevronUp size={20} className="text-[#236339] transition-colors duration-300" />
+                    <ChevronUp size={20} className="text-[#004643] transition-colors duration-300" />
                   ) : (
                     <ChevronDown size={20} className="text-gray-600 transition-colors duration-300" />
                   )}

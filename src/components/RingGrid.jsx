@@ -84,7 +84,7 @@ const RingsGrid = ({
             key={index}
           >
             <div
-              className="bg-white rounded-lg cursor-pointer transition-shadow duration-200"
+              className="bg-[#FEFAF5] rounded-lg cursor-pointer transition-shadow duration-200"
               onMouseEnter={() => handleMouseEnter(index)}
               onMouseLeave={() => handleMouseLeave()}
             >
@@ -185,7 +185,7 @@ const RingsGrid = ({
           <div className="flex justify-center mb-12">
             {" "}
             <button
-              className="w-fit px-8 bg-[#236339] mx-auto text-white py-3  font-medium transition-all duration-300 hover:bg-gray-800"
+              className="w-fit px-8 bg-[#004643] mx-auto text-white py-3 font-medium transition-all duration-300 hover:bg-gray-800"
               onClick={onPageChange}
             >
               Load More

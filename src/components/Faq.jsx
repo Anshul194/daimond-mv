@@ -7,28 +7,28 @@ import { fetchFaqs } from "../store/slices/faq"; // Adjust the path to your faqS
 
 const FAQItem = ({ question, answer, isOpen, onToggle }) => {
   return (
-    <div className="border-b border-gray-200">
+    <div className="border-b border-gray-100 last:border-0">
       <button
-        className="w-full py-6 px-0 flex items-center text-left transition-colors duration-200"
+        className="w-full py-8 flex items-center justify-between text-left group transition-all duration-300"
         onClick={onToggle}
       >
-        <div className="flex-shrink-0 mr-4">
+        <span className={`text-white font-semibold text-[10px] font-gintoNord uppercase tracking-[0.2em] transition-colors duration-300 ${isOpen ? 'text-[#00736C]' : 'group-hover:text-[#00736C]'}`}>
+          {question}
+        </span>
+        <div className="flex-shrink-0 ml-6">
           <ChevronDown
-            className={`w-5 h-5 text-gray-600 transform transition-transform duration-300 ${
-              isOpen ? "rotate-180" : "rotate-0"
+            className={`w-4 h-4 text-gray-400 transform transition-all duration-500 ease-in-out ${
+              isOpen ? "rotate-180 text-[#00736C]" : "rotate-0 group-hover:text-black"
             }`}
           />
         </div>
-        <span className="text-gray-800 font-medium text-sm md:text-sm font-gintoNord uppercase tracking-wide">
-          {question}
-        </span>
       </button>
       <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+        className={`overflow-hidden transition-all duration-500 ease-in-out ${
+          isOpen ? "max-h-[500px] opacity-100 mb-8" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="pb-6 pl-9 text-gray-900 font-gintoNormal text-sm md:text-sm leading-relaxed">
+        <div className="text-gray-600 font-gintoNormal text-sm leading-relaxed max-w-3xl">
           {answer}
         </div>
       </div>
@@ -109,25 +109,22 @@ export default function Faq() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div>
+    {/* <div className="bg-white"> */}
       {/* Header */}
-      <div className="bg text-white py-10">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h1 className="text-4xl md:text-5xl font-light mb-3 font-arizona tracking-wide">
-            FAQ
-          </h1>
-          <p className="text-emerald-100 font-gintoNormal text-sm">
-            Your questions, answered.
-          </p>
-        </div>
+      <div className="max-w-7xl mx-auto px-6 pt-24 pb-12 text-center">
+        <h2 className="text-3xl md:text-4xl font-light mb-4 font-arizona tracking-wide text-white">
+          Common Questions
+        </h2>
+        <p className="text-gray-500 font-gintoNormal text-[10px] uppercase tracking-[0.2em]">
+          Refining your engagement ring journey
+        </p>
       </div>
 
       {/* FAQ Content */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="rounded-lg shadow-sm">
-          {/* {loading && <p>Loading FAQs...</p>}
-          {error && <p className="text-red-500">Error: {error}</p>} */}
-          {faqs.length === 0 && <p>No FAQs available.</p>}
+      <div className="max-w-5xl mx-auto px-6 pb-24">
+        <div className="divide-y divide-gray-100">
+          {faqs.length === 0 && <p className="text-center py-12 text-gray-400">No FAQs available.</p>}
           {faqs.map((item, index) => (
             <FAQItem
               key={index}
