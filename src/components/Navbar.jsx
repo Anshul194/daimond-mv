@@ -21,6 +21,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "@/store/slices/categorySlice";
 import axiosInstance from "@/axiosConfig/axiosInstance";
 import ArdorLogo from "@/public/image/cropped-website-logo-1.png";
+import TransitionLink from "./TransitionLink";
 
 import { gsap } from "gsap";
 import { useRef } from "react";
@@ -489,7 +490,7 @@ const Navbar = () => {
                     }
                   }}
                 >
-                  <a
+                  <TransitionLink
                     href={
                       item.name === "FINE JEWELLERY"
                         ? "/fine-jewellery-807?finejewellery=6874b552f2ed2bebef46ccec"
@@ -505,7 +506,7 @@ const Navbar = () => {
                   >
                     {item.name}
                     <span className="absolute -bottom-0.5 left-0 h-[1px] w-0 bg-[#00736C] transition-all duration-300 group-hover:w-full" />
-                  </a>
+                  </TransitionLink>
                 </div>
               ))}
 
@@ -699,13 +700,13 @@ const Navbar = () => {
                           return null;
                         }
                         return (
-                          <a
+                          <TransitionLink
                             key={index}
                             href={`/fine-jewellery-807?finejewellery=${item._id}`}
                             className="block capitalize text-black hover:text-[#00736C] text-sm font-gintoNormal transition-colors duration-200"
                           >
                             {item.name}
-                          </a>
+                          </TransitionLink>
                         );
                       })}
                     </div>
@@ -716,7 +717,7 @@ const Navbar = () => {
                 <div className="flex-1">
                   <div className="grid grid-cols-2 gap-4 max-w-full">
                     {/* Statement Rings */}
-                    <a
+                    <TransitionLink
                       href={`/fine-jewellery-807?finejewellery=${
                         fineJewellerSubCategories.filter((e) =>
                           e.name.includes("Statement")
@@ -743,10 +744,10 @@ const Navbar = () => {
                           </div>
                         </div>
                       </div>
-                    </a>
+                    </TransitionLink>
 
                     {/* Stacker Rings */}
-                    <a
+                    <TransitionLink
                       href={`/fine-jewellery-807?finejewellery=${
                         fineJewellerSubCategories.filter((e) =>
                           e.name.includes("Stacker")
@@ -773,10 +774,10 @@ const Navbar = () => {
                           </div>
                         </div>
                       </div>
-                    </a>
+                    </TransitionLink>
 
                     {/* Minimal Rings */}
-                    <a
+                    <TransitionLink
                       href={
                         `/fine-jewellery-807?finejewellery=${
                           fineJewellerSubCategories.filter((e) =>
@@ -806,10 +807,10 @@ const Navbar = () => {
                           </div>
                         </div>
                       </div>
-                    </a>
+                    </TransitionLink>
 
                     {/* Initial Signet Ring */}
-                    <a href={`/fine-jewellery-807/initial-signet-ring-317`}>
+                    <TransitionLink href={`/fine-jewellery-807/initial-signet-ring-317`}>
                       <div className="group cursor-pointer">
                         <div className="relative overflow-hidden lg:mb-2 h-44">
                           <h3 className="text-black text-sm font-medium tracking-wide group-hover:text-[#00736C] font-gintoNord transition-colors duration-200">
@@ -830,7 +831,7 @@ const Navbar = () => {
                           </div>
                         </div>
                       </div>
-                    </a>
+                    </TransitionLink>
                   </div>
                 </div>
               </div>
@@ -859,7 +860,7 @@ const Navbar = () => {
                   BUILD A RING
                 </h3>
                 <div className="space-y-4">
-                  <a
+                  <TransitionLink
                     href="/engagement-230"
                     className="flex items-center font-gintoNord text-black hover:text-[#00736C] text-sm transition-colors duration-200"
                   >
@@ -867,7 +868,7 @@ const Navbar = () => {
                       <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                     </div>
                     Browse Settings
-                  </a>
+                  </TransitionLink>
                 </div>
 
                 <Link href="/new-arrivals">
@@ -895,7 +896,7 @@ const Navbar = () => {
                 <div className="space-y-4">
                   {openMenuData &&
                     openMenuData["METAL TYPE"]?.map((metal, index) => (
-                      <a
+                      <TransitionLink
                         key={index}
                         href={`/engagement-230?metal=${metal.value.toLowerCase()}`}
                         className="flex gap-2 items-center text-black hover:text-[#00736C] text-sm transition-colors duration-200 font-gintoNormal"
@@ -907,7 +908,7 @@ const Navbar = () => {
                           alt={metal.value}
                         />
                         {metal.value}
-                      </a>
+                      </TransitionLink>
                     ))}
                 </div>
               </div>
@@ -920,7 +921,7 @@ const Navbar = () => {
                 <div className="space-y-4">
                   {openMenuData &&
                     openMenuData["Style"]?.map((style, index) => (
-                      <a
+                      <TransitionLink
                         key={index}
                         href={`/engagement-230?style=${style.value.toLowerCase()}`}
                         className="flex gap-4 items-center text-black hover:text-[#00736C] text-sm transition-colors duration-200 font-gintoNormal"
@@ -933,7 +934,7 @@ const Navbar = () => {
                           className="object-contain brightness-0"
                         />
                         {style.value}
-                      </a>
+                      </TransitionLink>
                     ))}
                 </div>
               </div>
@@ -1008,21 +1009,21 @@ const Navbar = () => {
                     WOMEN
                   </h3>
                   <div className="space-y-4">
-                    <a
+                    <TransitionLink
                       href="/wedding-rings-873?gender=woman"
                       className="block text-black hover:text-[#00736C] font-gintoNormal text-sm transition-colors duration-200"
                     >
                       All Women's Wedding Rings
-                    </a>
+                    </TransitionLink>
                     {openMenuData &&
                       openMenuData["Style"]?.map((band, index) => (
-                        <a
+                        <TransitionLink
                           key={index}
                           href={`/wedding-rings-873?gender=woman&style=${band.value.toLowerCase()}`}
                           className="block text-black hover:text-[#00736C] text-sm font-gintoNormal transition-colors duration-200"
                         >
                           {band.value} Women's Wedding Rings
-                        </a>
+                        </TransitionLink>
                       ))}
                   </div>
                 </div>

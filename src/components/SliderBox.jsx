@@ -9,7 +9,7 @@ import {
   fetchProductById,
 } from "../store/slices/product";
 import ProductModal from "../../src/components/modal/Modal";
-import Link from "next/link";
+import TransitionLink from "./TransitionLink";
 import Image from "next/image";
 import { gsap } from "gsap";
 
@@ -142,11 +142,9 @@ const SliderBox = ({
         // console.log("Style clicked:", item);
         const attributeName = item.title || "Style"; // Adjust based on your data structure
         const attributeValue = item.value || item.name;
-        router.push(
-          `/products/rings?attributeName=${encodeURIComponent(
-            attributeName
-          )}&attributeValue=${encodeURIComponent(attributeValue)}`
-        );
+        const url = `/products/rings?attributeName=${encodeURIComponent(attributeName)}&attributeValue=${encodeURIComponent(attributeValue)}`;
+        window.dispatchEvent(new Event("__page-transition-start"));
+        setTimeout(() => router.push(url), 420);
       }
     },
     [type, items, dispatch, router]
@@ -262,7 +260,7 @@ const SliderBox = ({
               const itemData = getItemData(item);
 
               return (
-                <Link
+                <TransitionLink
                   key={itemData.id || index}
                   href={
                     type === "products"
@@ -328,7 +326,7 @@ const SliderBox = ({
                       </svg>
                     </div>
                   </div>
-                </Link>
+                </TransitionLink>
               );
             })}
           </div>

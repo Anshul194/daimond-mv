@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import TransitionLink from "./TransitionLink";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 
@@ -74,7 +75,7 @@ const RingsGrid = ({
     <div className="max-w-full 2xl:max-w-[1700px] mx-auto">
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 space-y-4 mb-12">
         {rings?.map((ring, index) => (
-          <Link
+          <TransitionLink
             href={
               pathname.includes("new-arrivals") ||
               pathname.includes("shop-all-jewelry")
@@ -176,7 +177,7 @@ const RingsGrid = ({
                 </p>
               </div>
             </div>
-          </Link>
+          </TransitionLink>
         ))}
       </div>
 

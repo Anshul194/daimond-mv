@@ -778,6 +778,7 @@ const ProductModal = ({ onClose, loading }) => {
       toast.error("Failed to load product data");
     } finally {
       setIsLoadingProduct(false);
+      window.dispatchEvent(new Event("__page-data-ready"));
     }
   };
   useEffect(() => {
