@@ -7,7 +7,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const Reviews = () => {
+const Reviews = ({ isProductReview = false, productId = null }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -18,13 +18,13 @@ const Reviews = () => {
   const [showForm, setShowForm] = useState(false);
   const [fetchTrigger, setFetchTrigger] = useState(0);
 
-  const sliderRef    = useRef(null);
-  const cardRefs     = useRef([]);
-  const sectionRef   = useRef(null);
-  const headingRef   = useRef(null);
-  const subTextRef   = useRef(null);
+  const sliderRef = useRef(null);
+  const cardRefs = useRef([]);
+  const sectionRef = useRef(null);
+  const headingRef = useRef(null);
+  const subTextRef = useRef(null);
   const sliderWrapRef = useRef(null);
-  const navBtnRefs   = useRef([]);
+  const navBtnRefs = useRef([]);
 
   /* 
   const reviews = [
@@ -78,10 +78,19 @@ const Reviews = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await fetch('/api/review?limit=20&isWebsiteReview=true');
+        let url = '/api/review?limit=20';
+        if (isProductReview && productId) {
+          url += `&product=${productId}`;
+        } else {
+          url += '&isWebsiteReview=true';
+        }
+
+        const response = await fetch(url);
         const data = await response.json();
-        
+
         if (data.success && data.data.results) {
+          const stats = data.data.stats || { averageRating: 5.0, totalReviews: data.data.totalDocuments };
+
           const dynamicReviews = data.data.results.map(rev => ({
             type: 'review',
             platform: 'Google',
@@ -89,10 +98,18 @@ const Reviews = () => {
             rating: rev.rating,
             timeAgo: formatTimeAgo(rev.createdAt),
             review: rev.comment,
-            avatar: rev.user?.profilepic || rev.user?.avatar || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y', // Fallback avatar
+            avatar: rev.user?.profilepic || rev.user?.avatar || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y',
           }));
 
-          setReviews(prev => [prev[0], ...dynamicReviews]);
+          setReviews([
+            {
+              type: 'summary',
+              googleRating: stats.averageRating.toFixed(1),
+              googleReviews: `${stats.totalReviews} reviews`,
+              trustpilotRating: stats.averageRating.toFixed(1),
+            },
+            ...dynamicReviews
+          ]);
         }
       } catch (error) {
         console.error('Error fetching reviews:', error);
@@ -105,10 +122,10 @@ const Reviews = () => {
   // ── Responsive items-per-view ──
   const updateItemsPerView = () => {
     const w = window.innerWidth;
-    if (w < 768)       setItemsPerView(1);
+    if (w < 768) setItemsPerView(1);
     else if (w < 1024) setItemsPerView(2);
     else if (w < 1280) setItemsPerView(3);
-    else               setItemsPerView(4);
+    else setItemsPerView(4);
   };
 
   useEffect(() => {
@@ -123,7 +140,7 @@ const Reviews = () => {
   const slideWidth = 100 / itemsPerView;
 
   const nextSlide = () => { if (currentSlide < maxSlides) setCurrentSlide(p => p + 1); };
-  const prevSlide = () => { if (currentSlide > 0)         setCurrentSlide(p => p - 1); };
+  const prevSlide = () => { if (currentSlide > 0) setCurrentSlide(p => p - 1); };
 
   // ── Max height logic ──
   const updateMaxHeight = () => {
@@ -148,23 +165,23 @@ const Reviews = () => {
     text.length <= max ? text : text.substring(0, max).trim() + '...';
 
   // ── Drag / touch handlers ──
-  const handleMouseDown  = (e) => { setIsDragging(true);  setStartX(e.pageX - sliderRef.current.offsetLeft); setScrollLeft(currentSlide); e.preventDefault(); };
-  const handleMouseMove  = (e) => { if (!isDragging) return; e.preventDefault(); const x = e.pageX - sliderRef.current.offsetLeft; const walk = (x - startX) * 0.5; setCurrentSlide(Math.max(0, Math.min(maxSlides, Math.round(scrollLeft - walk / 100)))); };
-  const handleMouseUp    = () => setIsDragging(false);
+  const handleMouseDown = (e) => { setIsDragging(true); setStartX(e.pageX - sliderRef.current.offsetLeft); setScrollLeft(currentSlide); e.preventDefault(); };
+  const handleMouseMove = (e) => { if (!isDragging) return; e.preventDefault(); const x = e.pageX - sliderRef.current.offsetLeft; const walk = (x - startX) * 0.5; setCurrentSlide(Math.max(0, Math.min(maxSlides, Math.round(scrollLeft - walk / 100)))); };
+  const handleMouseUp = () => setIsDragging(false);
   const handleMouseLeave = () => setIsDragging(false);
   const handleTouchStart = (e) => { setIsDragging(true); setStartX(e.touches[0].clientX); setScrollLeft(currentSlide); };
-  const handleTouchMove  = (e) => { if (!isDragging) return; const x = e.touches[0].clientX; const walk = (x - startX) * 0.5; setCurrentSlide(Math.max(0, Math.min(maxSlides, Math.round(scrollLeft - walk / 100)))); };
-  const handleTouchEnd   = () => setIsDragging(false);
+  const handleTouchMove = (e) => { if (!isDragging) return; const x = e.touches[0].clientX; const walk = (x - startX) * 0.5; setCurrentSlide(Math.max(0, Math.min(maxSlides, Math.round(scrollLeft - walk / 100)))); };
+  const handleTouchEnd = () => setIsDragging(false);
 
   // ── GSAP Animations ──
   useEffect(() => {
     const ctx = gsap.context(() => {
       // Immediately set all animated elements to hidden FROM state
-      gsap.set(headingRef.current,   { y: 30, opacity: 0, filter: 'blur(8px)' });
-      gsap.set(subTextRef.current,   { y: 20, opacity: 0, filter: 'blur(6px)' });
-      gsap.set(sliderWrapRef.current,{ y: 50, opacity: 0 });
+      gsap.set(headingRef.current, { y: 30, opacity: 0, filter: 'blur(8px)' });
+      gsap.set(subTextRef.current, { y: 20, opacity: 0, filter: 'blur(6px)' });
+      gsap.set(sliderWrapRef.current, { y: 50, opacity: 0 });
       const visibleCards = cardRefs.current.filter(Boolean);
-      gsap.set(visibleCards,         { y: 40, opacity: 0, filter: 'blur(6px)' });
+      gsap.set(visibleCards, { y: 40, opacity: 0, filter: 'blur(6px)' });
       gsap.set(navBtnRefs.current.filter(Boolean), { scale: 0.7, opacity: 0 });
 
       // ── Header timeline ──
@@ -225,7 +242,7 @@ const Reviews = () => {
     <div className="inline-flex items-center gap-2">
       <div className="w-6 h-6 bg-[#004643] rounded flex items-center justify-center">
         <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
         </svg>
       </div>
       <span className="text-[#004643] font-semibold text-lg">Trustpilot</span>
@@ -235,8 +252,8 @@ const Reviews = () => {
   const StarRating = ({ rating }) => (
     <div className="inline-flex items-center gap-0.5">
       {[...Array(5)].map((_, i) => (
-        <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 24 24">
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        <svg key={i} className={`w-4 h-4 ${i < Math.round(rating) ? 'text-yellow-400 fill-current' : 'text-gray-300 fill-current'}`} viewBox="0 0 24 24">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
         </svg>
       ))}
     </div>
@@ -299,14 +316,14 @@ const Reviews = () => {
                             <div className="mt-3 flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <div className="text-2xl font-bold text-gray-900 mb-1">{item.googleRating}</div>
-                                <StarRating rating={5} />
+                                <StarRating rating={item.googleRating} />
                               </div>
                               <div className="text-sm text-gray-600 mt-1">{item.googleReviews}</div>
                             </div>
                           </div>
                         </div>
                         <div className="space-y-3">
-                          <button 
+                          <button
                             onClick={() => setShowForm(true)}
                             className="w-full bg-[#004643] text-white py-3 px-4 text-[10px] font-semibold uppercase tracking-wide hover:bg-[#004643]/90 transition-colors"
                           >
@@ -355,7 +372,8 @@ const Reviews = () => {
 
           {showForm && (
             <div className="absolute inset-0 bg-white z-[60] flex items-center justify-center p-4">
-              <ReviewForm 
+              <ReviewForm
+                productId={productId}
                 onCancel={() => setShowForm(false)}
                 onSuccess={() => {
                   setShowForm(false);

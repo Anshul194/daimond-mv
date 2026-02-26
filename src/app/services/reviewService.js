@@ -62,7 +62,12 @@ class ReviewService {
         limitNum
       );
 
-      return reviews;
+      const stats = await this.reviewRepo.getAggregateStats(filterConditions);
+
+      return {
+        ...reviews,
+        stats
+      };
     } catch (error) {
       console.error("Error in getAllReviews:", error.message);
       throw new AppError("Cannot fetch reviews", StatusCodes.INTERNAL_SERVER_ERROR);

@@ -6,7 +6,7 @@ import axiosInstance from '@/axiosConfig/axiosInstance';
 import { useSelector } from 'react-redux';
 import Link from 'next/link';
 
-const ReviewForm = ({ onSuccess, onCancel }) => {
+const ReviewForm = ({ onSuccess, onCancel, productId = null }) => {
   const { isAuthenticated } = useSelector((state) => state.auth);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -20,15 +20,15 @@ const ReviewForm = ({ onSuccess, onCancel }) => {
         <h2 className="text-xl font-semibold mb-4 text-[#004643]">Please Sign In</h2>
         <p className="text-gray-600 mb-6">You need to be logged in to share your experience with us.</p>
         <div className="flex gap-3">
-          <button 
+          <button
             type="button"
-            onClick={onCancel} 
+            onClick={onCancel}
             className="flex-1 border border-[#004643] text-[#004643] py-2 rounded font-semibold hover:bg-gray-50"
           >
             Cancel
           </button>
-          <Link 
-            href="/signin" 
+          <Link
+            href="/signin"
             className="flex-1 bg-[#004643] text-white py-2 rounded font-semibold hover:bg-[#003633] flex items-center justify-center"
           >
             Sign In
@@ -62,8 +62,14 @@ const ReviewForm = ({ onSuccess, onCancel }) => {
       const formData = new FormData();
       formData.append('rating', rating);
       formData.append('comment', comment);
-      formData.append('isWebsiteReview', true);
-      
+
+      if (productId) {
+        formData.append('product', productId);
+        formData.append('isWebsiteReview', false);
+      } else {
+        formData.append('isWebsiteReview', true);
+      }
+
       images.forEach((image) => {
         formData.append('images', image);
       });
@@ -89,7 +95,7 @@ const ReviewForm = ({ onSuccess, onCancel }) => {
   return (
     <div className="bg-white p-6 max-w-md mx-auto rounded-lg">
       <h2 className="text-xl font-semibold mb-4 text-[#004643]">Share Your Experience</h2>
-      
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
@@ -102,9 +108,8 @@ const ReviewForm = ({ onSuccess, onCancel }) => {
                 className="focus:outline-none"
               >
                 <Star
-                  className={`w-8 h-8 ${
-                    star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-                  }`}
+                  className={`w-8 h-8 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                    }`}
                 />
               </button>
             ))}
@@ -127,22 +132,22 @@ const ReviewForm = ({ onSuccess, onCancel }) => {
           <label className="block text-sm font-medium text-gray-700 mb-1">Photos (Optional)</label>
           <div className="flex flex-wrap gap-2">
             {images.map((image, index) => {
-                let url = "";
-                try {
-                    url = URL.createObjectURL(image);
-                } catch (e) {}
-                return (
-                    <div key={index} className="relative w-16 h-16 border rounded bg-gray-50 flex items-center justify-center overflow-hidden">
-                        <img src={url} alt="preview" className="object-cover w-full h-full" />
-                        <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-0.5"
-                        >
-                        <X className="w-3 h-3" />
-                        </button>
-                    </div>
-                )
+              let url = "";
+              try {
+                url = URL.createObjectURL(image);
+              } catch (e) { }
+              return (
+                <div key={index} className="relative w-16 h-16 border rounded bg-gray-50 flex items-center justify-center overflow-hidden">
+                  <img src={url} alt="preview" className="object-cover w-full h-full" />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-0.5"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              )
             })}
             <label className="w-16 h-16 border-2 border-dashed border-gray-300 rounded flex flex-col items-center justify-center cursor-pointer hover:border-[#004643] text-gray-400 hover:text-[#004643]">
               <Upload className="w-6 h-6" />
