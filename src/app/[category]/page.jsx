@@ -132,7 +132,7 @@ const RingsBuild = ({ props }) => {
       setCategoryId(categoryID);
 
       if (categoryID === "6854fd3b5e53f236d75c07c1") {
-        dispatch(
+        await dispatch(
           fetchProductsByCategory({
             categoryId: categoryID,
             gender: gender ? gender : "both",
@@ -147,7 +147,7 @@ const RingsBuild = ({ props }) => {
         setCurrentCategoryData(subcategories.data.body.data);
       } else {
         setCurrentCategoryData(findCategory);
-        dispatch(
+        await dispatch(
           fetchProductsByCategory({
             categoryId: categoryID,
             gender: gender ? gender : "both",
@@ -156,6 +156,9 @@ const RingsBuild = ({ props }) => {
         );
       }
     }
+
+    // Signal that data is ready for the transition curtain
+    window.dispatchEvent(new Event("__page-data-ready"));
   };
 
   useEffect(() => {
