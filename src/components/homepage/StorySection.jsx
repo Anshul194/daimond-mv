@@ -98,7 +98,7 @@ export default function StorySection() {
     return (
         <section
             ref={sectionRef}
-            className="relative w-full h-screen flex items-center justify-center overflow-visible my-20"
+            className="relative w-full h-screen flex items-center justify-center overflow-visible"
         >
             {/* Expanding wrapper */}
             <div
