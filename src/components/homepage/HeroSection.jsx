@@ -5,6 +5,9 @@ import Link from "next/link";
 import { gsap } from "gsap";
 
 const HeroSection = () => {
+  const [banners, setBanners] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+
   const heroRef = useRef(null);
   const textRef = useRef(null);
   const leftImageRef = useRef(null);
@@ -12,9 +15,28 @@ const HeroSection = () => {
   const ctaRef = useRef(null);
 
   useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const response = await fetch('/api/banner?status=active');
+        const data = await response.json();
+        if (data.success && data.data.docs.length > 0) {
+          setBanners(data.data.docs);
+        }
+      } catch (error) {
+        console.error("Failed to fetch banners:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBanners();
+  }, []);
+
+  useEffect(() => {
+    if (loading) return;
+
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ 
-        defaults: { ease: "expo.out", duration: 2.5 } 
+      const tl = gsap.timeline({
+        defaults: { ease: "expo.out", duration: 2.5 }
       });
 
       // Split Screen Luxury Reveal
@@ -41,7 +63,7 @@ const HeroSection = () => {
       // Subtle mouse-tracking parallax for PC
       const handleMouseMove = (e) => {
         if (window.innerWidth < 1024) return;
-        
+
         const { clientX, clientY } = e;
         const xPos = (clientX / window.innerWidth - 0.5) * 20;
         const yPos = (clientY / window.innerHeight - 0.5) * 20;
@@ -70,6 +92,22 @@ const HeroSection = () => {
     return () => ctx.revert();
   }, []);
 
+  if (loading) return <div className="w-full h-[85vh] lg:h-[90vh] bg-black/5 flex items-center justify-center">
+    <div className="w-10 h-10 border-4 border-[#00736C] border-t-transparent rounded-full animate-spin"></div>
+  </div>;
+
+  const currentBanner = banners.length > 0 ? banners[0] : {
+    title: "Make a <br /> <span class=\"italic\">statement.</span>",
+    subtitle: "Exquisite engagement rings crafted for your forever.",
+    image: "/images/left-banner.webp",
+    rightImage: "/images/right-banner.webp",
+    label: "9,642 Trusted Reviews",
+    buttonPrimaryText: "EXPLORE ENGAGEMENT",
+    buttonPrimaryLink: "/engagement-rings/build-ring",
+    buttonSecondaryText: "JEWELRY",
+    buttonSecondaryLink: "/shop-all-jewelry"
+  };
+
   return (
     <div ref={heroRef} className="w-full h-[85vh] lg:h-[90vh] flex overflow-hidden">
       {/* Left Panel - Main Hero */}
@@ -77,7 +115,7 @@ const HeroSection = () => {
         {/* Background Image */}
         <div ref={leftImageRef} className="absolute inset-0 w-full h-full">
           <Image
-            src="/images/left-banner.webp"
+            src={currentBanner.image}
             alt="Engagement Ring Hero"
             fill
             className="object-cover scale-105"
@@ -88,7 +126,7 @@ const HeroSection = () => {
         {/* Content */}
         <div className="relative z-20 flex flex-col justify-end lg:justify-center h-full px-8 pb-12 md:pb-20 lg:pb-0 md:px-12 lg:px-20 max-w-2xl bg-gradient-to-t lg:bg-gradient-to-r from-black/60 lg:from-black/50 to-transparent reveal-content">
           <div className="mb-6">
-            {/* Google Reviews Badge */}
+            {/* Google Reviews Badge - Static */}
             <div className="mb-6 inline-block">
               <div className="inline-flex items-center bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
                 <div className="flex items-center gap-2">
@@ -112,19 +150,20 @@ const HeroSection = () => {
               </div>
             </div>
 
-            {/* Main Heading */}
-            <h1 className="text-4xl md:text-5xl lg:text-7xl !font-light font-arizona !text-white leading-[1.1] mb-4 drop-shadow-lg">
-              Make a <br />
-              <span className="italic">statement.</span>
+            {/* Main Heading - Static */}
+            <h1
+              className="text-4xl md:text-5xl lg:text-7xl !font-light font-arizona !text-white leading-[1.1] mb-4 drop-shadow-lg"
+            >
+              Make a <br /> <span className="italic">statement.</span>
             </h1>
 
-            {/* Subheading */}
+            {/* Subheading - Static */}
             <p className="text-lg md:text-xl !text-white/90 font-gintoNormal max-w-sm font-light leading-relaxed drop-shadow-md">
               Exquisite engagement rings crafted for your forever.
             </p>
           </div>
 
-          {/* CTA Buttons */}
+          {/* CTA Buttons - Static */}
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/engagement-rings/build-ring">
               <button className="bg-[#00736C] w-full !h-[65px] sm:w-[200px] hover:bg-[#005F5B] text-white py-4 px-8 text-xs font-semibold tracking-widest transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl uppercase">
@@ -145,7 +184,7 @@ const HeroSection = () => {
         {/* Background Image */}
         <div ref={rightImageRef} className="absolute inset-0 w-full h-full">
           <Image
-            src="/images/right-banner.webp"
+            src={currentBanner.rightImage || "/images/right-banner.webp"}
             alt="Ring Collection"
             fill
             className="object-cover"

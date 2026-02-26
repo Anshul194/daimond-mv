@@ -48,7 +48,7 @@ class ReviewRepository extends CrudRepository {
     try {
       return await Review.findOne({ _id: id, deletedAt: null })
         .populate('user', 'name email avatar')
-        // .populate('product', 'name slug price images');
+      // .populate('product', 'name slug price images');
     } catch (error) {
       console.error('ReviewRepo findById error:', error);
       throw error;
@@ -86,26 +86,26 @@ class ReviewRepository extends CrudRepository {
   //   }
   // }
 
-async update(id, data) {
-  try {
-    const review = await Review.findById(id);
-    if (!review) return null;
+  async update(id, data) {
+    try {
+      const review = await Review.findById(id);
+      if (!review) return null;
 
-    review.set(data);
-    await review.save();
+      review.set(data);
+      await review.save();
 
-    console.log('🔧 Review updated successfully:', review);
-    
+      console.log('🔧 Review updated successfully:', review);
 
-    const populated = await Review.findById(id)
-      .populate('user', 'name email avatar')
-      .populate('product', 'name slug price images');
-    return populated;
-  } catch (err) {
-    console.error('ReviewRepo update error:', err);
-    throw err;
+
+      const populated = await Review.findById(id)
+        .populate('user', 'name email avatar')
+        .populate('product', 'name slug price images');
+      return populated;
+    } catch (err) {
+      console.error('ReviewRepo update error:', err);
+      throw err;
+    }
   }
-}
 
 
 
@@ -175,6 +175,32 @@ async update(id, data) {
       };
     } catch (error) {
       console.error('ReviewRepo findByUser error:', error);
+      throw error;
+    }
+  }
+
+  async getAggregateStats(filterConditions) {
+    try {
+      const stats = await Review.aggregate([
+        { $match: { ...filterConditions, deletedAt: null } },
+        {
+          $group: {
+            _id: null,
+            averageRating: { $avg: "$rating" },
+            totalReviews: { $sum: 1 }
+          }
+        }
+      ]);
+
+      return stats.length > 0 ? {
+        averageRating: parseFloat(stats[0].averageRating.toFixed(1)),
+        totalReviews: stats[0].totalReviews
+      } : {
+        averageRating: 0,
+        totalReviews: 0
+      };
+    } catch (error) {
+      console.error('ReviewRepo getAggregateStats error:', error);
       throw error;
     }
   }
