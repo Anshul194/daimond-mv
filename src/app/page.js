@@ -1,8 +1,9 @@
 "use client";
-import GreenBoxText from "@/components/homepage/GreenBoxText";
 import HeroSection from "@/components/homepage/HeroSection";
-import VideoSection from "@/components/homepage/VideoSection";
+import GreenBoxText from "@/components/homepage/GreenBoxText";
 import SliderBox from "@/components/SliderBox";
+import StorySection from "@/components/homepage/StorySection";
+// import VideoSection from "@/components/homepage/VideoSection";
 // import {
 //   ringStyles,
 //   ringStylesTwo,
@@ -29,7 +30,7 @@ export default function Home() {
         subtitle="Discover our signature setting styles, including solitaire, trilogy, halo, toi et moi and bezel."
       />
       <GreenBoxText />
-      <VideoSection />
+      <StorySection />
 
       <SliderBox
         type="products"
