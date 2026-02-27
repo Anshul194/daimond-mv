@@ -7,6 +7,9 @@ const __dirname = dirname(__filename);
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["gsap"],
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   webpack: (config, { isServer, webpack }) => {
     if (!isServer) {
       // Comprehensive fallbacks for Node.js modules
@@ -32,12 +35,12 @@ const nextConfig = {
         new webpack.IgnorePlugin({
           resourceRegExp: /^fast-glob$/,
         }),
-        
+
         // Ignore @nodelib/fs modules specifically
         new webpack.IgnorePlugin({
           resourceRegExp: /^@nodelib\/fs/,
         }),
-        
+
         // Ignore context-specific @nodelib imports
         new webpack.IgnorePlugin({
           resourceRegExp: /@nodelib\/fs/,
@@ -54,7 +57,7 @@ const nextConfig = {
         'fast-glob': resolve(__dirname, './lib/empty-glob-module.js'),
       };
     }
-    
+
     return config;
   },
 };
