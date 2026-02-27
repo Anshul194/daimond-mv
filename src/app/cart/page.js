@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchCart, removeItemFromCart } from "@/store/slices/cart";
 import Link from "next/link";
 import Image from "next/image";
+import { getImageUrl } from "@/utils/image";
 
 const currencySymbol = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "₹";
 
@@ -79,7 +80,7 @@ const Cart = () => {
                   {/* Product Image - Centered */}
                   <div className="flex justify-center mb-4">
                     <div className="w-24 h-24 bg-gray-100 rounded-md flex items-center justify-center text-3xl">
-                      <img src={item.pid_image} className="object-cover" />
+                      <img src={getImageUrl(item.pid_image)} alt={item.pid_name || "product"} className="object-cover" />
                     </div>
                   </div>
 
@@ -132,7 +133,7 @@ const Cart = () => {
                     <div className="w-full flex flex-col gap-4 ">
                       <div className="flex items-center gap-4">
                         <div className="w-24 h-24 bg-gray-100  flex items-center justify-center text-2xl flex-shrink-0">
-                          <img src={item.pid_image} className="object-cover" />
+                          <img src={getImageUrl(item.pid_image)} alt={item.pid_name || "product"} className="object-cover" />
                         </div>
 
                         {/* Product Details */}
@@ -291,8 +292,8 @@ const Cart = () => {
               <button
                 disabled={!agreedToTerms}
                 className={`w-full py-3 lg:py-4 rounded-md font-medium text-sm tracking-wide transition-colors mb-4 ${agreedToTerms
-                    ? "bg-green-100 text-gray-800 hover:bg-green-200"
-                    : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  ? "bg-green-100 text-gray-800 hover:bg-green-200"
+                  : "bg-gray-100 text-gray-400 cursor-not-allowed"
                   }`}
               >
                 🔒 CHECKOUT | {currencySymbol}

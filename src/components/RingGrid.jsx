@@ -4,6 +4,7 @@ import Link from "next/link";
 import TransitionLink from "./TransitionLink";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
+import { getImageUrl } from "@/utils/image";
 
 const RingsGrid = ({
   rings,
@@ -78,7 +79,7 @@ const RingsGrid = ({
           <TransitionLink
             href={
               pathname.includes("new-arrivals") ||
-              pathname.includes("shop-all-jewelry")
+                pathname.includes("shop-all-jewelry")
                 ? `/${ring?.category_id?.slug}/${ring.slug}`
                 : `${pathname}/${ring.slug}`
             }
@@ -94,10 +95,10 @@ const RingsGrid = ({
                 <img
                   src={
                     hoveredRing === index
-                      ? getSliderImages(index)?.[getCurrentImageIndex(index)]
-                      : ring?.image?.[0]
+                      ? getImageUrl(getSliderImages(index)?.[getCurrentImageIndex(index)])
+                      : getImageUrl(ring?.image?.[0])
                   }
-                  alt={ring?.name}
+                  alt={ring?.name || "product"}
                   className="w-full h-full object-cover transition-all duration-500 ease-in-out transform"
                   style={{
                     opacity: hoveredRing === index ? 1 : 1,
@@ -108,11 +109,10 @@ const RingsGrid = ({
 
                 {/* Slider controls - only show when hovered with smooth fade in */}
                 <div
-                  className={`absolute inset-0 transition-opacity duration-300 ${
-                    hoveredRing === index
+                  className={`absolute inset-0 transition-opacity duration-300 ${hoveredRing === index
                       ? "opacity-100"
                       : "opacity-0 pointer-events-none"
-                  }`}
+                    }`}
                 >
                   <button
                     className="absolute cursor-pointer left-2 top-1/2 transform -translate-y-1/2 rounded-full p-2 transition-all duration-200 hover:scale-110"
@@ -157,11 +157,10 @@ const RingsGrid = ({
                     {getSliderImages(index)?.map((_, imgIndex) => (
                       <div
                         key={imgIndex}
-                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                          getCurrentImageIndex(index) === imgIndex
+                        className={`w-2 h-2 rounded-full transition-all duration-300 ${getCurrentImageIndex(index) === imgIndex
                             ? "bg-white scale-125"
                             : "bg-white/50 scale-100"
-                        }`}
+                          }`}
                       />
                     ))}
                   </div>

@@ -14,7 +14,7 @@ export default function TestReviewsPage() {
                     <br />
                     <code>isProductReview=true</code>
                     <br />
-                    <code>productId="{testProductId}"</code>
+                    <code>productId=&quot;{testProductId}&quot;</code>
                 </p>
                 <div className="mt-4 p-4 bg-blue-50 text-blue-800 rounded">
                     <strong>Note:</strong> You will only see reviews here that were specifically tagged with this ID.

@@ -20,6 +20,7 @@ import { clearState, resetData } from "@/store/slices/product";
 import { fetchSizes } from "@/store/slices/size";
 import { toast } from "react-toastify";
 import { ArrowLeft, ChevronDown } from "lucide-react";
+import { getImageUrl } from "@/utils/image";
 
 const currencySymbol = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "₹";
 // Image Slider Component
@@ -116,8 +117,8 @@ const ImageSlider = ({ images, currentIndex, onIndexChange }) => {
           >
             <div className="w-full h-full overflow-hidden shadow-lg bg-white">
               <img
-                src={images[getPrevIndex()]}
-                alt={images[getPrevIndex()]?.alt}
+                src={getImageUrl(images[getPrevIndex()])}
+                alt="previous product image"
                 className="w-full h-full object-cover"
                 draggable={false}
               />
@@ -137,8 +138,8 @@ const ImageSlider = ({ images, currentIndex, onIndexChange }) => {
           >
             <div className="w-full h-full overflow-hidden shadow-2xl bg-white">
               <img
-                src={images[currentIndex]}
-                alt={images[currentIndex]?.alt}
+                src={getImageUrl(images[currentIndex])}
+                alt="current product image"
                 className="w-full h-full object-cover"
                 draggable={false}
               />
@@ -159,8 +160,8 @@ const ImageSlider = ({ images, currentIndex, onIndexChange }) => {
           >
             <div className="w-full h-full overflow-hidden shadow-lg bg-white">
               <img
-                src={images[getNextIndex()]}
-                alt={images[getNextIndex()]?.alt}
+                src={getImageUrl(images[getNextIndex()])}
+                alt="next product image"
                 className="w-full h-full object-cover"
                 draggable={false}
               />
