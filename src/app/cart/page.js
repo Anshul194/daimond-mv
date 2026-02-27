@@ -70,156 +70,156 @@ const Cart = () => {
             // Create a unique key combining pid_id with selected options and diamond
             const uniqueKey = `${item.pid_id}-${item.selectedOptions?.metalType?.color?._id || item.selectedOptions?.metalType || 'no-metal'}-${item.selectedOptions?.ringSize?.size?._id || item.selectedOptions?.ringSize || 'no-size'}-${item.selectedDiamond?._id || 'no-diamond'}-${index}`;
             return (
-            <div
-              key={uniqueKey}
-              className="mb-6 lg:mb-8 pb-6 border-b border-gray-200 last:border-b-0"
-            >
-              {/* Mobile Layout */}
-              <div className="block  md:hidden">
-                {/* Product Image - Centered */}
-                <div className="flex justify-center mb-4">
-                  <div className="w-24 h-24 bg-gray-100 rounded-md flex items-center justify-center text-3xl">
-                    <img src={item.pid_image} className="object-cover" />
-                  </div>
-                </div>
-
-                {/* Product Name - Centered */}
-                <h2 className="text-base font-medium text-gray-800 mb-3 tracking-wide font-gintoNord text-start leading-tight">
-                  {item.pid_name}
-                </h2>
-
-                {/* Product Details - Compact */}
-                <div className="space-y-1 mb-4 text-start">
-                  <div className="flex items-center mb-1">
-                    <span className="text-gray-600 font-semibold text-[10px]">
-                      metal type:
-                    </span>
-                    <span className="ml-1 text-gray-800 text-[10px]">
-                      {item.selectedOptions.metalType.color.value}
-                    </span>
-                  </div>
-                  <div className="flex items-center mb-1">
-                    <span className="text-gray-600 font-semibold text-[10px]">
-                      Size
-                    </span>
-                    <span className="ml-1 text-gray-800 text-[10px]">
-                      {item.selectedOptions.ringSize.size_code}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Price and Actions Row */}
-                <div className="flex justify-between items-center">
-                  <div className="text-lg font-medium text-gray-800">
-                    {item.pid_price.toFixed(2)} USD
-                  </div>
-                  <div className="flex gap-4">
-                    <button className="text-gray-600 hover:underline hover:decoration-green-500 hover:decoration-2 text-[10px]">
-                      Edit
-                    </button>
-                    <button className="text-gray-600 hover:underline hover:decoration-green-500 hover:decoration-2 text-[10px]">
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Desktop Layout */}
-              <div className="hidden border-b border-gray-200 pb-2 md:block">
-                <div className="flex items-start gap-4">
-                  {/* Product Image */}
-
-                  <div className="w-full flex flex-col gap-4 ">
-                    <div className="flex items-center gap-4">
-                      <div className="w-24 h-24 bg-gray-100  flex items-center justify-center text-2xl flex-shrink-0">
-                        <img src={item.pid_image} className="object-cover" />
-                      </div>
-
-                      {/* Product Details */}
-                      <div className="flex-1">
-                        <div className="grid grid-cols-1 text-sm mb-1">
-                          <h2 className="text-lg font-medium text-gray-800  tracking-wide font-gintoNord">
-                            {item.pid_name}
-                          </h2>
-                          <div className="flex items-center mb-1">
-                            <span className="text-gray-600 font-semibold text-[10px]">
-                              metal type:
-                            </span>
-                            <span className="ml-1 text-gray-800 text-[10px]">
-                              {item?.selectedOptions?.metalType?.color?.value}
-                            </span>
-                          </div>
-                          <div className="flex items-center mb-1">
-                            <span className="text-gray-600 font-semibold text-[10px]">
-                              Size
-                            </span>
-                            <span className="ml-1 text-gray-800 text-[10px]">
-                              {item?.selectedOptions?.ringSize?.size_code}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="text-lg font-medium text-gray-800">
-                          {currencySymbol}
-                          {item.pid_price.toFixed(2)}
-                        </div>
-                      </div>
+              <div
+                key={uniqueKey}
+                className="mb-6 lg:mb-8 pb-6 border-b border-gray-200 last:border-b-0"
+              >
+                {/* Mobile Layout */}
+                <div className="block  md:hidden">
+                  {/* Product Image - Centered */}
+                  <div className="flex justify-center mb-4">
+                    <div className="w-24 h-24 bg-gray-100 rounded-md flex items-center justify-center text-3xl">
+                      <img src={item.pid_image} className="object-cover" />
                     </div>
+                  </div>
 
-                    {item?.selectedDiamond && (
+                  {/* Product Name - Centered */}
+                  <h2 className="text-base font-medium text-gray-800 mb-3 tracking-wide font-gintoNord text-start leading-tight">
+                    {item.pid_name}
+                  </h2>
+
+                  {/* Product Details - Compact */}
+                  <div className="space-y-1 mb-4 text-start">
+                    <div className="flex items-center mb-1">
+                      <span className="text-gray-600 font-semibold text-[10px]">
+                        metal type:
+                      </span>
+                      <span className="ml-1 text-gray-800 text-[10px]">
+                        {item?.selectedOptions?.metalType?.color?.value}
+                      </span>
+                    </div>
+                    <div className="flex items-center mb-1">
+                      <span className="text-gray-600 font-semibold text-[10px]">
+                        Size
+                      </span>
+                      <span className="ml-1 text-gray-800 text-[10px]">
+                        {item?.selectedOptions?.ringSize?.size_code}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Price and Actions Row */}
+                  <div className="flex justify-between items-center">
+                    <div className="text-lg font-medium text-gray-800">
+                      {item.pid_price.toFixed(2)} USD
+                    </div>
+                    <div className="flex gap-4">
+                      <button className="text-gray-600 hover:underline hover:decoration-green-500 hover:decoration-2 text-[10px]">
+                        Edit
+                      </button>
+                      <button className="text-gray-600 hover:underline hover:decoration-green-500 hover:decoration-2 text-[10px]">
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Desktop Layout */}
+                <div className="hidden border-b border-gray-200 pb-2 md:block">
+                  <div className="flex items-start gap-4">
+                    {/* Product Image */}
+
+                    <div className="w-full flex flex-col gap-4 ">
                       <div className="flex items-center gap-4">
                         <div className="w-24 h-24 bg-gray-100  flex items-center justify-center text-2xl flex-shrink-0">
-                          <iframe
-                            src={item.selectedDiamond.video}
-                            title={`Video for ${item.selectedDiamond._id}`}
-                            className="w-full h-full aspect-square overflow-hidden"
-                            allowFullScreen
-                          ></iframe>
+                          <img src={item.pid_image} className="object-cover" />
                         </div>
 
                         {/* Product Details */}
                         <div className="flex-1">
                           <div className="grid grid-cols-1 text-sm mb-1">
-                            <div className="text-lg  font-medium text-gray-800 ">
-                              {item?.selectedDiamond?.weight.toFixed(2)}w -{" "}
-                              {item?.selectedDiamond?.color} -{" "}
-                              {item?.selectedDiamond?.clarity} -{" "}
-                              {item?.selectedDiamond?.shape}
+                            <h2 className="text-lg font-medium text-gray-800  tracking-wide font-gintoNord">
+                              {item.pid_name}
+                            </h2>
+                            <div className="flex items-center mb-1">
+                              <span className="text-gray-600 font-semibold text-[10px]">
+                                metal type:
+                              </span>
+                              <span className="ml-1 text-gray-800 text-[10px]">
+                                {item?.selectedOptions?.metalType?.color?.value}
+                              </span>
                             </div>
                             <div className="flex items-center mb-1">
                               <span className="text-gray-600 font-semibold text-[10px]">
-                                SKU
+                                Size
                               </span>
                               <span className="ml-1 text-gray-800 text-[10px]">
-                                {item?.selectedDiamond?.certino}
+                                {item?.selectedOptions?.ringSize?.size_code}
                               </span>
                             </div>
                           </div>
 
                           <div className="text-lg font-medium text-gray-800">
                             {currencySymbol}
-                            {item.selectedDiamond.net.toFixed(2)}
+                            {item.pid_price.toFixed(2)}
                           </div>
                         </div>
                       </div>
-                    )}
-                  </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex gap-2">
-                    {/* <button className="text-gray-600 hover:text-gray-800 hover:decoration-green-500 hover:decoration-2 text-sm underline">
+                      {item?.selectedDiamond && (
+                        <div className="flex items-center gap-4">
+                          <div className="w-24 h-24 bg-gray-100  flex items-center justify-center text-2xl flex-shrink-0">
+                            <iframe
+                              src={item.selectedDiamond.video}
+                              title={`Video for ${item.selectedDiamond._id}`}
+                              className="w-full h-full aspect-square overflow-hidden"
+                              allowFullScreen
+                            ></iframe>
+                          </div>
+
+                          {/* Product Details */}
+                          <div className="flex-1">
+                            <div className="grid grid-cols-1 text-sm mb-1">
+                              <div className="text-lg  font-medium text-gray-800 ">
+                                {item?.selectedDiamond?.weight.toFixed(2)}w -{" "}
+                                {item?.selectedDiamond?.color} -{" "}
+                                {item?.selectedDiamond?.clarity} -{" "}
+                                {item?.selectedDiamond?.shape}
+                              </div>
+                              <div className="flex items-center mb-1">
+                                <span className="text-gray-600 font-semibold text-[10px]">
+                                  SKU
+                                </span>
+                                <span className="ml-1 text-gray-800 text-[10px]">
+                                  {item?.selectedDiamond?.certino}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="text-lg font-medium text-gray-800">
+                              {currencySymbol}
+                              {item.selectedDiamond.net.toFixed(2)}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      {/* <button className="text-gray-600 hover:text-gray-800 hover:decoration-green-500 hover:decoration-2 text-sm underline">
                       Edit
                     </button> */}
-                    <button
-                      onClick={() => handelRemove(item)}
-                      className="text-gray-600 hover:text-gray-800 hover:decoration-green-500 hover:decoration-2 text-sm underline"
-                    >
-                      Remove
-                    </button>
+                      <button
+                        onClick={() => handelRemove(item)}
+                        className="text-gray-600 hover:text-gray-800 hover:decoration-green-500 hover:decoration-2 text-sm underline"
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
             );
           })}
         </div>
@@ -290,11 +290,10 @@ const Cart = () => {
             <Link href="/checkout" disabled={!agreedToTerms}>
               <button
                 disabled={!agreedToTerms}
-                className={`w-full py-3 lg:py-4 rounded-md font-medium text-sm tracking-wide transition-colors mb-4 ${
-                  agreedToTerms
+                className={`w-full py-3 lg:py-4 rounded-md font-medium text-sm tracking-wide transition-colors mb-4 ${agreedToTerms
                     ? "bg-green-100 text-gray-800 hover:bg-green-200"
                     : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                }`}
+                  }`}
               >
                 🔒 CHECKOUT | {currencySymbol}
                 {subtotal.toFixed(2)}

@@ -38,6 +38,8 @@ const PinterestIcon = () => (
 /* ─── Footer Component ──────────────────────────────────────────── */
 export default function Footer() {
   const [otherCategory, setOtherCategory] = useState([]);
+  const [collections, setCollections] = useState([]);
+  const [mounted, setMounted] = useState(false);
   const footerRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -53,8 +55,20 @@ export default function Footer() {
     }
   };
 
+  const fetchCollections = async () => {
+    try {
+      const res = await axiosInstance.get(`api/category?status=active&limit=6`);
+      const data = res.data?.data?.result || res.data?.data || res.data?.result || [];
+      setCollections(Array.isArray(data) ? data : []);
+    } catch {
+      setCollections([]);
+    }
+  };
+
   useEffect(() => {
+    setMounted(true);
     getAttribute();
+    fetchCollections();
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
@@ -72,18 +86,18 @@ export default function Footer() {
         stagger: 0.15,
         ease: "power3.out",
       })
-      .from(".footer-bottom", {
-        y: 20,
-        opacity: 0,
-        duration: 0.6,
-        ease: "power2.out",
-      }, "-=0.4")
-      .from(".footer-logo", {
-        scale: 0.9,
-        opacity: 0,
-        duration: 1,
-        ease: "power2.out",
-      }, "-=1");
+        .from(".footer-bottom", {
+          y: 20,
+          opacity: 0,
+          duration: 0.6,
+          ease: "power2.out",
+        }, "-=0.4")
+        .from(".footer-logo", {
+          scale: 0.9,
+          opacity: 0,
+          duration: 1,
+          ease: "power2.out",
+        }, "-=1");
 
       // Hover animations for links
       const links = document.querySelectorAll(".footer-link");
@@ -103,7 +117,7 @@ export default function Footer() {
   return (
     <footer ref={footerRef} className="bg-[#00736C] text-white pt-20 pb-10 overflow-hidden font-light">
       <div ref={containerRef} className="container max-w-7xl mx-auto px-6">
-        
+
         {/* Top Section: Branding & Newsletter */}
         <div className="grid lg:grid-cols-2 gap-16 mb-20">
           <div className="footer-logo space-y-8">
@@ -121,11 +135,11 @@ export default function Footer() {
               Curating brilliance, crafting legacies. Your journey into the extraordinary begins here.
             </p>
             <div className="flex items-center space-x-6">
-               {[
+              {[
                 { icon: <Instagram className="w-5 h-5" />, label: "Instagram" },
-                { icon: <TikTokIcon />,                    label: "TikTok" },
+                { icon: <TikTokIcon />, label: "TikTok" },
                 { icon: <Facebook className="w-5 h-5" />, label: "Facebook" },
-                { icon: <PinterestIcon />,                 label: "Pinterest" },
+                { icon: <PinterestIcon />, label: "Pinterest" },
               ].map((social, i) => (
                 <a key={i} href="#" aria-label={social.label} className="text-white hover:opacity-80 transition-opacity duration-300 transform hover:scale-110">
                   {social.icon}
@@ -153,46 +167,65 @@ export default function Footer() {
 
         {/* Middle Section: Links Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-20 border-t border-white/10 pt-20">
-          
-          {/* Jewelry Collection */}
+
+          {/* Collections — dynamic from API */}
           <div className="footer-col space-y-6">
             <h3 className="text-[10px] font-gintoNord tracking-[0.2em] uppercase !text-white">Collections</h3>
             <ul className="space-y-4">
-              {[
-                { label: "New Arrivals", href: "/new-arrivals" },
-                { label: "Engagement Rings", href: "/engagement-230" },
-                { label: "Wedding Rings", href: "/wedding-rings-873" },
-                { label: "Fine Jewelry", href: "/fine-jewellery-807" },
-                { label: "Bespoke Design", href: "/bespoke" },
-              ].map((link) => (
-                <li key={link.label}>
-                  <TransitionLink href={link.href} className="footer-link text-sm text-white hover:opacity-80 transition-all duration-300 block">
-                    {link.label}
-                  </TransitionLink>
-                </li>
-              ))}
+              {/* Collections — dynamic from API, only renders client-side to prevent hydration mismatch */}
+              {mounted ? (
+                collections.length > 0 ? (
+                  collections.map((cat) => (
+                    <li key={cat._id}>
+                      <TransitionLink
+                        href={`/${cat.slug}`}
+                        className="footer-link text-sm text-white hover:opacity-80 transition-all duration-300 block capitalize"
+                      >
+                        {cat.name}
+                      </TransitionLink>
+                    </li>
+                  ))
+                ) : (
+                  // Fallback static links after mount if API empty
+                  [
+                    { label: "New Arrivals", href: "/new-arrivals" },
+                    { label: "Engagement Rings", href: "/engagement-rings" },
+                    { label: "Wedding Rings", href: "/wedding-rings" },
+                    { label: "Fine Jewelry", href: "/fine-jewellery" },
+                    { label: "Bespoke Design", href: "/bespoke" },
+                  ].map((link) => (
+                    <li key={link.label}>
+                      <TransitionLink href={link.href} className="footer-link text-sm text-white hover:opacity-80 transition-all duration-300 block">
+                        {link.label}
+                      </TransitionLink>
+                    </li>
+                  ))
+                )
+              ) : null}
             </ul>
           </div>
 
-          {/* Other Categories Dynamically */}
+          {/* Other Categories Dynamically — mounted guard prevents hydration mismatch */}
           <div className="footer-col space-y-6">
             <h3 className="text-[10px] font-gintoNord tracking-[0.2em] uppercase !text-white">Explore Categories</h3>
             <ul className="space-y-4">
-              {otherCategory.length > 0 ? (
-                otherCategory.slice(0, 5).map((cat) => (
-                  <li key={cat._id}>
-                    <TransitionLink href={`/fine-jewellery-807?finejewellery=${cat._id}`} className="footer-link text-sm text-white hover:opacity-80 capitalize block">
-                      {cat.name}
-                    </TransitionLink>
-                  </li>
-                ))
-              ) : (
-                <>
-                  <li><TransitionLink href="#" className="footer-link text-sm text-white hover:opacity-80 block">Diamond Rings</TransitionLink></li>
-                  <li><TransitionLink href="#" className="footer-link text-sm text-white hover:opacity-80 block">Gold Necklaces</TransitionLink></li>
-                  <li><TransitionLink href="#" className="footer-link text-sm text-white hover:opacity-80 block">Earrings</TransitionLink></li>
-                </>
-              )}
+              {mounted ? (
+                otherCategory.length > 0 ? (
+                  otherCategory.slice(0, 5).map((cat) => (
+                    <li key={cat._id}>
+                      <TransitionLink href={`/fine-jewellery-807?finejewellery=${cat._id}`} className="footer-link text-sm text-white hover:opacity-80 capitalize block">
+                        {cat.name}
+                      </TransitionLink>
+                    </li>
+                  ))
+                ) : (
+                  <>
+                    <li><TransitionLink href="#" className="footer-link text-sm text-white hover:opacity-80 block">Diamond Rings</TransitionLink></li>
+                    <li><TransitionLink href="#" className="footer-link text-sm text-white hover:opacity-80 block">Gold Necklaces</TransitionLink></li>
+                    <li><TransitionLink href="#" className="footer-link text-sm text-white hover:opacity-80 block">Earrings</TransitionLink></li>
+                  </>
+                )
+              ) : null}
             </ul>
           </div>
 
@@ -214,16 +247,16 @@ export default function Footer() {
           <div className="footer-col space-y-6">
             <h3 className="text-[10px] font-gintoNord tracking-[0.2em] uppercase !text-white">Concierge</h3>
             <div className="space-y-4 text-sm text-white">
-              <div className="flex items-center space-x-3 group cursor-pointer">
-                <Phone className="w-4 h-4 text-white hover:opacity-80 transition-colors" />
-                <span className="group-hover:opacity-80 transition-colors">+61 1300 977 619</span>
-              </div>
-              <div className="flex items-center space-x-3 group cursor-pointer">
-                <Mail className="w-4 h-4 text-white hover:opacity-80 transition-colors" />
-                <span className="group-hover:opacity-80 transition-colors">sales@ardordiamonds.com</span>
-              </div>
+              <a href="tel:+611300977619" className="flex items-center space-x-3 group hover:opacity-80 transition-opacity">
+                <Phone className="w-4 h-4 text-white flex-shrink-0" />
+                <span>+61 1300 977 619</span>
+              </a>
+              <a href="mailto:sales@ardordiamonds.com" className="flex items-center space-x-3 group hover:opacity-80 transition-opacity">
+                <Mail className="w-4 h-4 text-white flex-shrink-0" />
+                <span>sales@ardordiamonds.com</span>
+              </a>
               <div className="flex items-center space-x-3">
-                <MapPin className="w-4 h-4 text-white" />
+                <MapPin className="w-4 h-4 text-white flex-shrink-0" />
                 <span>By Appointment Only</span>
               </div>
             </div>
@@ -240,9 +273,9 @@ export default function Footer() {
             © 2025 Ardor Diamonds. All Rights Reserved.
           </div>
           <div className="flex items-center space-x-4 opacity-30 grayscale hover:grayscale-0 transition-all duration-500">
-             {['Visa', 'Mastercard', 'Amex', 'PayPal'].map(p => (
-               <span key={p} className="px-2 border border-white/20 rounded-sm py-1 font-bold">{p}</span>
-             ))}
+            {['Visa', 'Mastercard', 'Amex', 'PayPal'].map(p => (
+              <span key={p} className="px-2 border border-white/20 rounded-sm py-1 font-bold">{p}</span>
+            ))}
           </div>
         </div>
       </div>

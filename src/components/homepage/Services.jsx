@@ -1,10 +1,62 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+const FALLBACK_SERVICES = [
+  {
+    title: "SHOWROOMS",
+    image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    alt: "Jewelry showroom with display cases and seating area",
+    link: "/meet",
+  },
+  {
+    title: "APPOINTMENTS",
+    image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    alt: "Hand trying on engagement ring during consultation",
+    link: "/meet",
+  },
+  {
+    title: "CUSTOM RINGS",
+    image: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    alt: "Craftsperson working on custom jewelry with tools",
+    link: "/custom-made-engagement-rings",
+  },
+  {
+    title: "GET IN TOUCH",
+    image: "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    alt: "Jewelry consultation with rings on display tray",
+    link: "/contact",
+  },
+];
 
 const ServicesGrid = () => {
   const containerRef = useRef(null);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/api/service?status=active&limit=20`);
+        if (res.ok) {
+          const data = await res.json();
+          const docs = data?.data?.docs || [];
+          setServices(docs.length > 0 ? docs : FALLBACK_SERVICES);
+        } else {
+          setServices(FALLBACK_SERVICES);
+        }
+      } catch (_) {
+        setServices(FALLBACK_SERVICES);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchServices();
+  }, []);
+
+  useEffect(() => {
+    if (loading || services.length === 0) return;
     const ctx = gsap.context(() => {
       gsap.fromTo(".service-tile",
         { y: 30, opacity: 0 },
@@ -22,34 +74,13 @@ const ServicesGrid = () => {
       );
     }, containerRef);
     return () => ctx.revert();
-  }, []);
+  }, [loading, services]);
 
-  const services = [
-    {
-      title: "SHOWROOMS",
-      image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      alt: "Jewelry showroom with display cases and seating area",
-      link: "/meet",
-    },
-    {
-      title: "APPOINTMENTS",
-      image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      alt: "Hand trying on engagement ring during consultation",
-      link: "/meet",
-    },
-    {
-      title: "CUSTOM RINGS",
-      image: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      alt: "Craftsperson working on custom jewelry with tools",
-      link: "/custom-made-engagement-rings",
-    },
-    {
-      title: "GET IN TOUCH",
-      image: "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      alt: "Jewelry consultation with rings on display tray",
-      link: "/contact",
-    },
-  ];
+  const getImageSrc = (image) => {
+    if (!image) return "";
+    if (image.startsWith("http")) return image;
+    return `${BASE_URL}${image}`;
+  };
 
   return (
     <div ref={containerRef} className="max-w-7xl mx-auto px-4 py-24">
@@ -68,13 +99,13 @@ const ServicesGrid = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
         {services.map((service, index) => {
           const content = (
-            <div key={service.title} className="service-tile group cursor-pointer opacity-0">
+            <div key={service.title || index} className="service-tile group cursor-pointer opacity-0">
               {/* Service Image Container */}
               <div className="relative overflow-hidden bg-gray-50 mb-6">
                 <div className="aspect-[4/5] md:aspect-[3/4]">
                   <img
-                    src={service.image}
-                    alt={service.alt}
+                    src={getImageSrc(service.image)}
+                    alt={service.alt || service.title}
                     className="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
                   />
                 </div>
@@ -113,7 +144,7 @@ const ServicesGrid = () => {
 
           if (service.link) {
             return (
-              <a href={service.link} key={service.title} className="block">
+              <a href={service.link} key={service.title || index} className="block">
                 {content}
               </a>
             );
