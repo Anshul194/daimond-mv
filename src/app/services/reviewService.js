@@ -31,7 +31,7 @@ class ReviewService {
       for (const [key, value] of Object.entries(parsedFilters)) {
         if (key === 'rating') {
           filterConditions[key] = parseInt(value);
-        } else if (key === 'targetType' || key === 'user' || key === 'product') {
+        } else if (key === 'targetType' || key === 'user' || key === 'product' || key === 'status') {
           filterConditions[key] = value;
         } else {
           filterConditions[key] = value;

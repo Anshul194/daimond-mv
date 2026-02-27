@@ -25,17 +25,30 @@ const Collections = ({ className = "" }) => {
   const counterRef = useRef(null);
   const prevActiveRef = useRef(0);
 
-  const collections = [
-    { name: 'READY-TO-SHIP', image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&h=800&fit=crop' },
-    { name: 'STATEMENT',     image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&h=800&fit=crop' },
-    { name: 'MINIMAL',       image: 'https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?w=800&h=800&fit=crop' },
-    { name: 'STACKER',       image: 'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=800&h=800&fit=crop' },
-    { name: 'BEZEL',         image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800&h=800&fit=crop' },
-    { name: 'EAST-WEST',     image: 'https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?w=800&h=800&fit=crop' },
-  ];
+  const [collections, setCollections] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        const response = await fetch('/api/collection?status=active');
+        const data = await response.json();
+        if (data.success) {
+          setCollections(data.data.result || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch collections:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCollections();
+  }, []);
 
   /* ── section entry animations ── */
   useEffect(() => {
+    if (loading || collections.length === 0) return;
+
     const checkIfMobile = () => setIsMobile(window.innerWidth < 1024);
     checkIfMobile();
     window.addEventListener('resize', checkIfMobile);
@@ -107,7 +120,18 @@ const Collections = ({ className = "" }) => {
       window.removeEventListener('resize', checkIfMobile);
       ctx.revert();
     };
-  }, []);
+  }, [loading, collections]);
+
+  /*
+  const staticCollections = [
+    { name: 'READY-TO-SHIP', image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&h=800&fit=crop' },
+    { name: 'STATEMENT',     image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&h=800&fit=crop' },
+    { name: 'MINIMAL',       image: 'https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?w=800&h=800&fit=crop' },
+    { name: 'STACKER',       image: 'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=800&h=800&fit=crop' },
+    { name: 'BEZEL',         image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800&h=800&fit=crop' },
+    { name: 'EAST-WEST',     image: 'https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?w=800&h=800&fit=crop' },
+  ];
+  */
 
   /* ── image cross-fade on collection change (desktop) ── */
   useEffect(() => {
@@ -181,6 +205,16 @@ const Collections = ({ className = "" }) => {
 
   const getPrevIndex = () => (activeCollection - 1 + collections.length) % collections.length;
   const getNextIndex = () => (activeCollection + 1) % collections.length;
+
+  if (loading && collections.length === 0) {
+    return (
+      <div className="h-[600px] flex items-center justify-center bg-[#FEFAF5]">
+        <div className="animate-pulse text-gray-400">Loading collections...</div>
+      </div>
+    );
+  }
+
+  if (!loading && collections.length === 0) return null;
 
   return (
     <div

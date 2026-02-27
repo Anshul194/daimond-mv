@@ -5,7 +5,7 @@ import {
   deleteReview,
 } from '../../../controllers/reviewController.js';
 import { NextResponse } from 'next/server';
-import { verifyUserAccess } from '../../../middlewares/commonAuth.js';
+import { verifyAnyUserAccess, verifyAdminAccess } from '../../../middlewares/commonAuth.js';
 
 export async function GET(request, context) {
   await dbConnect();
@@ -23,11 +23,11 @@ export async function GET(request, context) {
 export async function PUT(request, context) {
   try {
     await dbConnect();
-    const authResult = await verifyUserAccess(request);
+    const authResult = await verifyAnyUserAccess(request);
     if (authResult.error) return authResult.error;
 
     const { user } = authResult;
-     const { id } = await context.params;
+    const { id } = await context.params;
 
     if (!id) {
       return NextResponse.json({ success: false, message: 'ID param missing' }, { status: 400 });
@@ -60,7 +60,7 @@ export async function PUT(request, context) {
 export async function DELETE(request, context) {
   try {
     await dbConnect();
-    const authResult = await verifyUserAccess(request);
+    const authResult = await verifyAnyUserAccess(request);
     if (authResult.error) {
       return authResult.error;
     }
@@ -80,6 +80,29 @@ export async function DELETE(request, context) {
   } catch (err) {
     console.error('🔥 DELETE /review/:id error:', err);
     return NextResponse.json({ success: false, message: 'Delete failed' }, { status: 400 });
+  }
+}
+
+export async function PATCH(request, context) {
+  try {
+    await dbConnect();
+    const authResult = await verifyAdminAccess(request);
+    if (authResult.error) return authResult.error;
+
+    const { id } = await context.params;
+    const { status } = await request.json();
+
+    if (!id || !status) {
+      return NextResponse.json({ success: false, message: 'ID and status are required' }, { status: 400 });
+    }
+
+    const { updateReviewStatus } = await import('../../../controllers/reviewController.js');
+    const result = await updateReviewStatus(id, status);
+
+    return NextResponse.json(result.body, { status: result.status });
+  } catch (err) {
+    console.error('PATCH /review/:id error:', err);
+    return NextResponse.json({ success: false, message: 'Update failed', error: err.message }, { status: 500 });
   }
 }
 

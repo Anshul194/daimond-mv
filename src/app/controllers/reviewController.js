@@ -36,10 +36,7 @@ export async function createReview(request, userId) {
 
     if (!userId || !rating || !comment) {
       console.warn('⚠️ Missing required fields:', { userId, rating, comment });
-      return {
-        status: 400,
-        body: errorResponse('Missing required fields: rating and comment are required'),
-      };
+      return errorResponse('Missing required fields: rating and comment are required', 400);
     }
 
     if (images && images.length > 0) {
@@ -80,10 +77,7 @@ export async function createReview(request, userId) {
 
     if (error) {
       console.error('❌ Validation error:', error.details);
-      return {
-        status: 400,
-        body: errorResponse('Validation error', 400, error.details),
-      };
+      return errorResponse('Validation error', 400, error.details);
     }
 
     console.log('💾 Creating review in database...');
@@ -94,16 +88,10 @@ export async function createReview(request, userId) {
 
     console.log('✅ Review created successfully:', newReview);
 
-    return {
-      status: 201,
-      body: successResponse(newReview, 'Review created successfully'),
-    };
+    return successResponse(newReview, 'Review created successfully', 201);
   } catch (err) {
     console.error('❌ createReview error:', err.message, err);
-    return {
-      status: 500,
-      body: errorResponse('Server error'),
-    };
+    return errorResponse(`Server error: ${err.message}`, 500);
   }
 }
 
@@ -112,16 +100,34 @@ export async function createReview(request, userId) {
 export async function getReviews(query) {
   try {
     const result = await reviewService.getAllReviews(query);
-    return {
-      status: 200,
-      body: successResponse(result, 'Reviews fetched successfully')
-    };
+    return successResponse(result, 'Reviews fetched successfully');
   } catch (err) {
     console.error('Get Reviews error:', err.message);
-    return {
-      status: 500,
-      body: errorResponse('Server error', 500)
-    };
+    return errorResponse('Server error', 500);
+  }
+}
+
+// Update Review Status
+export async function updateReviewStatus(id, status) {
+  try {
+    console.log(`➡️ Updating status for review ${id} to ${status}`);
+
+    if (!['pending', 'approved', 'rejected'].includes(status)) {
+      return errorResponse('Invalid status. Must be pending, approved, or rejected', 400);
+    }
+
+    const updated = await reviewService.updateReview(id, { status });
+    if (!updated) {
+      return errorResponse('Review not found', 404);
+    }
+
+    // Clear Redis cache
+    await redis.del('allReviews');
+
+    return successResponse(updated, 'Review status updated successfully');
+  } catch (err) {
+    console.error('Update Review Status error:', err.message);
+    return errorResponse('Server error', 500);
   }
 }
 
@@ -130,22 +136,13 @@ export async function getReviewById(id) {
   try {
     const review = await reviewService.getReviewById(id);
     if (!review) {
-      return {
-        status: 404,
-        body: errorResponse('Review not found', 404)
-      };
+      return errorResponse('Review not found', 404);
     }
 
-    return {
-      status: 200,
-      body: successResponse(review, 'Review fetched successfully')
-    };
+    return successResponse(review, 'Review fetched successfully');
   } catch (err) {
     console.error('Get Review error:', err.message);
-    return {
-      status: 500,
-      body: errorResponse('Server error', 500)
-    };
+    return errorResponse('Server error', 500);
   }
 }
 
@@ -157,10 +154,7 @@ export async function updateReview(id, data, userId) {
     // 1. Fetch the review by ID
     const existingReview = await reviewService.getReviewById(id);
     if (!existingReview) {
-      return {
-        status: 404,
-        body: errorResponse('Review not found', 404),
-      };
+      return errorResponse('Review not found', 404);
     }
 
     // 2. Compare owner ID with logged-in user ID
@@ -172,7 +166,7 @@ export async function updateReview(id, data, userId) {
     console.log('🧾 Review owner ID:', ownerId);
     console.log('🔐 Requesting user ID:', userId.toString());
 
-   
+
 
     // 3. Extract fields and handle image uploads
     const { images, ...fields } = data;
@@ -209,35 +203,23 @@ export async function updateReview(id, data, userId) {
     // 6. Validate payload
     const { error, value } = reviewUpdateValidator.validate(payload);
     if (error) {
-      return {
-        status: 400,
-        body: errorResponse('Validation error', 400, error.details),
-      };
+      return errorResponse('Validation error', 400, error.details);
     }
 
     // 7. Perform the update
     const updated = await reviewService.updateReview(id, value);
     if (!updated) {
-      return {
-        status: 404,
-        body: errorResponse('Review not found', 404),
-      };
+      return errorResponse('Review not found', 404);
     }
 
     // 8. Clear Redis cache
     await redis.del('allReviews');
 
     // 9. Return success
-    return {
-      status: 200,
-      body: successResponse(updated, 'Review updated successfully'),
-    };
+    return successResponse(updated, 'Review updated successfully');
   } catch (err) {
     console.error('Update Review error:', err.message);
-    return {
-      status: 500,
-      body: errorResponse('Server error', 500),
-    };
+    return errorResponse('Server error', 500);
   }
 }
 
@@ -250,13 +232,10 @@ export async function deleteReview(id, userId) {
     // Fetch review and populate user field (assuming reviewService.getReviewById does this)
     const existingReview = await reviewService.getReviewById(id);
     console.log('🔍 Fetched existing review:', existingReview);
-    
+
 
     if (!existingReview) {
-      return {
-        status: 404,
-        body: errorResponse('Review not found', 404),
-      };
+      return errorResponse('Review not found', 404);
     }
 
     // Determine owner user id, handle if populated or not
@@ -267,30 +246,21 @@ export async function deleteReview(id, userId) {
     console.log('Review owner ID:', ownerId);
     console.log('User requesting delete ID:', userId);
 
-   
+
 
     // Attempt to delete review
     const deleted = await reviewService.deleteReview(id);
 
     if (!deleted) {
-      return {
-        status: 404,
-        body: errorResponse('Review not found', 404),
-      };
+      return errorResponse('Review not found', 404);
     }
 
     // Clear relevant cache
     await redis.del('allReviews');
 
-    return {
-      status: 200,
-      body: successResponse(deleted, 'Review deleted successfully'),
-    };
+    return successResponse({ id }, 'Review deleted successfully');
   } catch (err) {
     console.error('Delete Review error:', err.message);
-    return {
-      status: 500,
-      body: errorResponse('Server error', 500),
-    };
+    return errorResponse('Server error', 500);
   }
 }

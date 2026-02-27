@@ -42,6 +42,11 @@ const reviewSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending',
+  },
 }, {
   timestamps: true,
 });

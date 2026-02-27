@@ -85,6 +85,12 @@ const Reviews = ({ isProductReview = false, productId = null }) => {
           url += '&isWebsiteReview=true';
         }
 
+        const filters = { status: 'approved' };
+        if (isProductReview && productId) filters.product = productId;
+        else filters.isWebsiteReview = true;
+
+        url = `/api/review?limit=20&filters=${encodeURIComponent(JSON.stringify(filters))}`;
+
         const response = await fetch(url);
         const data = await response.json();
 
@@ -94,7 +100,7 @@ const Reviews = ({ isProductReview = false, productId = null }) => {
           const dynamicReviews = data.data.results.map(rev => ({
             type: 'review',
             platform: 'Google',
-            name: rev.user?.name || 'Anonymous',
+            name: rev.reviewerName || rev.user?.name || 'Anonymous',
             rating: rev.rating,
             timeAgo: formatTimeAgo(rev.createdAt),
             review: rev.comment,
