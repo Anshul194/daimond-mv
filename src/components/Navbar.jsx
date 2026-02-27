@@ -14,6 +14,7 @@ import {
   User,
   SearchIcon,
   XIcon,
+  ArrowRight,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -25,6 +26,12 @@ import TransitionLink from "./TransitionLink";
 
 import { gsap } from "gsap";
 import { useRef } from "react";
+
+const TikTokIcon = () => (
+  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M19.321 5.562a5.122 5.122 0 0 1-.443-.258 6.228 6.228 0 0 1-1.137-.966c-.849-.849-1.359-2.02-1.359-3.338h-3.064v13.814c0 1.355-1.104 2.459-2.459 2.459s-2.459-1.104-2.459-2.459 1.104-2.459 2.459-2.459c.26 0 .509.041.743.117V8.407c-.234-.023-.472-.035-.715-.035-3.384 0-6.123 2.739-6.123 6.123s2.739 6.123 6.123 6.123 6.123-2.739 6.123-6.123V9.25c1.336.95 2.97 1.513 4.73 1.513v-3.064c-1.14 0-2.184-.459-2.938-1.201-.481-.476-.812-1.089-.942-1.768a3.058 3.058 0 0 1-.094-.765V5.562h-.444z" />
+  </svg>
+);
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -54,6 +61,11 @@ const Navbar = () => {
   const leftNavRef = useRef(null);
   const rightNavRef = useRef(null);
   const logoRef = useRef(null);
+  const mobileMenuRef = useRef(null);
+  const mobileLinksRef = useRef([]);
+  const mobileOverlayRef = useRef(null);
+  const mobileCloseBtnRef = useRef(null);
+  const mobileMenuTimeline = useRef(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -79,6 +91,51 @@ const Navbar = () => {
 
     return () => ctx.revert();
   }, [categories]); // Re-run when categories load to animate them
+
+  // Mobile Menu GSAP Animation
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Set initial states
+      gsap.set(mobileMenuRef.current, {
+        clipPath: "circle(0% at 24px 32px)",
+        visibility: "hidden",
+      });
+      gsap.set(mobileOverlayRef.current, { opacity: 0, visibility: "hidden" });
+      gsap.set(".mobile-nav-item", { x: -20, opacity: 0 });
+
+      mobileMenuTimeline.current = gsap.timeline({ paused: true })
+        .to(mobileOverlayRef.current, {
+          autoAlpha: 1,
+          duration: 0.4,
+          ease: "power2.inOut",
+        })
+        .to(mobileMenuRef.current, {
+          autoAlpha: 1,
+          clipPath: "circle(150% at 24px 32px)",
+          duration: 0.8,
+          ease: "power4.inOut",
+        }, "-=0.2")
+        .to(".mobile-nav-item", {
+          x: 0,
+          opacity: 1,
+          stagger: 0.05,
+          duration: 0.6,
+          ease: "power3.out",
+        }, "-=0.4");
+    }, mobileMenuRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      mobileMenuTimeline.current?.play();
+      document.body.style.overflow = "hidden";
+    } else {
+      mobileMenuTimeline.current?.reverse();
+      document.body.style.overflow = "auto";
+    }
+  }, [isMobileMenuOpen]);
 
   const navItems = [
     { name: "NEW ARRIVALS", href: "/new-arrivals" },
@@ -341,8 +398,15 @@ const Navbar = () => {
     },
   ];
 
+  const [expandedSubAccordion, setExpandedSubAccordion] = useState(null);
+
   const toggleAccordion = (index) => {
     setExpandedAccordion(expandedAccordion === index ? null : index);
+    setExpandedSubAccordion(null);
+  };
+
+  const toggleSubAccordion = (id) => {
+    setExpandedSubAccordion(expandedSubAccordion === id ? null : id);
   };
 
   const handelProfileClick = async () => {
@@ -1287,22 +1351,18 @@ const Navbar = () => {
 
       {/* Mobile Menu Overlay */}
       <div
-        className={`lg:hidden fixed inset-0 z-[9999] overflow-hidden transition-all duration-300 ${
-          isMobileMenuOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        } bg-black/50`}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) setIsMobileMenuOpen(false);
-        }}
+        ref={mobileOverlayRef}
+        className="lg:hidden fixed inset-0 z-[9999] bg-black/40 backdrop-blur-sm transition-all duration-300 pointer-events-none"
+        onClick={() => setIsMobileMenuOpen(false)}
+      />
+
+      <div
+        ref={mobileMenuRef}
+        className="lg:hidden fixed inset-0 z-[10000] w-full h-screen bg-white flex flex-col pointer-events-none"
       >
-        <div
-          className={`h-full w-[80%] max-w-[240px] bg-white flex flex-col transition-transform duration-300 ease-in-out ${
-            isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
-        >
+        <div className="flex flex-col h-full pointer-events-auto">
           {/* Header with close button */}
-          <div className="flex items-center justify-between px-4 h-16 border-b border-gray-200 bg-white relative z-[10000]">
+          <div className="flex items-center justify-between px-6 h-16 lg:h-20 border-b border-gray-100 bg-white">
             <button
               onClick={() => {
                 setShowSearch(true);
@@ -1310,181 +1370,237 @@ const Navbar = () => {
               }}
               className="text-black hover:text-[#00736C] transition-colors duration-200"
             >
-              <Search size={20} />
+              <Search size={22} />
             </button>
             <button
+              ref={mobileCloseBtnRef}
               onClick={() => setIsMobileMenuOpen(false)}
               className="text-black hover:text-[#00736C] transition-colors duration-200"
             >
-              <X size={24} />
+              <X size={28} />
             </button>
           </div>
 
           {/* Navigation Items */}
-          <div className="flex-1 px-4 py-8 overflow-y-auto">
-            <div className="space-y-6">
-              {/* Hidden items from desktop (More dropdown) */}
-              {hiddenLeftNavItems.map((item) => (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  className="block text-black hover:text-[#00736C] text-[10px] font-medium tracking-wide transition-colors duration-200"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.name}
-                </a>
-              ))}
-
-              {/* Accordion for Fine Jewellery */}
-              {mobileAccordionItems.map((accordionItem, index) => (
-                <div
-                  key={accordionItem.title}
-                  className="border-b border-gray-200"
-                >
-                  <button
-                    onClick={() => toggleAccordion(index)}
-                    className="flex items-center justify-between w-full text-left text-black hover:text-[#00736C] text-[10px] font-medium tracking-wide transition-colors duration-200"
-                  >
-                    <span>{accordionItem.title}</span>
-                    {expandedAccordion === index ? (
-                      <ChevronUp size={16} />
-                    ) : (
-                      <ChevronDown size={16} />
-                    )}
-                  </button>
-
-                  {expandedAccordion === index && (
-                    <div className="mt-4 ml-4 space-y-3 animate-in slide-in-from-top-2 duration-200">
-                      {accordionItem.subcategories.map((subcat, subIndex) => (
-                        <div key={subIndex}>
-                          {subcat.items ? (
-                            <div>
-                              <div className="text-black text-[10px] font-medium tracking-wide mb-2">
-                                {subcat.name}
-                              </div>
-                              <div className="ml-3 space-y-2">
-                                {subcat.items.map((item) => (
-                                  <a
-                                    key={item.name}
-                                    href={item.href}
-                                    className="block text-black hover:text-[#00736C] text-[10px] transition-colors duration-200"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                  >
-                                    {item.name}
-                                  </a>
-                                ))}
-                              </div>
-                            </div>
-                          ) : (
-                            <a
-                              href={subcat.href}
-                              className="block text-black hover:text-[#236339] text-[10px] transition-colors duration-200"
-                              onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                              {subcat.name}
-                            </a>
-                          )}
-                        </div>
-                      ))}
+          <div className="flex-1 px-6 py-10 overflow-y-auto">
+            <div className="space-y-8 flex flex-col items-start">
+              {/* Dynamic Categories from State & Right Nav */}
+              {[...navItems, ...rightNavItems].map((cat, catIndex) => {
+                const isExpanded = expandedAccordion === catIndex;
+                const hasSubMenu = ["ENGAGEMENT RINGS", "WEDDING RINGS", "FINE JEWELLERY", "EDUCATION", "CONTACT"].includes(cat.name);
+                
+                return (
+                  <div key={cat.name} className="mobile-nav-item w-full border-b border-gray-50 pb-4">
+                    <div className="flex items-center justify-between w-full">
+                      <a
+                        href={cat.href}
+                        className="text-black hover:text-[#00736C] text-2xl font-light font-gintoNord tracking-tighter transition-colors duration-200"
+                        onClick={() => !hasSubMenu && setIsMobileMenuOpen(false)}
+                      >
+                        {cat.name}
+                      </a>
+                      {hasSubMenu && (
+                        <button
+                          onClick={() => toggleAccordion(catIndex)}
+                          className="p-2 text-gray-300 hover:text-[#00736C] transition-colors"
+                        >
+                          {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                        </button>
+                      )}
                     </div>
-                  )}
-                </div>
-              ))}
 
-              {/* Right nav items */}
-              {rightNavItems.map((item) => (
+                    <div 
+                      className={`grid transition-all duration-500 ease-in-out ${isExpanded && hasSubMenu ? "grid-rows-[1fr] opacity-100 mt-6" : "grid-rows-[0fr] opacity-0 mt-0"}`}
+                    >
+                      <div className="overflow-hidden ml-2 space-y-6">
+                        {/* ENGAGEMENT RINGS SUBMENU */}
+                        {cat.name === "ENGAGEMENT RINGS" && (
+                          <>
+                            {[
+                              { title: "BUILD A RING", items: [
+                                { name: "Browse Settings", href: "/engagement-230" },
+                                { name: "Ready-to-Ship Rings", href: "/engagement-230" },
+                                { name: "Custom-Made Rings", href: "/custom-made-engagement-rings" }
+                              ]},
+                              { title: "SHOP BY METAL", items: attributesData["ENGAGEMENT RINGS"]?.["METAL TYPE"]?.map(m => ({ name: m.value, href: `/engagement-230?metal=${m.value.toLowerCase()}` })) || [] },
+                              { title: "SHOP BY STYLE", items: attributesData["ENGAGEMENT RINGS"]?.["Style"]?.map(s => ({ name: s.value, href: `/engagement-230?style=${s.value.toLowerCase()}` })) || [] },
+                              { title: "GUIDANCE", items: [
+                                { name: "Engagement Ring Guide", href: "/engagement-rings/build-rings" },
+                                { name: "Design Basics", href: "/engagement-rings/build-rings" },
+                                { name: "Find Your Ring Size", href: "/engagement-rings/build-rings" },
+                                { name: "Precious Metals Guide", href: "/engagement-rings/build-rings" },
+                                { name: "Our Crafting Process", href: "/engagement-rings/build-rings" },
+                                { name: "Ring Care Guide", href: "/engagement-rings/build-rings" }
+                              ]}
+                            ].map((sub, idx) => (
+                              <div key={idx} className="space-y-4">
+                                <button 
+                                  onClick={() => toggleSubAccordion(`eng-${idx}`)}
+                                  className="text-[#00736C] text-[10px] font-bold tracking-[0.2em] uppercase flex items-center justify-between w-full group"
+                                >
+                                  {sub.title}
+                                  <ChevronDown 
+                                    size={12} 
+                                    className={`transition-transform duration-300 ${expandedSubAccordion === `eng-${idx}` ? "rotate-180" : ""}`} 
+                                  />
+                                </button>
+                                <div className={`grid transition-all duration-300 ease-in-out ${expandedSubAccordion === `eng-${idx}` ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+                                  <div className="overflow-hidden ml-2 space-y-3 flex flex-col items-start pt-2">
+                                    {sub.items?.map((item, i) => (
+                                      <a key={i} href={item.href} className="text-black/60 hover:text-black text-sm font-light py-1" onClick={() => setIsMobileMenuOpen(false)}>{item.name}</a>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </>
+                        )}
+
+                        {/* WEDDING RINGS SUBMENU */}
+                        {cat.name === "WEDDING RINGS" && (
+                          <>
+                            {[
+                              { title: "WOMEN", items: [
+                                { name: "All Women's Wedding Rings", href: "/wedding-rings-873?gender=woman" },
+                                ...(attributesData["WEDDING RINGS"]?.["Style"]?.map(s => ({ name: `${s.value} Women's`, href: `/wedding-rings-873?gender=woman&style=${s.value.toLowerCase()}` })) || [])
+                              ]},
+                              { title: "MEN", items: [
+                                { name: "All Men's Wedding Rings", href: "/wedding-rings-873?gender=man" },
+                                ...(attributesData["WEDDING RINGS"]?.["Style"]?.map(s => ({ name: `${s.value} Men's`, href: `/wedding-rings-873?gender=man&style=${s.value.toLowerCase()}` })) || [])
+                              ]},
+                              { title: "RINGS BY METAL", items: attributesData["WEDDING RINGS"]?.["METAL TYPE"]?.map(m => ({ name: m.value, href: `/engagement-230?metal=${m.value.toLowerCase()}` })) || [] },
+                              { title: "GUIDANCE", items: [
+                                { name: "Wedding Ring Guide", href: "/wedding-rings/women" },
+                                { name: "Design Basics", href: "/wedding-rings/women" },
+                                { name: "Find Your Ring Size", href: "/wedding-rings/women" },
+                                { name: "Precious Metals Guide", href: "/precious-metals-guide" },
+                                { name: "Our Crafting Process", href: "/crafting-process" }
+                              ]}
+                            ].map((sub, idx) => (
+                              <div key={idx} className="space-y-4">
+                                <button 
+                                  onClick={() => toggleSubAccordion(`wed-${idx}`)}
+                                  className="text-[#00736C] text-[10px] font-bold tracking-[0.2em] uppercase flex items-center justify-between w-full group"
+                                >
+                                  {sub.title}
+                                  <ChevronDown 
+                                    size={12} 
+                                    className={`transition-transform duration-300 ${expandedSubAccordion === `wed-${idx}` ? "rotate-180" : ""}`} 
+                                  />
+                                </button>
+                                <div className={`grid transition-all duration-300 ease-in-out ${expandedSubAccordion === `wed-${idx}` ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+                                  <div className="overflow-hidden ml-2 space-y-3 flex flex-col items-start pt-2">
+                                    {sub.items?.map((item, i) => (
+                                      <a key={i} href={item.href} className="text-black/60 hover:text-black text-sm font-light py-1" onClick={() => setIsMobileMenuOpen(false)}>{item.name}</a>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </>
+                        )}
+
+                        {/* FINE JEWELLERY SUBMENU */}
+                        {cat.name === "FINE JEWELLERY" && (
+                          <div className="space-y-4 pt-2 pb-4">
+                            <div className="text-[#00736C] text-[10px] font-bold tracking-[0.2em] uppercase">COLLECTIONS</div>
+                            <div className="ml-2 grid grid-cols-2 gap-y-4 gap-x-2">
+                              {fineJewellerSubCategories.map((sub, i) => (
+                                <a key={i} href={`/fine-jewellery-807?finejewellery=${sub._id}`} className="text-black/60 hover:text-black text-sm font-light border-l border-gray-100 pl-3 py-1" onClick={() => setIsMobileMenuOpen(false)}>
+                                  {sub.name}
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* EDUCATION SUBMENU */}
+                        {cat.name === "EDUCATION" && (
+                          <div className="space-y-6 pt-2 pb-4">
+                            {educationCategories?.map((category, idx) => (
+                              <div key={idx} className="space-y-3">
+                                <Link 
+                                  href={`/blogs/6878cbb596dfc8337a3359b4/${category.subCategory._id}`}
+                                  className="text-[#00736C] text-[10px] font-bold tracking-[0.2em] uppercase block"
+                                  onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                  {category.subCategory.name}
+                                </Link>
+                                <div className="ml-2 space-y-2 flex flex-col">
+                                  {category.blogs?.slice(0, 3).map((blog) => (
+                                    <Link key={blog._id} href={`/blogs/6878cbb596dfc8337a3359b4/${category.subCategory._id}/${blog._id}`} className="text-black/60 hover:text-black text-[13px] font-light" onClick={() => setIsMobileMenuOpen(false)}>
+                                      {blog.title}
+                                    </Link>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* CONTACT SUBMENU */}
+                        {cat.name === "CONTACT" && (
+                          <div className="space-y-4 pt-2 pb-4">
+                            {[
+                              { name: "Get In Touch", href: "/contact" },
+                              { name: "Book an Appointment", href: "/meet" },
+                              { name: "FAQs", href: "/faqs" }
+                            ].map((link, i) => (
+                              <a key={i} href={link.href} className="text-black/70 hover:text-[#00736C] text-lg font-light block" onClick={() => setIsMobileMenuOpen(false)}>
+                                {link.name}
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Meet With Us & User actions explicitly added if not in navItems */}
+              <div className="mobile-nav-item w-full flex items-center justify-between border-b border-gray-50 pb-4">
+                 <button onClick={handelProfileClick} className="text-black hover:text-[#00736C] text-2xl font-light font-gintoNord tracking-tighter">
+                   MY ACCOUNT
+                 </button>
+              </div>
+
+              {/* Book Appointment emphasized */}
+              <div className="mobile-nav-item pt-4 w-full">
                 <a
-                  key={item.name}
-                  href={item.href}
-                  className="block text-black hover:text-[#00736C] text-[10px] font-medium tracking-wide transition-colors duration-200"
+                  href="/meet"
+                  className="inline-flex items-center gap-4 text-[#00736C] text-sm font-bold tracking-[0.2em] uppercase border-b border-[#00736C] pb-2 hover:opacity-70 transition-opacity duration-200"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  {item.name}
+                  BOOK APPOINTMENT
+                  <ArrowRight size={16} />
                 </a>
-              ))}
-
-              {/* Book Appointment */}
-              <a
-                href="/book-appointment"
-                className="block text-black hover:text-[#00736C] text-lg font-medium tracking-wide transition-colors duration-200 pt-4"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                BOOK APPOINTMENT
-              </a>
+              </div>
             </div>
           </div>
 
           {/* Bottom Section */}
-          <div className="px-4 pb-8">
-            {/* Currency Selector */}
-            <div className="mb-8">
-              <select className="text-black text-sm font-medium tracking-wide bg-transparent border-none outline-none">
-                <option>IN (USD $)</option>
-                <option>IN (EUR €)</option>
-                <option>IN (GBP £)</option>
-              </select>
-            </div>
-
+          <div className="mobile-nav-item px-6 pb-12 mt-auto">
             {/* Social Media Icons */}
-            <div className="flex items-center space-x-6 flex-wrap gap-2">
-              <a
-                href="#"
-                className="text-black hover:text-[#00736C] transition-colors duration-200"
-              >
-                <Instagram size={20} />
-              </a>
-              <a
-                href="#"
-                className="text-black hover:text-[#00736C] transition-colors duration-200"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
+            <div className="flex items-center space-x-8 pt-8 border-t border-gray-100">
+              {[
+                { icon: <Instagram size={24} />, href: "#" },
+                { icon: <TikTokIcon />, href: "#" },
+                { icon: <Facebook size={24} />, href: "#" },
+                { icon: <Youtube size={24} />, href: "#" },
+              ].map((social, i) => (
+                <a
+                  key={i}
+                  href={social.href}
+                  className="text-gray-400 hover:text-[#00736C] transition-all duration-300 transform hover:scale-110"
                 >
-                  <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
-                </svg>
-              </a>
-              <a
-                href="#"
-                className="text-black hover:text-[#00736C] transition-colors duration-200"
-              >
-                <Facebook size={20} />
-              </a>
-              <a
-                href="#"
-                className="text-black hover:text-[#00736C] transition-colors duration-200"
-              >
-                <Youtube size={20} />
-              </a>
-              <a
-                href="#"
-                className="text-black hover:text-[#00736C] transition-colors duration-200"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M12 0C5.374 0 0 5.373 0 12s5.374 12 12 12 12-5.373 12-12S18.626 0 12 0zm5.568 8.16c-.169 1.858-.896 3.423-2.001 4.536-1.194 1.188-2.819 1.844-4.67 1.844-.598 0-1.174-.085-1.727-.247-.264-.078-.526-.171-.782-.278-.348-.146-.68-.317-.993-.513-.793-.495-1.485-1.211-1.957-2.085-.332-.614-.52-1.295-.52-2.01 0-.717.188-1.398.52-2.01.472-.874 1.164-1.59 1.957-2.085.313-.196.645-.367.993-.513.256-.107.518-.2.782-.278.553-.162 1.129-.247 1.727-.247 1.851 0 3.476.656 4.67 1.844 1.105 1.113 1.832 2.678 2.001 4.536z" />
-                </svg>
-              </a>
-              <a
-                href="#"
-                className="text-black hover:text-[#00736C] transition-colors duration-200"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                </svg>
-              </a>
+                  {social.icon}
+                </a>
+              ))}
             </div>
+            <p className="mt-10 text-[10px] text-gray-400 tracking-widest uppercase">
+              © 2025 Ardor Diamonds
+            </p>
           </div>
         </div>
       </div>

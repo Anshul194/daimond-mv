@@ -124,8 +124,7 @@ const HeroSection = () => {
         </div>
 
         {/* Content */}
-        <div className="relative z-20 flex flex-col justify-center h-full px-8 md:px-12 lg:px-20 max-w-2xl bg-gradient-to-r from-black/50 to-transparent reveal-content">
-
+        <div className="relative z-20 flex flex-col justify-end lg:justify-center h-full px-8 pb-12 md:pb-20 lg:pb-0 md:px-12 lg:px-20 max-w-2xl bg-gradient-to-t lg:bg-gradient-to-r from-black/60 lg:from-black/50 to-transparent reveal-content">
           <div className="mb-6">
             {/* Google Reviews Badge - Static */}
             <div className="mb-6 inline-block">
