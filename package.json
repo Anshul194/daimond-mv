@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "DISABLE_ESLINT_PLUGIN=true next build",
-    "start": "DISABLE_ESLINT_PLUGIN=true next start -p $PORT"
+    "build": "cross-env DISABLE_ESLINT_PLUGIN=true next build",
+    "start": "cross-env DISABLE_ESLINT_PLUGIN=true next start -p $PORT"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.8.2",
@@ -47,6 +47,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4.1.10",
+    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
     "tailwindcss": "^4"
