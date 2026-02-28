@@ -6,6 +6,8 @@ const __dirname = dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Explicit empty turbopack config to avoid "Call retries were exceeded" build warnings
+  turbopack: {},
   transpilePackages: ["gsap"],
   eslint: {
     ignoreDuringBuilds: true,
