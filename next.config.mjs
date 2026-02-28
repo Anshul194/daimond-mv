@@ -9,6 +9,7 @@ const nextConfig = {
   // Explicit empty turbopack config to avoid "Call retries were exceeded" build warnings
   turbopack: {},
   transpilePackages: ["gsap"],
+  serverExternalPackages: ["nodemailer"],
   eslint: {
     ignoreDuringBuilds: true,
   },

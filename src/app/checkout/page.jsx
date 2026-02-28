@@ -282,10 +282,10 @@ const CheckoutPage = () => {
         pid_image: item.pid_image,
         pid_price: item.pid_price,
         quantity: item.quantity,
-        selectedOptions: {
-          ringSize: item.selectedOptions.ringSize._id,
-          metalType: item.selectedOptions.metalType._id,
-        },
+        selectedOptions: item.selectedOptions ? {
+          ringSize: item.selectedOptions.ringSize?._id || item.selectedOptions.ringSize,
+          metalType: item.selectedOptions.metalType?._id || item.selectedOptions.metalType,
+        } : null,
         selectedDiamond: item?.selectedDiamond?._id,
       }));
 

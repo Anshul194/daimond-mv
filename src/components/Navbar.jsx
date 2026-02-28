@@ -72,7 +72,7 @@ const Navbar = () => {
       const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
 
       tl.fromTo(navRef.current, { y: -100, opacity: 0 }, { y: 0, opacity: 1, duration: 1 });
-      
+
       tl.fromTo(logoRef.current, { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 1 }, "-=0.5");
 
       const navElements = [];
@@ -141,10 +141,10 @@ const Navbar = () => {
     { name: "NEW ARRIVALS", href: "/new-arrivals" },
     ...(categories && categories.length > 0
       ? [...categories].reverse().map((category) => ({
-          name: category.name.toUpperCase(),
-          href: `/${category.slug}`,
-          hasDropdown: true,
-        }))
+        name: category.name.toUpperCase(),
+        href: `/${category.slug}`,
+        hasDropdown: true,
+      }))
       : []),
   ];
 
@@ -410,11 +410,7 @@ const Navbar = () => {
   };
 
   const handelProfileClick = async () => {
-    if (isAuthenticated) {
-      window.location.href = "/my-orders";
-    } else {
-      window.location.href = "/login";
-    }
+    window.location.href = "/login";
   };
 
   useEffect(() => {
@@ -450,16 +446,14 @@ const Navbar = () => {
   return (
     <>
       <div
-        className={`fixed inset-0 w-full h-screen bg-black/20 z-[9999] transition-all duration-300 ${
-          showSearch
+        className={`fixed inset-0 w-full h-screen bg-black/20 z-[9999] transition-all duration-300 ${showSearch
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
-        }`}
+          }`}
       >
         <div
-          className={`h-24 max-sm:h-20 max-sm:px-10 px-32 ${
-            showSearch ? "mt-0" : "-mt-24 max-sm:-mt-20"
-          } bg-white flex justify-between items-center transition-all duration-300`}
+          className={`h-24 max-sm:h-20 max-sm:px-10 px-32 ${showSearch ? "mt-0" : "-mt-24 max-sm:-mt-20"
+            } bg-white flex justify-between items-center transition-all duration-300`}
         >
           <div className="w-2/3 flex gap-4 items-center">
             <SearchIcon className="text-gray-900" />
@@ -525,9 +519,8 @@ const Navbar = () => {
       {/* Desktop Navbar */}
       <nav
         ref={navRef}
-        className={`sticky top-0 w-full h-16 lg:h-20 bg-white z-50 border-b border-gray-100 transition-all duration-300 ${
-          scrolled ? "shadow-md" : ""
-        }`}
+        className={`sticky top-0 w-full h-16 lg:h-20 bg-white z-50 border-b border-gray-100 transition-all duration-300 ${scrolled ? "shadow-md" : ""
+          }`}
       >
         <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
@@ -606,63 +599,62 @@ const Navbar = () => {
                   </span>
 
                   <div
-                    className={`absolute top-full left-0 w-48 bg-white shadow-md border border-gray-100 py-2 z-50 flex flex-col transition-all duration-300 ease-in-out ${
-                      showMoreDropdown
+                    className={`absolute top-full left-0 w-48 bg-white shadow-md border border-gray-100 py-2 z-50 flex flex-col transition-all duration-300 ease-in-out ${showMoreDropdown
                         ? "opacity-100 translate-y-0 pointer-events-auto"
                         : "opacity-0 -translate-y-2 pointer-events-none"
-                    }`}
+                      }`}
                   >
-                      <div className="w-full h-full absolute top-[-40px] left-0 bg-transparent"></div>
-                      {hiddenLeftNavItems.map((item) => (
-                        <div
-                          key={item.name}
-                          className="relative px-6 py-3 hover:bg-gray-50"
-                          onMouseEnter={() => {
-                            if (item.hasDropdown) {
-                              if (item.name === "FINE JEWELLERY") {
-                                setShowJewelleryDropdown(true);
-                                setOpenMenuData(attributesData[item.name] || {});
-                              } else if (item.name === "WEDDING RINGS") {
-                                setShowWeddingDropdown(true);
-                                setOpenMenuData(attributesData[item.name] || {});
-                              } else if (item.name === "ENGAGEMENT RINGS") {
-                                setShowEngagementDropdown(true);
-                                setOpenMenuData(attributesData[item.name] || {});
-                              }
+                    <div className="w-full h-full absolute top-[-40px] left-0 bg-transparent"></div>
+                    {hiddenLeftNavItems.map((item) => (
+                      <div
+                        key={item.name}
+                        className="relative px-6 py-3 hover:bg-gray-50"
+                        onMouseEnter={() => {
+                          if (item.hasDropdown) {
+                            if (item.name === "FINE JEWELLERY") {
+                              setShowJewelleryDropdown(true);
+                              setOpenMenuData(attributesData[item.name] || {});
+                            } else if (item.name === "WEDDING RINGS") {
+                              setShowWeddingDropdown(true);
+                              setOpenMenuData(attributesData[item.name] || {});
+                            } else if (item.name === "ENGAGEMENT RINGS") {
+                              setShowEngagementDropdown(true);
+                              setOpenMenuData(attributesData[item.name] || {});
                             }
-                          }}
-                          onMouseLeave={() => {
-                            if (item.hasDropdown) {
-                              if (item.name === "FINE JEWELLERY") {
-                                setShowJewelleryDropdown(false);
-                              } else if (item.name === "WEDDING RINGS") {
-                                setShowWeddingDropdown(false);
-                              } else if (item.name === "ENGAGEMENT RINGS") {
-                                setShowEngagementDropdown(false);
-                              }
+                          }
+                        }}
+                        onMouseLeave={() => {
+                          if (item.hasDropdown) {
+                            if (item.name === "FINE JEWELLERY") {
+                              setShowJewelleryDropdown(false);
+                            } else if (item.name === "WEDDING RINGS") {
+                              setShowWeddingDropdown(false);
+                            } else if (item.name === "ENGAGEMENT RINGS") {
+                              setShowEngagementDropdown(false);
                             }
-                          }}
+                          }
+                        }}
+                      >
+                        <a
+                          href={
+                            item.name === "FINE JEWELLERY"
+                              ? "/fine-jewellery-807?finejewellery=6874b552f2ed2bebef46ccec"
+                              : item.name === "WEDDING RINGS"
+                                ? "/wedding-rings-105"
+                                : item.name === "ENGAGEMENT RINGS"
+                                  ? "/engagement-rings-334"
+                                  : item.name === "RINGS"
+                                    ? "/rings-945"
+                                    : item?.href
+                          }
+                          className="group relative text-black hover:text-[#00736C] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-300 block"
                         >
-                          <a
-                            href={
-                              item.name === "FINE JEWELLERY"
-                                ? "/fine-jewellery-807?finejewellery=6874b552f2ed2bebef46ccec"
-                                : item.name === "WEDDING RINGS"
-                                  ? "/wedding-rings-105"
-                                  : item.name === "ENGAGEMENT RINGS"
-                                    ? "/engagement-rings-334"
-                                    : item.name === "RINGS"
-                                      ? "/rings-945"
-                                      : item?.href
-                            }
-                            className="group relative text-black hover:text-[#00736C] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-300 block"
-                          >
-                            {item.name}
-                            <span className="absolute -bottom-0.5 left-0 h-[1px] w-0 bg-[#00736C] transition-all duration-300 group-hover:w-full" />
-                          </a>
-                        </div>
-                      ))}
-                    </div>
+                          {item.name}
+                          <span className="absolute -bottom-0.5 left-0 h-[1px] w-0 bg-[#00736C] transition-all duration-300 group-hover:w-full" />
+                        </a>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -706,13 +698,13 @@ const Navbar = () => {
                       }
                     }}
                   >
-                      <Link
-                        href={item.href}
-                        className="group relative text-black hover:text-[#00736C] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-300 inline-block"
-                      >
-                        {item.name}
-                        <span className="absolute -bottom-0.5 left-0 h-[1px] w-0 bg-[#00736C] transition-all duration-300 group-hover:w-full" />
-                      </Link>
+                    <Link
+                      href={item.href}
+                      className="group relative text-black hover:text-[#00736C] text-[10px] font-semibold font-gintoNord tracking-wide transition-colors duration-300 inline-block"
+                    >
+                      {item.name}
+                      <span className="absolute -bottom-0.5 left-0 h-[1px] w-0 bg-[#00736C] transition-all duration-300 group-hover:w-full" />
+                    </Link>
                   </div>
                 ))}
 
@@ -754,11 +746,10 @@ const Navbar = () => {
       <div>
         {/* Fine Jewellery Dropdown Menu */}
         <div
-          className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${
-            showJewelleryDropdown
+          className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${showJewelleryDropdown
               ? "opacity-100 translate-y-0 pointer-events-auto"
               : "opacity-0 -translate-y-2 pointer-events-none"
-          }`}
+            }`}
           onMouseEnter={() => setShowJewelleryDropdown(true)}
           onMouseLeave={() => setShowJewelleryDropdown(false)}
         >
@@ -801,11 +792,10 @@ const Navbar = () => {
                   <div className="grid grid-cols-2 gap-4 max-w-full">
                     {/* Statement Rings */}
                     <TransitionLink
-                      href={`/fine-jewellery-807?finejewellery=${
-                        fineJewellerSubCategories.filter((e) =>
-                          e.name.includes("Statement")
-                        )[0]?._id
-                      }`}
+                      href={`/fine-jewellery-807?finejewellery=${fineJewellerSubCategories.filter((e) =>
+                        e.name.includes("Statement")
+                      )[0]?._id
+                        }`}
                     >
                       <div className="group cursor-pointer">
                         <div className="relative overflow-hidden lg:mb-2 h-44">
@@ -831,11 +821,10 @@ const Navbar = () => {
 
                     {/* Stacker Rings */}
                     <TransitionLink
-                      href={`/fine-jewellery-807?finejewellery=${
-                        fineJewellerSubCategories.filter((e) =>
-                          e.name.includes("Stacker")
-                        )[0]?._id
-                      }`}
+                      href={`/fine-jewellery-807?finejewellery=${fineJewellerSubCategories.filter((e) =>
+                        e.name.includes("Stacker")
+                      )[0]?._id
+                        }`}
                     >
                       <div className="group cursor-pointer">
                         <div className="relative overflow-hidden lg:mb-2 h-44">
@@ -862,10 +851,9 @@ const Navbar = () => {
                     {/* Minimal Rings */}
                     <TransitionLink
                       href={
-                        `/fine-jewellery-807?finejewellery=${
-                          fineJewellerSubCategories.filter((e) =>
-                            e.name.includes("Minimal")
-                          )[0]?._id
+                        `/fine-jewellery-807?finejewellery=${fineJewellerSubCategories.filter((e) =>
+                          e.name.includes("Minimal")
+                        )[0]?._id
                         }` ||
                         "/fine-jewellery-807?finejewellery=6874b552f2ed2bebef46ccec"
                       }
@@ -925,11 +913,10 @@ const Navbar = () => {
 
       {/* Engagement Rings Dropdown Menu */}
       <div
-        className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${
-          showEngagementDropdown
+        className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${showEngagementDropdown
             ? "opacity-100 translate-y-0 pointer-events-auto"
             : "opacity-0 -translate-y-2 pointer-events-none"
-        }`}
+          }`}
         onMouseEnter={() => setShowEngagementDropdown(true)}
         onMouseLeave={() => setShowEngagementDropdown(false)}
       >
@@ -1074,11 +1061,10 @@ const Navbar = () => {
       <div>
         {/* Wedding Rings Dropdown Menu */}
         <div
-          className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${
-            showWeddingDropdown
+          className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${showWeddingDropdown
               ? "opacity-100 translate-y-0 pointer-events-auto"
               : "opacity-0 -translate-y-2 pointer-events-none"
-          }`}
+            }`}
           onMouseEnter={() => setShowWeddingDropdown(true)}
           onMouseLeave={() => setShowWeddingDropdown(false)}
         >
@@ -1207,11 +1193,10 @@ const Navbar = () => {
 
       {/* Contact Dropdown Menu */}
       <div
-        className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${
-          showContactDropdown
+        className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${showContactDropdown
             ? "opacity-100 translate-y-0 pointer-events-auto"
             : "opacity-0 -translate-y-2 pointer-events-none"
-        }`}
+          }`}
         onMouseEnter={() => setShowContactDropdown(true)}
         onMouseLeave={() => setShowContactDropdown(false)}
       >
@@ -1295,11 +1280,10 @@ const Navbar = () => {
 
       {/* Education Dropdown Menu */}
       <div
-        className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${
-          showEducationDropdown
+        className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${showEducationDropdown
             ? "opacity-100 translate-y-0 pointer-events-auto"
             : "opacity-0 -translate-y-2 pointer-events-none"
-        }`}
+          }`}
         onMouseEnter={() => setShowEducationDropdown(true)}
         onMouseLeave={() => setShowEducationDropdown(false)}
       >
@@ -1388,7 +1372,7 @@ const Navbar = () => {
               {[...navItems, ...rightNavItems].map((cat, catIndex) => {
                 const isExpanded = expandedAccordion === catIndex;
                 const hasSubMenu = ["ENGAGEMENT RINGS", "WEDDING RINGS", "FINE JEWELLERY", "EDUCATION", "CONTACT"].includes(cat.name);
-                
+
                 return (
                   <div key={cat.name} className="mobile-nav-item w-full border-b border-gray-50 pb-4">
                     <div className="flex items-center justify-between w-full">
@@ -1409,7 +1393,7 @@ const Navbar = () => {
                       )}
                     </div>
 
-                    <div 
+                    <div
                       className={`grid transition-all duration-500 ease-in-out ${isExpanded && hasSubMenu ? "grid-rows-[1fr] opacity-100 mt-6" : "grid-rows-[0fr] opacity-0 mt-0"}`}
                     >
                       <div className="overflow-hidden ml-2 space-y-6">
@@ -1417,31 +1401,35 @@ const Navbar = () => {
                         {cat.name === "ENGAGEMENT RINGS" && (
                           <>
                             {[
-                              { title: "BUILD A RING", items: [
-                                { name: "Browse Settings", href: "/engagement-230" },
-                                { name: "Ready-to-Ship Rings", href: "/engagement-230" },
-                                { name: "Custom-Made Rings", href: "/custom-made-engagement-rings" }
-                              ]},
+                              {
+                                title: "BUILD A RING", items: [
+                                  { name: "Browse Settings", href: "/engagement-230" },
+                                  { name: "Ready-to-Ship Rings", href: "/engagement-230" },
+                                  { name: "Custom-Made Rings", href: "/custom-made-engagement-rings" }
+                                ]
+                              },
                               { title: "SHOP BY METAL", items: attributesData["ENGAGEMENT RINGS"]?.["METAL TYPE"]?.map(m => ({ name: m.value, href: `/engagement-230?metal=${m.value.toLowerCase()}` })) || [] },
                               { title: "SHOP BY STYLE", items: attributesData["ENGAGEMENT RINGS"]?.["Style"]?.map(s => ({ name: s.value, href: `/engagement-230?style=${s.value.toLowerCase()}` })) || [] },
-                              { title: "GUIDANCE", items: [
-                                { name: "Engagement Ring Guide", href: "/engagement-rings/build-rings" },
-                                { name: "Design Basics", href: "/engagement-rings/build-rings" },
-                                { name: "Find Your Ring Size", href: "/engagement-rings/build-rings" },
-                                { name: "Precious Metals Guide", href: "/engagement-rings/build-rings" },
-                                { name: "Our Crafting Process", href: "/engagement-rings/build-rings" },
-                                { name: "Ring Care Guide", href: "/engagement-rings/build-rings" }
-                              ]}
+                              {
+                                title: "GUIDANCE", items: [
+                                  { name: "Engagement Ring Guide", href: "/engagement-rings/build-rings" },
+                                  { name: "Design Basics", href: "/engagement-rings/build-rings" },
+                                  { name: "Find Your Ring Size", href: "/engagement-rings/build-rings" },
+                                  { name: "Precious Metals Guide", href: "/engagement-rings/build-rings" },
+                                  { name: "Our Crafting Process", href: "/engagement-rings/build-rings" },
+                                  { name: "Ring Care Guide", href: "/engagement-rings/build-rings" }
+                                ]
+                              }
                             ].map((sub, idx) => (
                               <div key={idx} className="space-y-4">
-                                <button 
+                                <button
                                   onClick={() => toggleSubAccordion(`eng-${idx}`)}
                                   className="text-[#00736C] text-[10px] font-bold tracking-[0.2em] uppercase flex items-center justify-between w-full group"
                                 >
                                   {sub.title}
-                                  <ChevronDown 
-                                    size={12} 
-                                    className={`transition-transform duration-300 ${expandedSubAccordion === `eng-${idx}` ? "rotate-180" : ""}`} 
+                                  <ChevronDown
+                                    size={12}
+                                    className={`transition-transform duration-300 ${expandedSubAccordion === `eng-${idx}` ? "rotate-180" : ""}`}
                                   />
                                 </button>
                                 <div className={`grid transition-all duration-300 ease-in-out ${expandedSubAccordion === `eng-${idx}` ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
@@ -1460,32 +1448,38 @@ const Navbar = () => {
                         {cat.name === "WEDDING RINGS" && (
                           <>
                             {[
-                              { title: "WOMEN", items: [
-                                { name: "All Women's Wedding Rings", href: "/wedding-rings-873?gender=woman" },
-                                ...(attributesData["WEDDING RINGS"]?.["Style"]?.map(s => ({ name: `${s.value} Women's`, href: `/wedding-rings-873?gender=woman&style=${s.value.toLowerCase()}` })) || [])
-                              ]},
-                              { title: "MEN", items: [
-                                { name: "All Men's Wedding Rings", href: "/wedding-rings-873?gender=man" },
-                                ...(attributesData["WEDDING RINGS"]?.["Style"]?.map(s => ({ name: `${s.value} Men's`, href: `/wedding-rings-873?gender=man&style=${s.value.toLowerCase()}` })) || [])
-                              ]},
+                              {
+                                title: "WOMEN", items: [
+                                  { name: "All Women's Wedding Rings", href: "/wedding-rings-873?gender=woman" },
+                                  ...(attributesData["WEDDING RINGS"]?.["Style"]?.map(s => ({ name: `${s.value} Women's`, href: `/wedding-rings-873?gender=woman&style=${s.value.toLowerCase()}` })) || [])
+                                ]
+                              },
+                              {
+                                title: "MEN", items: [
+                                  { name: "All Men's Wedding Rings", href: "/wedding-rings-873?gender=man" },
+                                  ...(attributesData["WEDDING RINGS"]?.["Style"]?.map(s => ({ name: `${s.value} Men's`, href: `/wedding-rings-873?gender=man&style=${s.value.toLowerCase()}` })) || [])
+                                ]
+                              },
                               { title: "RINGS BY METAL", items: attributesData["WEDDING RINGS"]?.["METAL TYPE"]?.map(m => ({ name: m.value, href: `/engagement-230?metal=${m.value.toLowerCase()}` })) || [] },
-                              { title: "GUIDANCE", items: [
-                                { name: "Wedding Ring Guide", href: "/wedding-rings/women" },
-                                { name: "Design Basics", href: "/wedding-rings/women" },
-                                { name: "Find Your Ring Size", href: "/wedding-rings/women" },
-                                { name: "Precious Metals Guide", href: "/precious-metals-guide" },
-                                { name: "Our Crafting Process", href: "/crafting-process" }
-                              ]}
+                              {
+                                title: "GUIDANCE", items: [
+                                  { name: "Wedding Ring Guide", href: "/wedding-rings/women" },
+                                  { name: "Design Basics", href: "/wedding-rings/women" },
+                                  { name: "Find Your Ring Size", href: "/wedding-rings/women" },
+                                  { name: "Precious Metals Guide", href: "/precious-metals-guide" },
+                                  { name: "Our Crafting Process", href: "/crafting-process" }
+                                ]
+                              }
                             ].map((sub, idx) => (
                               <div key={idx} className="space-y-4">
-                                <button 
+                                <button
                                   onClick={() => toggleSubAccordion(`wed-${idx}`)}
                                   className="text-[#00736C] text-[10px] font-bold tracking-[0.2em] uppercase flex items-center justify-between w-full group"
                                 >
                                   {sub.title}
-                                  <ChevronDown 
-                                    size={12} 
-                                    className={`transition-transform duration-300 ${expandedSubAccordion === `wed-${idx}` ? "rotate-180" : ""}`} 
+                                  <ChevronDown
+                                    size={12}
+                                    className={`transition-transform duration-300 ${expandedSubAccordion === `wed-${idx}` ? "rotate-180" : ""}`}
                                   />
                                 </button>
                                 <div className={`grid transition-all duration-300 ease-in-out ${expandedSubAccordion === `wed-${idx}` ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
@@ -1519,7 +1513,7 @@ const Navbar = () => {
                           <div className="space-y-6 pt-2 pb-4">
                             {educationCategories?.map((category, idx) => (
                               <div key={idx} className="space-y-3">
-                                <Link 
+                                <Link
                                   href={`/blogs/6878cbb596dfc8337a3359b4/${category.subCategory._id}`}
                                   className="text-[#00736C] text-[10px] font-bold tracking-[0.2em] uppercase block"
                                   onClick={() => setIsMobileMenuOpen(false)}
@@ -1560,9 +1554,9 @@ const Navbar = () => {
 
               {/* Meet With Us & User actions explicitly added if not in navItems */}
               <div className="mobile-nav-item w-full flex items-center justify-between border-b border-gray-50 pb-4">
-                 <button onClick={handelProfileClick} className="text-black hover:text-[#00736C] text-2xl font-light font-gintoNord tracking-tighter">
-                   MY ACCOUNT
-                 </button>
+                <button onClick={handelProfileClick} className="text-black hover:text-[#00736C] text-2xl font-light font-gintoNord tracking-tighter">
+                  MY ACCOUNT
+                </button>
               </div>
 
               {/* Book Appointment emphasized */}

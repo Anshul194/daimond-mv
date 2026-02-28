@@ -15,7 +15,7 @@ export default function ElegantLogin() {
   const [otp, setOtp] = useState("");
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const containerRef = useRef(null);
   const leftSideRef = useRef(null);
   const formCardRef = useRef(null);
@@ -30,13 +30,14 @@ export default function ElegantLogin() {
     // Entrance Animation
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: "power4.out", duration: 1.2 } });
-      
+
       tl.fromTo(leftSideRef.current, { x: -100, opacity: 0 }, { x: 0, opacity: 1 })
         .fromTo(formCardRef.current, { y: 50, opacity: 0 }, { y: 0, opacity: 1 }, "-=0.8")
         .fromTo(titleRef.current, { y: 20, opacity: 0 }, { y: 0, opacity: 1 }, "-=1")
         .fromTo(inputRef.current, { y: 20, opacity: 0 }, { y: 0, opacity: 1 }, "-=1")
-        .fromTo(buttonRef.current, { y: 20, opacity: 0 }, { y: 0, opacity: 1 }, "-=1")
-        .fromTo(diamondRef.current, { scale: 0, rotate: -45 }, { scale: 1, rotate: 0, duration: 1.5, ease: "back.out(1.7)" }, "-=1.2");
+        .fromTo(buttonRef.current, { y: 20, opacity: 0 }, { y: 0, opacity: 1 }, "-=1");
+      // .fromTo(diamondRef.current, { scale: 0, rotate: -45 }, { scale: 1, rotate: 0, duration: 1.5, ease: "back.out(1.7)" }, "-=1.2");
+
 
       // Background floating elements
       gsap.to(".bg-sparkle", {
@@ -52,22 +53,31 @@ export default function ElegantLogin() {
     return () => ctx.revert();
   }, []);
 
+  useEffect(() => {
+    if (isOtpSent) {
+      gsap.fromTo(".otp-state",
+        { x: 30, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.6, ease: "power3.out", delay: 0.1 }
+      );
+    }
+  }, [isOtpSent]);
+
   const handleSendOtp = async () => {
     if (!email) return;
     setIsLoading(true);
-    
+
     // Subtle button click animation
     gsap.to(buttonRef.current, { scale: 0.95, duration: 0.1, yoyo: true, repeat: 1 });
 
     try {
       const result = await dispatch(sendOtp(email));
+
       if (result.payload?.success) {
         // Transition animation to OTP state
         const tl = gsap.timeline();
-        tl.to(".login-initial-state", { x: -30, opacity: 0, duration: 0.4, ease: "power2.in" })
-          .call(() => setIsOtpSent(true));
+        tl.to(".login-initial-state", { x: -30, opacity: 0, duration: 0.4, ease: "power2.in", onComplete: () => setIsOtpSent(true) });
       } else {
-        toast.error("Failed to send OTP. Please try again.");
+        toast.error(typeof result.payload === 'string' ? result.payload : "Failed to send OTP. Please try again.");
       }
     } catch (error) {
       toast.error("Error sending OTP. Please try again.");
@@ -109,7 +119,7 @@ export default function ElegantLogin() {
       {/* Decorative Background Elements */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
         {[...Array(6)].map((_, i) => (
-          <div 
+          <div
             key={i}
             className="bg-sparkle absolute w-2 h-2 rounded-full bg-[#00736C]/10"
             style={{
@@ -124,7 +134,7 @@ export default function ElegantLogin() {
       </div>
 
       <div className="container max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center relative z-10">
-        
+
         {/* Left Side: Visual/Branding */}
         <div ref={leftSideRef} className="hidden lg:block space-y-8">
           {/* <Link href="/" className="inline-block">
@@ -139,10 +149,10 @@ export default function ElegantLogin() {
               />
             </div>
           </Link> */}
-          
+
           <div className="space-y-6">
             <h1 className="text-6xl font-extralight text-gray-900 leading-tight">
-              Timeless <br /> 
+              Timeless <br />
               <span className="italic font-arizona text-[#00736C]">Elegance</span> <br />
               Awaits You
             </h1>
@@ -164,7 +174,7 @@ export default function ElegantLogin() {
         {/* Right Side: Login Card */}
         <div ref={formCardRef} className="w-full max-w-md mx-auto">
           <div className="bg-white/70 backdrop-blur-xl p-10 lg:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-white/50 relative overflow-hidden group">
-            
+
             {/* Glossy Overlay Effect */}
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
@@ -214,7 +224,7 @@ export default function ElegantLogin() {
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto" />
                     ) : (
                       <span className="inline-flex items-center text-white">
-                        Request Access 
+                        Request Access
                         <ArrowRight className="ml-3 w-4 h-4 transition-transform duration-500 group-hover/btn:translate-x-1" />
                       </span>
                     )}
@@ -231,7 +241,7 @@ export default function ElegantLogin() {
                 </div>
               </div>
             ) : (
-              <div className="otp-state space-y-8 relative shadow-none">
+              <div className="otp-state space-y-8 relative shadow-none opacity-0">
                 <div className="flex items-center justify-between mb-4">
                   <button onClick={handleBack} className="text-gray-400 hover:text-gray-900 transition-colors flex items-center text-[10px] font-gintoNord tracking-wider">
                     <ChevronLeft className="w-4 h-4 mr-1" /> BACK
