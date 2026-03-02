@@ -169,9 +169,8 @@ const SliderBoxTwo = () => {
         <button
           onClick={prevSlide}
           disabled={currentSlide === 0}
-          className={`absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center transition-all duration-300 hover:bg-gray-50 hover:shadow-lg ${
-            currentSlide === 0 ? 'opacity-30 cursor-not-allowed' : 'opacity-80 hover:opacity-100'
-          }`}
+          className={`absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center transition-all duration-300 hover:bg-gray-50 hover:shadow-lg ${currentSlide === 0 ? 'opacity-30 cursor-not-allowed' : 'opacity-80 hover:opacity-100'
+            }`}
         >
           <svg
             className="w-5 h-5 text-gray-600"
@@ -192,9 +191,8 @@ const SliderBoxTwo = () => {
         <button
           onClick={nextSlide}
           disabled={currentSlide === maxSlides}
-          className={`absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center transition-all duration-300 hover:bg-gray-50 hover:shadow-lg ${
-            currentSlide === maxSlides ? 'opacity-30 cursor-not-allowed' : 'opacity-80 hover:opacity-100'
-          }`}
+          className={`absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center transition-all duration-300 hover:bg-gray-50 hover:shadow-lg ${currentSlide === maxSlides ? 'opacity-30 cursor-not-allowed' : 'opacity-80 hover:opacity-100'
+            }`}
         >
           <svg
             className="w-5 h-5 text-gray-600"
@@ -213,9 +211,8 @@ const SliderBoxTwo = () => {
 
         <div
           ref={sliderRef}
-          className={`flex transition-transform duration-500 ease-in-out ${
-            isDragging ? "cursor-grabbing" : "cursor-grab"
-          }`}
+          className={`flex transition-transform duration-500 ease-in-out ${isDragging ? "cursor-grabbing" : "cursor-grab"
+            }`}
           style={{
             transform: `translateX(-${currentSlide * slideWidth}%)`,
           }}
@@ -227,9 +224,9 @@ const SliderBoxTwo = () => {
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          {categories.map((style) => (
+          {categories.map((style, index) => (
             <Link
-              key={style.name}
+              key={`${style.slug}-${index}`}
               href={`/${style.slug}`}
               className="flex-shrink-0 px-4"
               style={{ width: `${slideWidth}%` }}
@@ -260,13 +257,13 @@ const Page = () => {
       {/* Hero Section */}
       <div className="relative h-96 w-full">
         <div className="absolute inset-0">
-          <img 
+          <img
             src="https://cdn.shopify.com/s/files/1/0644/3067/0060/files/ImageBanner_web_2000x2000.png?v=1745460814"
             alt="Wedding rings"
             className="w-full h-full object-cover"
           />
         </div>
-        
+
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/60 to-transparent"></div>
       </div>
 
@@ -279,16 +276,16 @@ const Page = () => {
           <h2 className="text-4xl text-gray-800 mb-8 font-arizona font-light">
             Our Approach
           </h2>
-          
+
           <div className="space-y-4 text-gray-600 leading-relaxed">
             <p className="text-md font-arizona font-light">
               An engagement ring is a personal promise of love and commitment. Your design is an expression and symbol of your story.
             </p>
-            
+
             <p className="text-md font-arizona font-light">
               With this in mind, we believe the design process should be a personal one - a collaboration between you and our design team from start to finish.
             </p>
-            
+
             <p className="text-md font-arizona font-light">
               Consultations are complimentary and there are never any customisation fees. Our engagement ring specialists work with you to bring your piece to life.
             </p>
@@ -296,121 +293,128 @@ const Page = () => {
         </div>
       </section>
 
-    {/* YouTube Video Section */}
-    <section className="w-full h-screen flex items-center justify-center bg-black">
+      <section className="w-full h-screen flex items-center justify-center bg-black">
         <div className="w-full h-full">
-            <iframe src="https://www.youtube.com/embed/r7P08zf1h4w" title="Your Story, Our Craft." frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="" class="svelte-1g2jw83" className="!h-full !w-full"></iframe>
+          <iframe
+            src="https://www.youtube.com/embed/r7P08zf1h4w"
+            title="Your Story, Our Craft."
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+            className="!h-full !w-full"
+          ></iframe>
         </div>
-    </section>
+      </section>
 
-    <ProcessSection />
-    <StartProcessForm />
+      <ProcessSection />
+      <StartProcessForm />
 
-     <section className="py-16 px-8 bg-white">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl text-gray-800 mb-4 font-arizona font-light">
-            Expert Guidance
-          </h2>
-          <div className="w-16 h-0.5 bg-gray-400 mx-auto mb-6"></div>
-          <p className="text-gray-600 text-sm font-arizona font-light">
-            Empowering you with insights for selecting and acquiring the ideal ring.
-          </p>
-        </div>
-
-        {/* Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Card 1 */}
-          <div className="group cursor-pointer">
-            <div className="aspect-[2/2] bg-gray-100 overflow-hidden mb-6 relative">
-              <img
-                src="/serviceRings/ring-one.webp"
-                alt="Custom engagement ring with pink stones"
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-medium text-gray-800 font-arizona tracking-wide uppercase">
-                HOW MUCH DOES IT COST TO MAKE A CUSTOM ENGAGEMENT RING
-              </h3>
-              <svg
-                className="w-5 h-5 text-gray-600 ml-4 flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </div>
+      <section className="py-16 px-8 bg-white">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h2 className="text-4xl text-gray-800 mb-4 font-arizona font-light">
+              Expert Guidance
+            </h2>
+            <div className="w-16 h-0.5 bg-gray-400 mx-auto mb-6"></div>
+            <p className="text-gray-600 text-sm font-arizona font-light">
+              Empowering you with insights for selecting and acquiring the ideal ring.
+            </p>
           </div>
 
-          {/* Card 2 */}
-          <div className="group cursor-pointer">
-            <div className="aspect-[2/2] bg-gray-100 overflow-hidden mb-6 relative">
-              <img
-                src="/serviceRings/ring-two.webp"
-                alt="Custom wedding bands"
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-medium text-gray-800 font-arizona tracking-wide uppercase">
-                OUR FAVOURITE WAYS TO CUSTOMISE MEN&apos;S WEDDING BANDS
-              </h3>
-              <svg
-                className="w-5 h-5 text-gray-600 ml-4 flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
+          {/* Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Card 1 */}
+            <div className="group cursor-pointer">
+              <div className="aspect-[2/2] bg-gray-100 overflow-hidden mb-6 relative">
+                <img
+                  src="/serviceRings/ring-one.webp"
+                  alt="Custom engagement ring with pink stones"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
-              </svg>
+              </div>
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-medium text-gray-800 font-arizona tracking-wide uppercase">
+                  HOW MUCH DOES IT COST TO MAKE A CUSTOM ENGAGEMENT RING
+                </h3>
+                <svg
+                  className="w-5 h-5 text-gray-600 ml-4 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </div>
             </div>
-          </div>
 
-          {/* Card 3 */}
-          <div className="group cursor-pointer">
-            <div className="aspect-[2/2] bg-gray-100 overflow-hidden mb-6 relative">
-              <img
-                src="/serviceRings/ring-three.webp"
-                alt="Custom engagement ring design process"
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-medium text-gray-800 font-arizona tracking-wide uppercase">
-                THE CUSTOM ENGAGEMENT RING DESIGN PROCESS
-              </h3>
-              <svg
-                className="w-5 h-5 text-gray-600 ml-4 flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
+            {/* Card 2 */}
+            <div className="group cursor-pointer">
+              <div className="aspect-[2/2] bg-gray-100 overflow-hidden mb-6 relative">
+                <img
+                  src="/serviceRings/ring-two.webp"
+                  alt="Custom wedding bands"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
-              </svg>
+              </div>
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-medium text-gray-800 font-arizona tracking-wide uppercase">
+                  OUR FAVOURITE WAYS TO CUSTOMISE MEN&apos;S WEDDING BANDS
+                </h3>
+                <svg
+                  className="w-5 h-5 text-gray-600 ml-4 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            {/* Card 3 */}
+            <div className="group cursor-pointer">
+              <div className="aspect-[2/2] bg-gray-100 overflow-hidden mb-6 relative">
+                <img
+                  src="/serviceRings/ring-three.webp"
+                  alt="Custom engagement ring design process"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-medium text-gray-800 font-arizona tracking-wide uppercase">
+                  THE CUSTOM ENGAGEMENT RING DESIGN PROCESS
+                </h3>
+                <svg
+                  className="w-5 h-5 text-gray-600 ml-4 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
-    <FAQComponent/>
+      </section>
+      <FAQComponent />
     </div>
   );
 };
