@@ -10,9 +10,12 @@ const objectId = (value, helpers) => {
 };
 
 const baseReviewSchema = {
-  user: Joi.string().custom(objectId).messages({
+  user: Joi.string().custom(objectId).allow(null, '').messages({
     'any.invalid': 'Invalid user ID',
-    'string.empty': 'User is required',
+  }),
+
+  reviewerName: Joi.string().max(100).allow('', null).messages({
+    'string.max': 'Reviewer name can be maximum 100 characters',
   }),
 
   product: Joi.string().custom(objectId).allow(null, '').messages({
@@ -42,7 +45,8 @@ const baseReviewSchema = {
 
 // Create validator (required fields)
 export const reviewCreateValidator = Joi.object({
-  user: baseReviewSchema.user.required(),
+  user: baseReviewSchema.user.optional(),
+  reviewerName: baseReviewSchema.reviewerName.optional(),
   product: baseReviewSchema.product.optional(),
   rating: baseReviewSchema.rating.required(),
   comment: baseReviewSchema.comment.optional(),

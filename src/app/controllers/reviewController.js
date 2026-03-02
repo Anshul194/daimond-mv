@@ -20,6 +20,7 @@ export async function createReview(request, userId) {
     const productId = form.get('product');
     const rating = form.get('rating');
     const comment = form.get('comment');
+    const reviewerName = form.get('reviewerName');
     const isWebsiteReview = !productId ? true : form.get('isWebsiteReview') === 'true';
     const targetType = productId ? 'product' : 'website';
     const images = form.getAll('images');
@@ -29,13 +30,15 @@ export async function createReview(request, userId) {
       productId,
       rating,
       comment,
+      reviewerName,
       isWebsiteReview,
       targetType,
       imagesLength: images.length,
     });
 
-    if (!userId || !rating || !comment) {
-      console.warn('⚠️ Missing required fields:', { userId, rating, comment });
+    // Check for rating and comment (user is now optional for guests)
+    if (!rating || !comment) {
+      console.warn('⚠️ Missing required fields:', { rating, comment });
       return errorResponse('Missing required fields: rating and comment are required', 400);
     }
 
@@ -62,13 +65,15 @@ export async function createReview(request, userId) {
     }
 
     const payload = {
-      user: userId.toString(),
       rating: parseInt(rating),
       comment: comment.trim(),
       targetType,
       isWebsiteReview,
       images: imageUrls,
     };
+
+    if (userId) payload.user = userId.toString();
+    if (reviewerName) payload.reviewerName = reviewerName;
 
     if (productId) payload.product = productId;
 

@@ -11,10 +11,8 @@ export async function POST(request) {
     await dbConnect();
 
     const authResult = await verifyAnyUserAccess(request);
-    if (authResult.error) return authResult.error;
-
-    const { user } = authResult;
-    const result = await createReview(request, user.id);
+    const user = authResult.user;
+    const result = await createReview(request, user ? user.id : null);
 
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {

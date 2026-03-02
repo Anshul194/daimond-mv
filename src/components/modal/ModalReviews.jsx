@@ -145,7 +145,7 @@ const ModalReviews = () => {
     try {
       const response = await fetch('/api/review?limit=20&isWebsiteReview=true');
       const data = await response.json();
-      
+
       if (data.success && data.data.results) {
         const dynamicReviews = data.data.results.map(rev => ({
           type: 'review',
@@ -209,7 +209,7 @@ const ModalReviews = () => {
   const updateMaxHeight = () => {
     // Check if any reviews are expanded
     const hasExpandedReviews = Object.values(expandedReviews).some(expanded => expanded)
-    
+
     if (!hasExpandedReviews) {
       setMaxHeight(240)
       return
@@ -229,7 +229,7 @@ const ModalReviews = () => {
       }
       return 240
     })
-    
+
     const newMaxHeight = Math.max(240, ...heights)
     setMaxHeight(newMaxHeight)
   }
@@ -323,7 +323,7 @@ const ModalReviews = () => {
     <div className="inline-flex items-center gap-2">
       <div className="w-6 h-6 bg-[#004643] rounded flex items-center justify-center">
         <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
         </svg>
       </div>
       <span className="text-[#004643] font-semibold text-lg">Trustpilot</span>
@@ -334,7 +334,7 @@ const ModalReviews = () => {
     <div className="inline-flex items-center gap-0.5">
       {[...Array(5)].map((_, i) => (
         <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 24 24">
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
         </svg>
       ))}
     </div>
@@ -371,14 +371,14 @@ const ModalReviews = () => {
               onTouchEnd={handleTouchEnd}
             >
               {reviews.map((item, index) => (
-                <div 
-                  key={index} 
-                  className="flex-shrink-0 px-2" 
-                  style={{ 
+                <div
+                  key={index}
+                  className="flex-shrink-0 px-2"
+                  style={{
                     width: `${slideWidth}%`
                   }}
                 >
-                  <div 
+                  <div
                     ref={el => cardRefs.current[index] = el}
                     className="bg-white p-4 md:p-6 transition-all duration-300 shadow-sm border border-gray-100"
                     style={{ height: `${maxHeight}px` }}
@@ -395,27 +395,30 @@ const ModalReviews = () => {
                         {/* Trustpilot Section */}
                         <div className="text-center">
                           <div className="mt-3">
-                             <div className="mt-3 flex items-center justify-between">
-                            <div className='flex items-center gap-2'>
+                            <div className="mt-3 flex items-center justify-between">
+                              <div className='flex items-center gap-2'>
                                 <div className="text-2xl font-bold text-gray-900 mb-1">{item.googleRating}</div>
-                            <StarRating rating={5} />
+                                <StarRating rating={5} />
+                              </div>
+                              <div className="text-sm text-gray-600 mt-1">{item.googleReviews}</div>
                             </div>
-                            <div className="text-sm text-gray-600 mt-1">{item.googleReviews}</div>
-                          </div>
                           </div>
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="space-y-3">
-                          <button 
+                        <div className="space-y-3 mt-auto">
+                          <button
                             onClick={() => setShowForm(true)}
-                            className="w-full bg-[#004643] text-white py-3 px-4 text-[10px] font-semibold uppercase tracking-wide hover:bg-[#004643]/90 transition-colors"
+                            className="w-full bg-[#004643] text-white py-4 px-8 text-[11px] font-bold uppercase tracking-widest hover:bg-black transition-all duration-300 shadow-md"
                           >
                             WRITE A REVIEW
                           </button>
-                          <button className="w-full bg-[#004643]/80 text-white py-3 px-4 text-[10px] font-semibold uppercase tracking-wide hover:bg-[#004643] transition-colors">
+                          <Link
+                            href="/reviews"
+                            className="block w-full bg-[#3D6B68] text-white py-4 px-8 text-[11px] font-bold uppercase tracking-widest hover:bg-[#004643] transition-all duration-300 text-center shadow-md"
+                          >
                             READ OUR REVIEWS
-                          </button>
+                          </Link>
                         </div>
                       </div>
                     ) : (
@@ -423,11 +426,11 @@ const ModalReviews = () => {
                       <div className="space-y-4">
                         {/* Platform Logo */}
                         <GoogleLogo />
-                        
+
                         {/* Reviewer Info */}
                         <div className="flex items-center gap-3">
-                          <img 
-                            src={item.avatar} 
+                          <img
+                            src={item.avatar}
                             alt={item.name}
                             className="w-10 h-10 rounded-full object-cover"
                           />
@@ -444,7 +447,7 @@ const ModalReviews = () => {
                         <div className="text-[10px] text-gray-700 leading-relaxed">
                           {expandedReviews[index] ? item.review : truncateText(item.review)}
                           {(item.readMore || item.review.length > 120) && (
-                            <button 
+                            <button
                               className="text-blue-600 hover:underline ml-1"
                               onClick={() => toggleReviewExpansion(index)}
                             >
@@ -459,18 +462,6 @@ const ModalReviews = () => {
               ))}
             </div>
           </div>
-
-          {showForm && (
-            <div className="absolute inset-0 bg-white z-[60] flex items-center justify-center p-4">
-              <ReviewForm 
-                onCancel={() => setShowForm(false)}
-                onSuccess={() => {
-                  setShowForm(false);
-                  fetchReviews();
-                }}
-              />
-            </div>
-          )}
 
           {/* Navigation arrows */}
           {maxSlides > 0 && (
@@ -497,6 +488,20 @@ const ModalReviews = () => {
           )}
         </div>
       </div>
+
+      {showForm && (
+        <div className="fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="w-full max-w-xl animate-in fade-in zoom-in duration-300">
+            <ReviewForm
+              onCancel={() => setShowForm(false)}
+              onSuccess={() => {
+                setShowForm(false);
+                fetchReviews();
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

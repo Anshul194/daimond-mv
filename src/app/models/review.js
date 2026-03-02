@@ -6,7 +6,11 @@ const reviewSchema = new Schema({
   user: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
+    required: false, // optional for guest reviews
+  },
+  reviewerName: {
+    type: String,
+    trim: true,
   },
   product: {
     type: Schema.Types.ObjectId,
