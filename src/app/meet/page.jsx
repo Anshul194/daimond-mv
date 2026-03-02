@@ -4,6 +4,13 @@ import React from "react";
 import { InlineWidget } from "react-calendly";
 
 function Page() {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event("__page-data-ready"));
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   function handleClick() {
     window.history.back();
   }

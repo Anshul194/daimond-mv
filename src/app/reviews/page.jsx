@@ -4,6 +4,13 @@ import React, { useState, useEffect } from 'react';
 import Reviews from '@/components/homepage/Reviews';
 
 const AllReviewsPage = () => {
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            window.dispatchEvent(new Event("__page-data-ready"));
+        }, 100);
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
         <main className="min-h-screen bg-[#FEFAF5] pt-24 pb-16">
             <div className="max-w-7xl mx-auto px-4 md:px-8">
