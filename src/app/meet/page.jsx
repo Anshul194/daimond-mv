@@ -1,6 +1,6 @@
 "use client";
 import { X } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 import CalendlyWidget from "./CalendlyWidget";
 
 function Page() {
