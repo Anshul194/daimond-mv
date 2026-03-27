@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import TransitionLink from '../TransitionLink';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -142,7 +143,10 @@ export default function StorySection() {
                     >
                     </h2>
 
-                    <button className="group flex items-center space-x-4 bg-white/10 backdrop-blur-md border border-white/30 text-white px-10 py-4 text-xs font-medium tracking-[0.2em] uppercase cursor-pointer hover:bg-white hover:text-[#00736C] transition-all duration-500 rounded-sm">
+                    <TransitionLink
+                        href="/custom-made-engagement-rings"
+                        className="group flex items-center space-x-4 bg-white/10 backdrop-blur-md border border-white/30 text-white px-10 py-4 text-xs font-medium tracking-[0.2em] uppercase cursor-pointer hover:bg-white hover:text-[#00736C] transition-all duration-500 rounded-sm"
+                    >
                         <span>EXPLORE CUSTOM RINGS</span>
                         <svg
                             className="w-5 h-5 transition-transform duration-500 group-hover:translate-x-2"
@@ -157,7 +161,7 @@ export default function StorySection() {
                                 d="M17 8l4 4m0 0l-4 4m4-4H3"
                             />
                         </svg>
-                    </button>
+                    </TransitionLink>
                 </div>
             </div>
         </section>

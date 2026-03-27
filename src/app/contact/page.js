@@ -1,7 +1,7 @@
 "use client";
 import axiosInstance from "@/axiosConfig/axiosInstance";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect } from "react";
 import { toast } from "react-toastify";
 
 const Page = () => {
@@ -14,6 +14,13 @@ const Page = () => {
   });
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event("__page-data-ready"));
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

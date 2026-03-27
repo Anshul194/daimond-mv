@@ -1,4 +1,5 @@
 "use client";
+import React, { useEffect } from "react";
 import HeroSection from "@/components/homepage/HeroSection";
 import GreenBoxText from "@/components/homepage/GreenBoxText";
 import SliderBox from "@/components/SliderBox";
@@ -19,6 +20,13 @@ import Faq from "@/components/Faq";
 import { useSelector } from "react-redux";
 
 export default function Home() {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event("__page-data-ready"));
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div>
       <HeroSection />

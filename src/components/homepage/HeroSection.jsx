@@ -101,7 +101,7 @@ const HeroSection = () => {
     subtitle: "Exquisite engagement rings crafted for your forever.",
     image: "/images/left-banner.webp",
     rightImage: "/images/right-banner.webp",
-    label: "9,642 Trusted Reviews",
+   // label: "9,642 Trusted Reviews",
     buttonPrimaryText: "EXPLORE ENGAGEMENT",
     buttonPrimaryLink: "/engagement-rings/build-ring",
     buttonSecondaryText: "JEWELRY",
@@ -143,9 +143,9 @@ const HeroSection = () => {
                       ))}
                     </div>
                   </div>
-                  <span className="text-[10px] font-medium text-white/90">
-                    9,642 Trusted Reviews
-                  </span>
+                  {/* <span className="text-[10px] font-medium text-white/90"> */}
+                    {/* 9,642 Trusted Reviews */}
+                  {/* </span> */}
                 </div>
               </div>
             </div>

@@ -39,7 +39,7 @@ async function sendOTPByEmail(email, otp) {
     console.log(`OTP sent to ${email}`);
   } catch (error) {
     console.error("Error sending OTP email:", error);
-    throw new Error("Failed to send OTP email");
+    throw new Error("Failed to send OTP email: " + error.message);
   }
 }
 
@@ -58,12 +58,15 @@ export async function sendOTP(data) {
       );
     }
 
-    const user = await userService.getUserByEmail(email);
+    let user = await userService.getUserByEmail(email);
     if (!user) {
-      return new Response(
-        JSON.stringify({ success: false, message: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
-      );
+      // Auto-register the user if they don't exist
+      const randomPassword = Math.random().toString(36).slice(-10) + "A1!";
+      user = await userService.signup({
+        email,
+        password: randomPassword
+      });
+      console.log("Auto-registered new user during OTP request:", email);
     }
 
     const otp = generateOTP();
@@ -84,7 +87,7 @@ export async function sendOTP(data) {
   } catch (err) {
     console.error("Send OTP error:", err.message);
     return new Response(
-      JSON.stringify({ success: false, message: "Failed to send OTP" }),
+      JSON.stringify({ success: false, message: err.message || "Failed to send OTP" }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }

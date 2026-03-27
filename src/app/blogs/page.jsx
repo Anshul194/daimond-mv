@@ -24,6 +24,15 @@ const Page = () => {
       dispatch(fetchBlogCategories());
     }
   }, [status, dispatch]);
+
+  useEffect(() => {
+    if (status === "succeeded") {
+      const timer = setTimeout(() => {
+        window.dispatchEvent(new Event("__page-data-ready"));
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [status]);
   return (
     <div>
       {/* Hero Banner */}

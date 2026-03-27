@@ -37,15 +37,24 @@ const Page = () => {
 
     fetchData();
   }, []);
+
+  // Handle page transition curtain
+  useEffect(() => {
+    if (Object.keys(categoryData).length > 0) {
+      const timer = setTimeout(() => {
+        window.dispatchEvent(new Event("__page-data-ready"));
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [categoryData]);
   return (
     <div>
       {/* Hero Banner */}
       <div
         className="relative h-96 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: `url('${
-            categoryData.image || "/images/blogBanner.jpg"
-          }')`,
+          backgroundImage: `url('${categoryData.image || "/images/blogBanner.jpg"
+            }')`,
         }}
       >
         <div className="absolute inset-0 bg-black/20 bg-opacity-40"></div>

@@ -22,7 +22,8 @@ export async function PUT(request, context) {
 
     // ✅ Extract params properly
     const { params } = context;
-    const { id } = params;
+    const awaitedParams = await params;
+    const { id } = awaitedParams;
 
     // ✅ Verify admin access
     const authResult = await verifyAdminAccess(request);

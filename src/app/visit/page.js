@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import LocationSelector from './LocationSelector';
 import DateTimeSelector from './DateTimeSelector';
 import UserDetailsForm from './UserDetailsForm';
@@ -10,6 +10,13 @@ const Visit = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedDateTime, setSelectedDateTime] = useState(null);
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event("__page-data-ready"));
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleLocationSelect = (location) => {
     setSelectedLocation(location);
@@ -29,9 +36,9 @@ const Visit = () => {
       dateTime: selectedDateTime,
       userDetails: formData
     });
-    
+
     setBookingConfirmed(true);
-    
+
     // You could also redirect or show a success message
     alert('Booking confirmed! You will receive a confirmation email shortly.');
   };
@@ -64,13 +71,12 @@ const Visit = () => {
               className={`relative flex-1 ${index === 0 ? '' : 'ml-[-1px]'}`}
             >
               <div
-                className={`relative px-8 py-4 font-medium text-sm transition-colors ${
-                  step.active
-                    ? 'bg-[#004643] text-white'
-                    : step.skipped
+                className={`relative px-8 py-4 font-medium text-sm transition-colors ${step.active
+                  ? 'bg-[#004643] text-white'
+                  : step.skipped
                     ? 'bg-gray-100 text-gray-400'
                     : 'bg-gray-100 text-gray-500'
-                } `}
+                  } `}
               >
                 {step.label}
               </div>
@@ -85,7 +91,7 @@ const Visit = () => {
 
   const renderServiceInfo = () => {
     if (currentStep === 1) return null;
-    
+
     return (
       <div className="w-full max-w-6xl mx-auto mb-6">
         <div className="bg-gray-50 p-4 rounded-lg">
@@ -114,7 +120,7 @@ const Visit = () => {
                 Thank you for booking your appointment. You will receive a confirmation email shortly with all the details.
               </p>
             </div>
-            
+
             <div className="bg-gray-50 p-4 rounded-lg mb-6 text-left">
               <h3 className="font-medium text-gray-800 mb-2">Appointment Details:</h3>
               <p className="text-sm text-gray-600 mb-1">
@@ -150,14 +156,14 @@ const Visit = () => {
       <div className="px-4">
         {currentStep !== 1 && renderProgressBar()}
         {renderServiceInfo()}
-        
+
         {currentStep === 1 && (
           <LocationSelector
             onLocationSelect={handleLocationSelect}
             selectedLocation={selectedLocation}
           />
         )}
-        
+
         {currentStep === 3 && (
           <DateTimeSelector
             onDateTimeSelect={handleDateTimeSelect}
@@ -165,7 +171,7 @@ const Visit = () => {
             onBack={goBackToLocations}
           />
         )}
-        
+
         {currentStep === 4 && (
           <UserDetailsForm
             selectedDateTime={selectedDateTime}

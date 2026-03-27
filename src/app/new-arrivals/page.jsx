@@ -127,6 +127,16 @@ const RingsBuild = ({ props }) => {
     setSelectedRing(null);
   }, [categories, location]);
 
+  // Handle page transition curtain
+  useEffect(() => {
+    if (Products && Products.length > 0) {
+      const timer = setTimeout(() => {
+        window.dispatchEvent(new Event("__page-data-ready"));
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [Products]);
+
   const handleRingClick = (ring, index) => {
     setSelectedRing({ ...ring, index });
     setIsModalOpen(true);

@@ -179,7 +179,7 @@ const Education = () => {
         >
           {data.map((style, index) => (
             <Link
-              href={`/blogs/${style.BlogCategory._id}/${style._id}`}
+              href={`/blogs/${style.BlogCategory?._id || style.BlogCategory || '6878cbb596dfc8337a3359b4'}/${style._id}`}
               key={style._id}
               className="flex-shrink-0 px-2"
               style={{ width: `${slideWidth}%` }}

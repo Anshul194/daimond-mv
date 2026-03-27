@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import ReviewForm from '../ReviewForm';
+import Link from 'next/link';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -285,8 +286,9 @@ const Reviews = ({ isProductReview = false, productId = null }) => {
           </p>
         </div>
 
+
         {/* ── Slider Container ── */}
-        <div ref={sliderWrapRef} className="bg p-6 relative">
+        <div ref={sliderWrapRef} className="bg-[#004643] p-6 md:p-12 relative">
           <div className="overflow-hidden">
             <div
               ref={sliderRef}
@@ -331,13 +333,16 @@ const Reviews = ({ isProductReview = false, productId = null }) => {
                         <div className="space-y-3">
                           <button
                             onClick={() => setShowForm(true)}
-                            className="w-full bg-[#004643] text-white py-3 px-4 text-[10px] font-semibold uppercase tracking-wide hover:bg-[#004643]/90 transition-colors"
+                            className="w-full bg-[#004643] text-white py-3 px-4 text-[10px] font-semibold uppercase tracking-widest hover:bg-black transition-all duration-300"
                           >
                             WRITE A REVIEW
                           </button>
-                          <button className="w-full bg-[#004643]/80 text-white py-3 px-4 text-[10px] font-semibold uppercase tracking-wide hover:bg-[#004643] transition-colors">
+                          <Link
+                            href="/reviews"
+                            className="block w-full bg-[#3D6B68] text-white py-3 px-4 text-[10px] font-semibold uppercase tracking-widest hover:bg-[#004643] transition-all duration-300 text-center"
+                          >
                             READ OUR REVIEWS
-                          </button>
+                          </Link>
                         </div>
                       </div>
                     ) : (
@@ -376,19 +381,6 @@ const Reviews = ({ isProductReview = false, productId = null }) => {
             </div>
           </div>
 
-          {showForm && (
-            <div className="absolute inset-0 bg-white z-[60] flex items-center justify-center p-4">
-              <ReviewForm
-                productId={productId}
-                onCancel={() => setShowForm(false)}
-                onSuccess={() => {
-                  setShowForm(false);
-                  setFetchTrigger(p => p + 1);
-                }}
-              />
-            </div>
-          )}
-
           {/* ── Navigation Arrows ── */}
           {maxSlides > 0 && (
             <>
@@ -415,6 +407,21 @@ const Reviews = ({ isProductReview = false, productId = null }) => {
             </>
           )}
         </div>
+
+        {showForm && (
+          <div className="fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm">
+            <div className="w-full max-w-xl animate-in fade-in zoom-in duration-300">
+              <ReviewForm
+                productId={productId}
+                onCancel={() => setShowForm(false)}
+                onSuccess={() => {
+                  setShowForm(false);
+                  setFetchTrigger(p => p + 1);
+                }}
+              />
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

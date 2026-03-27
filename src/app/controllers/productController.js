@@ -782,8 +782,17 @@ export async function updateProduct(id, formData) {
     fileUploadPromises.push(...itemImagePromises);
     await Promise.all(fileUploadPromises);
 
-    // Merge new images with existing ones
-    value.image = [...(existingProduct.image || []), ...mainImageUrls];
+    // Parse existing images that were kept by the user
+    const existingImagesList = [];
+    const existingImagesFromForm = formData.getAll("existingImages");
+    if (existingImagesFromForm.length === 1 && existingImagesFromForm[0] === '[]') {
+      // all existing images were deleted by user
+    } else if (existingImagesFromForm.length > 0) {
+      existingImagesFromForm.forEach(img => existingImagesList.push(img));
+    }
+
+    // Merge new images with retained existing ones
+    value.image = [...existingImagesList, ...mainImageUrls];
 
     // Step 5: Update product
     const updatedProduct = await productService.updateProduct(id, value, {

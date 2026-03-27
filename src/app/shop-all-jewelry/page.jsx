@@ -456,6 +456,16 @@ const ShopAllJewelry = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, selectedCategory, isSubCategory, inStockOnly, sortBy, appliedFiltersString]);
 
+  // Handle page transition curtain
+  useEffect(() => {
+    if (!productsLoading) {
+      const timer = setTimeout(() => {
+        window.dispatchEvent(new Event("__page-data-ready"));
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [productsLoading]);
+
   // Note: Initial fetch is handled by the useEffect above when selectedCategory is null
 
   const handleCategoryClick = (categoryId, categoryName) => {
