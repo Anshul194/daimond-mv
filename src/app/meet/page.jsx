@@ -1,7 +1,7 @@
 "use client";
 import { X } from "lucide-react";
 import React from "react";
-import { InlineWidget } from "react-calendly";
+import CalendlyWidget from "./CalendlyWidget";
 
 function Page() {
   function handleClick() {
@@ -10,7 +10,7 @@ function Page() {
   return (
     <>
       <div className="fixed top-0 left-0 right-0 z-99 flex justify-center items-center h-screen bg-black/20">
-        <InlineWidget
+        <CalendlyWidget
           className="h-full w-full"
           url="https://calendly.com/dhrumit6789/30min"
           pageSettings={{
