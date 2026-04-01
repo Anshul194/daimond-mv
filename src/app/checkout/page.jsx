@@ -89,7 +89,7 @@ const PaymentSuccessPopup = ({ isOpen, onClose, orderDetails }) => {
             <button
               onClick={() => {
                 onClose();
-                window.location.href = "/my-orders";
+                window.location.href = "/";
               }}
               className="w-full bg-black text-white py-3 rounded-lg font-medium  transition-all duration-300"
             >
