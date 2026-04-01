@@ -117,7 +117,7 @@ const ImageSlider = ({ images, currentIndex, onIndexChange }) => {
           >
             <div className="w-full h-full overflow-hidden shadow-lg bg-white">
               <img
-                src={getImageUrl(images[getPrevIndex()])}
+                src={getImageUrl(images[getPrevIndex()]) || undefined}
                 alt="previous product image"
                 className="w-full h-full object-cover"
                 draggable={false}
@@ -138,7 +138,7 @@ const ImageSlider = ({ images, currentIndex, onIndexChange }) => {
           >
             <div className="w-full h-full overflow-hidden shadow-2xl bg-white">
               <img
-                src={getImageUrl(images[currentIndex])}
+                src={getImageUrl(images[currentIndex]) || undefined}
                 alt="current product image"
                 className="w-full h-full object-cover"
                 draggable={false}
@@ -160,7 +160,7 @@ const ImageSlider = ({ images, currentIndex, onIndexChange }) => {
           >
             <div className="w-full h-full overflow-hidden shadow-lg bg-white">
               <img
-                src={getImageUrl(images[getNextIndex()])}
+                src={getImageUrl(images[getNextIndex()]) || undefined}
                 alt="next product image"
                 className="w-full h-full object-cover"
                 draggable={false}
@@ -242,8 +242,8 @@ const ThumbnailNavigation = ({ images, currentIndex, onIndexChange }) => {
             }`}
         >
           <img
-            src={image}
-            alt={image.alt}
+            src={(typeof image === 'string' ? image : (image?.url || '')) || undefined}
+            alt={typeof image === 'string' ? `thumbnail-${index}` : (image?.alt || `thumbnail-${index}`)}
             className="w-full h-full object-cover"
           />
         </button>

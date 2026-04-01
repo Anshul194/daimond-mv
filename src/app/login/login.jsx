@@ -23,6 +23,7 @@ export default function ElegantLogin() {
   const inputRef = useRef(null);
   const buttonRef = useRef(null);
   const diamondRef = useRef(null);
+  const [sparkles, setSparkles] = useState([]);
 
   const dispatch = useDispatch();
 
@@ -51,6 +52,15 @@ export default function ElegantLogin() {
     }, containerRef);
 
     return () => ctx.revert();
+  }, []);
+
+  // Generate sparkle positions on client only to avoid SSR/CSR mismatch
+  useEffect(() => {
+    const arr = Array.from({ length: 6 }).map(() => ({
+      top: `${Math.random() * 100}%`,
+      left: `${Math.random() * 100}%`,
+    }));
+    setSparkles(arr);
   }, []);
 
   useEffect(() => {
@@ -116,15 +126,15 @@ export default function ElegantLogin() {
 
   return (
     <div ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#FEFAF5]">
-      {/* Decorative Background Elements */}
+      {/* Decorative Background Elements (positions generated on client) */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
-        {[...Array(6)].map((_, i) => (
+        {sparkles.length > 0 && sparkles.map((s, i) => (
           <div
             key={i}
             className="bg-sparkle absolute w-2 h-2 rounded-full bg-[#00736C]/10"
             style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
+              top: s.top,
+              left: s.left,
               filter: "blur(1px)"
             }}
           />

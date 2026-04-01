@@ -87,16 +87,48 @@ class OrderService {
         JSON.stringify(cartContent, null, 2)
       );
 
-      // Fetch products to get correct vendor IDs
-      const productIds = cartContent.map(item => item.id);
-      const products = await Product.find({ _id: { $in: productIds } }).select('vendor').lean();
+      // Fetch products to get correct vendor IDs and normalize vendor values
+      const productIds = cartContent.map((item) => item.id);
+      const products = await Product.find({ _id: { $in: productIds } })
+        .select('vendor')
+        .lean();
+
       const productVendorMap = products.reduce((map, p) => {
-        map[p._id.toString()] = p.vendor;
+        const pid = p._id.toString();
+        let vendorVal = null;
+        if (p.vendor && typeof p.vendor === 'string') {
+          if (mongoose.Types.ObjectId.isValid(p.vendor)) {
+            vendorVal = p.vendor.toString();
+          } else if (p.vendor === 'admin') {
+            // keep 'admin' marker for legacy/global items
+            vendorVal = 'admin';
+            console.warn(`Product ${pid} has vendor='admin' (legacy string). Treating as global.`);
+          } else {
+            // Unknown vendor format
+            vendorVal = null;
+            console.warn(`Product ${pid} has invalid vendor value:`, p.vendor);
+          }
+        } else if (p.vendor && p.vendor._id) {
+          // If vendor is populated object
+          vendorVal = p.vendor._id.toString();
+        } else if (p.vendor && typeof p.vendor === 'object') {
+          // Vendor might be an object with id
+          vendorVal = (p.vendor._id || p.vendor.id) ? (p.vendor._id || p.vendor.id).toString() : null;
+        }
+        map[pid] = vendorVal;
         return map;
       }, {});
-      // Update cartContent with correct vendor_id from product
-      cartContent.forEach(item => {
-        item.options.vendor_id = productVendorMap[item.id];
+
+      // Update cartContent with normalized vendor_id (string ObjectId or 'admin' or null)
+      cartContent.forEach((item) => {
+        const v = productVendorMap[item.id];
+        if (v) {
+          item.options = item.options || {};
+          item.options.vendor_id = v;
+        } else {
+          item.options = item.options || {};
+          item.options.vendor_id = null;
+        }
       });
 
       const groupedCart = await orderHelpersServices.groupCartByVendor(
@@ -263,9 +295,14 @@ class OrderService {
         if (taxType === "zone_wise_tax") {
           subTaxAmount = (subOrderTotal * (taxProducts.percentage || 0)) / 100;
         }
+        // Ensure vendor_id is a valid ObjectId or null (treat 'admin' or invalid ids as null)
+        const vendor_id_value = (vendorId && mongoose.Types.ObjectId.isValid(vendorId) && vendorId !== 'admin')
+          ? new mongoose.Types.ObjectId(vendorId)
+          : null;
+
         const subOrder = await SubOrder.create({
           order_id: order._id,
-          vendor_id: vendorId || null,
+          vendor_id: vendor_id_value,
           total_amount: subOrderTotal,
           shipping_cost: subShippingCost,
           tax_amount: subTaxAmount,

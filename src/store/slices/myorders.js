@@ -7,6 +7,11 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 export const fetchOrderHistory = createAsyncThunk(
   "order/fetchOrderHistory",
   async (id, { rejectWithValue }) => {
+    // Defensive: if no id provided, don't call the API
+    if (!id) {
+      console.warn('fetchOrderHistory skipped: no user id provided');
+      return [];
+    }
     try {
       const response = await axiosInstance.get(`/api/order?user_id=${id}`, {
         headers: {

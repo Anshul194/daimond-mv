@@ -25,8 +25,10 @@ const OrderHistoryPage = () => {
   } = useSelector((state) => state.myOrders);
 
   useEffect(() => {
-    dispatch(fetchOrderHistory(user?._id));
-  }, [dispatch]);
+    if (user && user._id) {
+      dispatch(fetchOrderHistory(user._id));
+    }
+  }, [dispatch, user]);
 
   const getStatusIcon = (status) => {
     switch (status) {

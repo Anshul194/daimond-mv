@@ -19,7 +19,7 @@ const BASE_URL =
  * @returns {string} - fully-qualified image URL
  */
 export function getImageUrl(path) {
-    if (!path) return "";
+    if (!path) return undefined;
     // Already an absolute URL (http/https/data) — return as-is
     if (/^(https?:\/\/|data:)/.test(path)) return path;
     // Relative path — prefix with backend base URL
@@ -33,6 +33,6 @@ export function getImageUrl(path) {
  * @returns {string}
  */
 export function getFirstImage(images) {
-    if (!Array.isArray(images) || images.length === 0) return "";
+    if (!Array.isArray(images) || images.length === 0) return undefined;
     return getImageUrl(images[0]);
 }

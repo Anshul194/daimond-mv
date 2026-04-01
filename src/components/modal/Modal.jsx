@@ -73,6 +73,8 @@ const ImageSlider = ({ images, currentIndex, onIndexChange }) => {
   const handleMouseUp = () => handleDragEnd();
   const handleMouseLeave = () => handleDragEnd();
 
+  if (!Array.isArray(images) || images.length === 0) return null;
+
   const getPrevIndex = () => (currentIndex - 1 + images.length) % images.length;
   const getNextIndex = () => (currentIndex + 1) % images.length;
 
@@ -106,8 +108,8 @@ const ImageSlider = ({ images, currentIndex, onIndexChange }) => {
           >
             <div className="w-full h-full overflow-hidden shadow-lg rounded-lg bg-white">
               <img
-                src={images[getPrevIndex()].url}
-                alt={images[getPrevIndex()].alt}
+                src={(images[getPrevIndex()] && images[getPrevIndex()].url) || undefined}
+                alt={(images[getPrevIndex()] && images[getPrevIndex()].alt) || `slide-${getPrevIndex()}`}
                 className="w-full h-full object-cover"
                 draggable={false}
               />
@@ -127,8 +129,8 @@ const ImageSlider = ({ images, currentIndex, onIndexChange }) => {
           >
             <div className="w-full h-full overflow-hidden shadow-2xl rounded-lg bg-white">
               <img
-                src={images[currentIndex].url}
-                alt={images[currentIndex].alt}
+                src={(images[currentIndex] && images[currentIndex].url) || undefined}
+                alt={(images[currentIndex] && images[currentIndex].alt) || `slide-${currentIndex}`}
                 className="w-full h-full object-cover"
                 draggable={false}
               />
@@ -149,8 +151,8 @@ const ImageSlider = ({ images, currentIndex, onIndexChange }) => {
           >
             <div className="w-full h-full overflow-hidden shadow-lg rounded-lg bg-white">
               <img
-                src={images[getNextIndex()].url}
-                alt={images[getNextIndex()].alt}
+                src={(images[getNextIndex()] && images[getNextIndex()].url) || undefined}
+                alt={(images[getNextIndex()] && images[getNextIndex()].alt) || `slide-${getNextIndex()}`}
                 className="w-full h-full object-cover"
                 draggable={false}
               />
@@ -211,8 +213,8 @@ const ThumbnailNavigation = ({ images, currentIndex, onIndexChange }) => {
           }`}
         >
           <img
-            src={image.url}
-            alt={image.alt}
+            src={(image && image.url) || undefined}
+            alt={(image && image.alt) || `thumb-${index}`}
             className="w-full h-full object-cover"
           />
         </button>

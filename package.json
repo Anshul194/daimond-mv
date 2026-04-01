@@ -6,6 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start -p $PORT",
+    "seed:attributes": "node scripts/seedProductAttributes.js",
+    "migrate:vendors": "node scripts/migrateVendors.js",
     "lint": "next lint"
   },
   "dependencies": {
