@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { mkdir } from "fs/promises";
 import puppeteer from "puppeteer";
+import PDFDocument from "pdfkit";
 
 // Generates a PDF invoice using HTML and saves it to public/invoice
 //        customerData: orderSession.customerDetails,
@@ -309,13 +310,81 @@ export default async function generateInvoicePdf(data) {
 </body>
 </html>`;
 
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
+    // Allow overriding Chromium/Chrome executable via env var `PUPPETEER_EXECUTABLE_PATH`
+    // Useful on environments where bundled Chromium is unavailable.
+    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || process.env.CHROME_PATH || undefined;
 
-  await page.setContent(html, { waitUntil: "networkidle0" });
-  await page.pdf({ path: filePath, format: "A4", printBackground: true });
+    const launchOptions = {
+        headless: true,
+        args: [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-accelerated-2d-canvas",
+            "--disable-gpu",
+        ],
+    };
 
-  await browser.close();
+    if (executablePath) {
+        console.log(`generateInvoice: using executablePath=${executablePath}`);
+        launchOptions.executablePath = executablePath;
+    } else {
+        console.log("generateInvoice: no executablePath provided; using bundled Chromium if available");
+    }
 
-  return publicUrl;
+        try {
+            const browser = await puppeteer.launch(launchOptions);
+            const page = await browser.newPage();
+
+            await page.setContent(html, { waitUntil: "networkidle0" });
+            await page.pdf({ path: filePath, format: "A4", printBackground: true });
+
+            await browser.close();
+
+            return publicUrl;
+        } catch (pptrErr) {
+            console.warn("generateInvoice: Puppeteer failed, falling back to PDFKit:", pptrErr?.message || pptrErr);
+
+            // Fallback: generate a simple PDF using PDFKit
+            try {
+                const doc = new PDFDocument({ size: "A4", margin: 50 });
+                const stream = fs.createWriteStream(filePath);
+                doc.pipe(stream);
+
+                doc.fontSize(20).text("Invoice", { align: "center" });
+                doc.moveDown();
+
+                doc.fontSize(12).text(`Invoice Number: ${data.orderId}`);
+                doc.text(`Date: ${data.date}`);
+                doc.moveDown();
+
+                doc.fontSize(14).text("Customer Details", { underline: true });
+                doc.fontSize(12).text(`${data.customerData.name}`);
+                doc.text(`${data.customerData.email}`);
+                doc.text(`${data.customerData.phone}`);
+                doc.moveDown();
+
+                doc.fontSize(14).text("Items", { underline: true });
+                data.items.forEach((item) => {
+                    doc.fontSize(12).text(`${item.pid_name} — ${item.quantity} × ${item.pid_price} = ${item.quantity * item.pid_price}`);
+                });
+                doc.moveDown();
+
+                doc.fontSize(12).text(`Subtotal: ₹${data.total}`);
+                doc.text(`Tax (${data.taxPer}%): ₹${data.tax}`);
+                doc.fontSize(14).text(`Total: ₹${data.total + data.tax}`);
+
+                doc.end();
+
+                await new Promise((resolve, reject) => {
+                    stream.on("finish", resolve);
+                    stream.on("error", reject);
+                });
+
+                return publicUrl;
+            } catch (pdfErr) {
+                console.error("generateInvoice: PDFKit fallback also failed:", pdfErr);
+                throw pdfErr;
+            }
+        }
 }

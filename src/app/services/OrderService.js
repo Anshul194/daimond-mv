@@ -14,7 +14,10 @@ import TaxClassOption from "../models/TaxClassOption.js";
 import orderHelpersService from "./orderHelpersService.js";
 import mongoose from "mongoose";
 import generateInvoicePdf from "../lib/generateInvoice.js";
+import sendEmail from "../lib/sendEmail.js";
+import path from "path";
 import OrderSession from "../models/OrderSession.js";
+import { Token } from "../lib/token.js";
 
 function calculatePrice(base, taxRate, context = "product") {
   if (context === "shipping") {
@@ -44,7 +47,9 @@ class OrderService {
       // ✅ Add this block to check/create user
       console.log("Service: Checking or creating user by email:", body.email);
       let user = await User.findOne({ email: body.email });
+      let isNewUser = false;
       if (!user) {
+        isNewUser = true;
         console.log(
           `No user found with email ${body.email}, creating new user...`
         );
@@ -195,19 +200,26 @@ class OrderService {
         .populate("tax_id");
 
       console.log("Service: OrderSession found: ===>", orderSession);
-      const invoice = await generateInvoicePdf({
-        customerData: orderSession.customerDetails,
-        orderId: order._id,
-        date: new Date().toLocaleDateString(),
-        items: orderSession.cartItems,
-        total: orderSession.totalAmount,
-        taxPer: orderSession.tax_id?.rate || 0,
-        tax: orderSession.tax,
-      });
+      let invoice = null;
+      try {
+        invoice = await generateInvoicePdf({
+          customerData: orderSession.customerDetails,
+          orderId: order._id,
+          date: new Date().toLocaleDateString(),
+          items: orderSession.cartItems,
+          total: orderSession.totalAmount,
+          taxPer: orderSession.tax_id?.rate || 0,
+          tax: orderSession.tax,
+        });
 
-      await order.updateOne({
-        invoice_url: invoice,
-      });
+        if (invoice) {
+          await order.updateOne({
+            invoice_url: invoice,
+          });
+        }
+      } catch (invErr) {
+        console.warn("Service: Invoice generation failed, continuing without invoice:", invErr.message || invErr);
+      }
       console.log("Service: Order created:", order._id);
       order.order_number = await orderHelpersServices.generateUniqueOrderNumber(
         order._id
@@ -359,14 +371,70 @@ class OrderService {
       }
       await orderHelpersServices.updateInventory(order._id);
       console.log("Service: Inventory updated");
-      return {
+      const responsePayload = {
         success: true,
         type: "success",
         order_id: order._id,
         total_amount: finalAmount,
         invoice_number: order.invoice_number,
         created_at: order.createdAt,
+        user_id: body.user_id,
       };
+
+      if (isNewUser) {
+        try {
+          const {
+            accessToken,
+            refreshToken,
+            accessTokenExp,
+            refreshTokenExp,
+          } = Token.generateTokens(user);
+          responsePayload.tokens = {
+            accessToken,
+            refreshToken,
+            accessTokenExp,
+            refreshTokenExp,
+          };
+        } catch (tokErr) {
+          console.warn("Service: Failed to generate tokens for guest user:", tokErr);
+        }
+      }
+
+      // Send order confirmation email with invoice attachment if available
+      try {
+        const to = user?.email;
+        if (to) {
+          const subject = `Order Confirmation - ${order.order_number || order._id}`;
+          const invoiceUrl = order.invoice_url;
+          const invoiceLink = invoiceUrl ? `${process.env.APP_BASE_URL || ""}${invoiceUrl}` : null;
+          const html = `
+            <p>Hi ${user.name || "Customer"},</p>
+            <p>Thank you for your order. Your order number is <strong>${order.order_number || order._id}</strong>.</p>
+            ${invoiceLink ? `<p>You can download your invoice <a href="${invoiceLink}">here</a>.</p>` : ""}
+            <p>Regards,<br/>CULLEN</p>
+          `;
+
+          const attachments = [];
+          if (invoiceUrl) {
+            const rel = invoiceUrl.startsWith("/") ? invoiceUrl.slice(1) : invoiceUrl;
+            const invoicePath = path.join(process.cwd(), "public", rel);
+            attachments.push({ filename: path.basename(invoicePath), path: invoicePath });
+          }
+
+          const emailRes = await sendEmail(to, subject, html, attachments);
+          if (!emailRes || !emailRes.success) {
+            console.warn("Service: order confirmation email failed:", emailRes?.message || emailRes?.error);
+          } else {
+            console.log("Service: order confirmation email sent to", to);
+          }
+        } else {
+          console.warn("Service: No recipient email available for order confirmation");
+        }
+      } catch (mailErr) {
+        console.warn("Service: Error sending confirmation email:", mailErr?.message || mailErr);
+      }
+
+      return responsePayload;
     } catch (error) {
       console.log("Service: createOrder error:", error);
       console.error("Service: createOrder error:", error.message, error.stack);

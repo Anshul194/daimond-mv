@@ -8,7 +8,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendEmail = async (to, subject, html) => {
+const sendEmail = async (to, subject, html, attachments = []) => {
   try {
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -17,12 +17,16 @@ const sendEmail = async (to, subject, html) => {
       html,
     };
 
+    if (attachments && Array.isArray(attachments) && attachments.length > 0) {
+      mailOptions.attachments = attachments;
+    }
+
     const info = await transporter.sendMail(mailOptions);
     console.log("Email sent: " + info.response);
     return { success: true, message: "Email sent successfully" };
   } catch (error) {
     console.error("Error sending email:", error);
-    return { success: false, message: "Failed to send email" };
+    return { success: false, message: "Failed to send email", error: error.message };
   }
 };
 

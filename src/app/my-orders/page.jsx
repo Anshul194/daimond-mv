@@ -171,9 +171,11 @@ const OrderHistoryPage = () => {
                   <div className="space-y-4">
                     {order?.sub_orders[0]?.sub_order_items?.map(
                       (item, index) => (
-                        <div className="last:border-0 border-b border-gray-200">
+                        <div
+                          key={item?._id || `${order?._id}-${index}`}
+                          className="last:border-0 border-b border-gray-200"
+                        >
                           <div
-                            key={index}
                             className="flex items-center space-x-4  pb-4 "
                           >
                             <div className="w-16 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
