@@ -97,9 +97,9 @@ const ShopAllJewelry = () => {
       try {
         const catResponse = await axiosInstance.get('/api/category');
         currentCats = catResponse.data?.body?.data?.result || catResponse.data?.data?.result || [];
-        console.log('Direct fetch - categories count:', currentCats.length);
+        // // console.log('Direct fetch - categories count:', currentCats.length);
       } catch (e) {
-        console.error('Failed to fetch categories directly', e);
+        // // console.error('Failed to fetch categories directly', e);
         // Fallback to Redux if direct fetch fails
         if (categoryStatus === "idle" || categories.length === 0) {
           await dispatch(fetchCategories());
@@ -115,13 +115,13 @@ const ShopAllJewelry = () => {
         for (const mainCat of currentCats) {
           if (mainCat._id) {
             try {
-              console.log(`Fetching subcategories for "${mainCat.name}" (ID: ${mainCat._id})`);
+              // // console.log(`Fetching subcategories for "${mainCat.name}" (ID: ${mainCat._id})`);
               const res = await axiosInstance.get(
                 `/api/category/subcategory?categoryId=${mainCat._id}`
               );
               const fetched = res.data?.data || res.data?.body?.data || [];
               if (fetched.length > 0) {
-                console.log(`Found ${fetched.length} subcategories under "${mainCat.name}"`);
+                // // console.log(`Found ${fetched.length} subcategories under "${mainCat.name}"`);
                 // Add parent category info to subcategories
                 const subCatsWithParent = fetched.map(sub => ({
                   ...sub,
@@ -139,7 +139,7 @@ const ShopAllJewelry = () => {
                       );
                       const nested = nestedRes.data?.data || nestedRes.data?.body?.data || [];
                       if (nested.length > 0) {
-                        console.log(`Found ${nested.length} nested subcategories under "${subCat.name}"`);
+                        // // console.log(`Found ${nested.length} nested subcategories under "${subCat.name}"`);
                         const nestedWithParent = nested.map(n => ({
                           ...n,
                           parentCategoryName: mainCat.name,
@@ -155,20 +155,20 @@ const ShopAllJewelry = () => {
                 }
               }
             } catch (err) {
-              console.warn(`Failed to fetch subcategories for "${mainCat.name}":`, err);
+              // // console.warn(`Failed to fetch subcategories for "${mainCat.name}":`, err);
             }
           }
         }
 
-        console.log('Total subcategories found:', subCats.length);
-        console.log('Subcategory details:', subCats.map(s => ({
-          name: s.name,
-          _id: s._id,
-          slug: s.slug,
-          parent: s.parentCategoryName
-        })));
+        // // console.log('Total subcategories found:', subCats.length);
+        // // console.log('Subcategory details:', subCats.map(s => ({
+        //   name: s.name,
+        //   _id: s._id,
+        //   slug: s.slug,
+        //   parent: s.parentCategoryName
+        // })));
       } catch (err) {
-        console.error("Error fetching subcategories", err);
+        // // console.error("Error fetching subcategories", err);
       }
 
       setLoadingCategories(false);
@@ -189,18 +189,18 @@ const ShopAllJewelry = () => {
       const combinedSource = [...currentCats, ...subCats];
 
       // Log all available categories for debugging
-      console.log('All categories:', currentCats.map(c => ({
-        name: c.name,
-        _id: c._id,
-        slug: c.slug
-      })));
-      console.log('All subcategories:', subCats.map(c => ({
-        name: c.name,
-        _id: c._id,
-        slug: c.slug
-      })));
-      console.log('Combined source count:', combinedSource.length);
-      console.log('Looking for:', targetNames);
+      // // console.log('All categories:', currentCats.map(c => ({
+      //   name: c.name,
+      //   _id: c._id,
+      //   slug: c.slug
+      // })));
+      // // // console.log('All subcategories:', subCats.map(c => ({
+      //   name: c.name,
+      //   _id: c._id,
+      //   slug: c.slug
+      // })));
+      // // // console.log('Combined source count:', combinedSource.length);
+      // // // console.log('Looking for:', targetNames);
 
       const mappedCats = targetNames.map(name => {
         // Try multiple matching strategies
@@ -299,10 +299,10 @@ const ShopAllJewelry = () => {
         }
 
         if (!match) {
-          console.warn(`Could not find category match for: "${name}"`);
-          console.log('Available categories:', combinedSource.map(c => c.name).filter(Boolean));
+          // // // console.warn(`Could not find category match for: "${name}"`);
+          // // // console.log('Available categories:', combinedSource.map(c => c.name).filter(Boolean));
         } else {
-          console.log(`✅ Matched "${name}" to: "${match.name}" (ID: ${match._id})`);
+          // // // console.log(`✅ Matched "${name}" to: "${match.name}" (ID: ${match._id})`);
         }
 
         return {
@@ -317,7 +317,7 @@ const ShopAllJewelry = () => {
       setDisplayCategories(mappedCats);
 
       // Log the mapped categories for debugging
-      console.log('Mapped categories:', mappedCats);
+      // // // console.log('Mapped categories:', mappedCats);
     };
 
     // Only run when categories are actually loaded, and only once
@@ -450,7 +450,7 @@ const ShopAllJewelry = () => {
       fetchParams.categoryId = null;
     }
 
-    console.log('Fetching products with params:', fetchParams);
+    // // // console.log('Fetching products with params:', fetchParams);
     // Fetch products - if selectedCategory is null, fetch all products
     dispatch(fetchProductsByCategory(fetchParams));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -470,10 +470,10 @@ const ShopAllJewelry = () => {
 
   const handleCategoryClick = (categoryId, categoryName) => {
     if (!categoryId) {
-      console.warn(`Category "${categoryName}" has no ID and cannot be filtered`);
+      // // console.warn(`Category "${categoryName}" has no ID and cannot be filtered`);
       return; // Prevent clicking items with no ID
     }
-    console.log(`Category clicked: ${categoryName} (ID: ${categoryId})`);
+    // // console.log(`Category clicked: ${categoryName} (ID: ${categoryId})`);
     // Always set the selected category (don't toggle off)
     setSelectedCategory(categoryId);
   };

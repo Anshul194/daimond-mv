@@ -20,7 +20,7 @@ export async function PUT(request, context) {
     const authResult = await verifyAdminAccess(request);
     if (authResult.error) return authResult.error;
 
-    console.log("PUT /product/:id called with ID:", id);
+    // console.log("PUT /product/:id called with ID:", id);
 
     // ✅ Detect and parse content-type
     let data;
@@ -48,8 +48,8 @@ export async function PUT(request, context) {
     const result = await updateProduct(id, data);
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.log("Error in PUT /product/:id:", err);
-    console.error("Update Product error:", err);
+    // console.log("Error in PUT /product/:id:", err);
+    // console.error("Update Product error:", err);
     return NextResponse.json(
       {
         success: false,
@@ -65,13 +65,13 @@ export async function GET(request, { params }) {
   try {
     await dbConnect();
     const awaitedParams = await params;
-    console.log(" new GET /product/:id called with params:", awaitedParams);
+    // console.log(" new GET /product/:id called with params:", awaitedParams);
     const { id, slug } = awaitedParams;
     // id is the category slug, slug is the product slug
     const result = await getProductById(id, slug);
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error("GET /product/:id error:", err);
+    // console.error("GET /product/:id error:", err);
     return NextResponse.json(
       { success: false, message: err.message || "Server error" },
       { status: 500 }
@@ -93,7 +93,7 @@ export async function DELETE(request, { params }) {
 
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error("DELETE /product/:id error:", err);
+    // console.error("DELETE /product/:id error:", err);
     return NextResponse.json(
       { success: false, message: "Server error" },
       { status: 500 }

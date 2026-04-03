@@ -12,7 +12,7 @@ class CategoryService {
   //   try {
   //     return await this.categoryRepo.findAll();
   //   } catch (error) {
-  //     console.error('Error in getAllCategories:', error);
+  //     // console.error('Error in getAllCategories:', error);
   //     throw error;
   //   }
   // }
@@ -20,7 +20,7 @@ class CategoryService {
 
   async getSubCategoriesByCategoryId(categoryId) {
     try {
-      console.log('Fetching subcategories for categoryId:', categoryId);
+      // console.log('Fetching subcategories for categoryId:', categoryId);
 
       if (!categoryId) {
         throw new AppError('categoryId is required', StatusCodes.BAD_REQUEST);
@@ -32,7 +32,7 @@ class CategoryService {
         categoryIdQuery = new mongoose.Types.ObjectId(categoryId);
       } else {
         // Try to find by string match if not a valid ObjectId
-        console.warn('categoryId is not a valid ObjectId, trying string match:', categoryId);
+        // console.warn('categoryId is not a valid ObjectId, trying string match:', categoryId);
         categoryIdQuery = categoryId;
       }
 
@@ -41,12 +41,12 @@ class CategoryService {
         deletedAt: null
       }).lean();
 
-      console.log('Subcategories found:', subCategories?.length || 0);
+      // console.log('Subcategories found:', subCategories?.length || 0);
 
       return subCategories || [];
     } catch (error) {
-      console.error('Error in getSubCategoriesByCategoryId:', error.message);
-      console.error('Error stack:', error.stack);
+      // console.error('Error in getSubCategoriesByCategoryId:', error.message);
+      // console.error('Error stack:', error.stack);
       // Re-throw AppError as-is, wrap other errors
       if (error instanceof AppError) {
         throw error;
@@ -57,7 +57,7 @@ class CategoryService {
 
   async getAllCategories(query) {
     try {
-      console.log("Query Parameters:", query);
+      // console.log("Query Parameters:", query);
       // Ensure query is an object
       const queryObj = query || {};
       const { page = 1, limit = 100, filters = "{}", searchFields = "{}", sort = "{}" } = queryObj;
@@ -65,10 +65,10 @@ class CategoryService {
       const pageNum = parseInt(page) || 1;
       const limitNum = parseInt(limit) || 100;
 
-      // console.log("Filter Conditions:", filterConditions);
-      // console.log("Sort Conditions:", sortConditions);
-      console.log("Page Number:", pageNum);
-      console.log("Limit Number:", limitNum);
+      // // console.log("Filter Conditions:", filterConditions);
+      // // console.log("Sort Conditions:", sortConditions);
+      // console.log("Page Number:", pageNum);
+      // console.log("Limit Number:", limitNum);
 
       // Helper function to safely parse JSON strings
       const safeJsonParse = (str, defaultValue = {}) => {
@@ -78,7 +78,7 @@ class CategoryService {
         try {
           return JSON.parse(str);
         } catch (e) {
-          console.warn(`Failed to parse JSON: ${str}, using default value`);
+          // console.warn(`Failed to parse JSON: ${str}, using default value`);
           return defaultValue;
         }
       };
@@ -123,7 +123,7 @@ class CategoryService {
 
       return courseCategories;
     } catch (error) {
-      console.log("error category", error.message);
+      // console.log("error category", error.message);
       throw new AppError("Cannot fetch data of all the courseCategories", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
@@ -133,7 +133,7 @@ class CategoryService {
     try {
       return await this.categoryRepo.findById(id);
     } catch (error) {
-      console.error('Error in getCategoryById:', error);
+      // console.error('Error in getCategoryById:', error);
       throw error;
     }
   }
@@ -141,10 +141,10 @@ class CategoryService {
   async createCategory(data) {
     try {
       return await this.categoryRepo.create(data);
-      console.log('Service createCategory called with:', data);
+      // console.log('Service createCategory called with:', data);
 
     } catch (error) {
-      console.log('Error in createCategory:', error.message);
+      // console.log('Error in createCategory:', error.message);
       throw error;
     }
   }
@@ -153,31 +153,31 @@ class CategoryService {
     try {
       return await this.categoryRepo.findByName(name);
     } catch (error) {
-      console.error('Error in findByName:', error);
+      // console.error('Error in findByName:', error);
       throw error;
     }
   }
 
   async updateCategory(id, data) {
     try {
-      console.log('Service updateCategory called with:', id, data);
+      // console.log('Service updateCategory called with:', id, data);
       const updated = await this.categoryRepo.update(id, data);
-      console.log('Service updated result:', updated);
+      // console.log('Service updated result:', updated);
       return updated;
     } catch (error) {
-      console.error('Error in updateCategory:', error);
+      // console.error('Error in updateCategory:', error);
       throw error;
     }
   }
 
   async deleteCategory(id) {
     try {
-      console.log('Service deleteCategory called with:', id);
+      // console.log('Service deleteCategory called with:', id);
       const deleted = await this.categoryRepo.softDelete(id);
-      console.log('Service deleted result:', deleted);
+      // console.log('Service deleted result:', deleted);
       return deleted;
     } catch (error) {
-      console.error('Error in deleteCategory:', error);
+      // console.error('Error in deleteCategory:', error);
       throw error;
     }
   }

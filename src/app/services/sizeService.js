@@ -9,14 +9,14 @@ class SizeService {
 
   async getAllSizes(query, vendorId = null) {
     try {
-      console.log("Query Parameters:", query);
+      // // console.log("Query Parameters:", query);
       const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
 
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 
-      console.log("Page Number:", pageNum);
-      console.log("Limit Number:", limitNum);
+      // // console.log("Page Number:", pageNum);
+      // // console.log("Limit Number:", limitNum);
 
       // Parse JSON strings from query parameters to objects
       const parsedFilters = JSON.parse(filters);
@@ -52,7 +52,7 @@ class SizeService {
 
       return sizes;
     } catch (error) {
-      console.log("error size", error.message);
+      // // console.log("error size", error.message);
       throw new AppError("Cannot fetch data of all the sizes", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
@@ -61,17 +61,17 @@ class SizeService {
     try {
       return await this.sizeRepo.findById(id);
     } catch (error) {
-      console.error('Error in getSizeById:', error);
+      // // console.error('Error in getSizeById:', error);
       throw error;
     }
   }
 
   async createSize(data) {
     try {
-      console.log('Service createSize called with:', data);
+      // // console.log('Service createSize called with:', data);
       return await this.sizeRepo.create(data);
     } catch (error) {
-      console.log('Error in createSize:', error.message);
+      // // // console.log('Error in createSize:', error.message);
       throw error;
     }
   }
@@ -80,7 +80,7 @@ class SizeService {
     try {
       return await this.sizeRepo.findByName(name, vendorId);
     } catch (error) {
-      console.error('Error in findByName:', error);
+      // // // console.error('Error in findByName:', error);
       throw error;
     }
   }
@@ -89,31 +89,31 @@ class SizeService {
     try {
       return await this.sizeRepo.findBySizeCode(size_code, vendorId);
     } catch (error) {
-      console.error('Error in findBySizeCode:', error);
+      // // // console.error('Error in findBySizeCode:', error);
       throw error;
     }
   }
 
   async updateSize(id, data) {
     try {
-      console.log('Service updateSize called with:', id, data);
+      // // // console.log('Service updateSize called with:', id, data);
       const updated = await this.sizeRepo.update(id, data);
-      console.log('Service updated result:', updated);
+      // // // console.log('Service updated result:', updated);
       return updated;
     } catch (error) {
-      console.error('Error in updateSize:', error);
+      // // // console.error('Error in updateSize:', error);
       throw error;
     }
   }
 
   async deleteSize(id) {
     try {
-      console.log('Service deleteSize called with:', id);
+      // // // console.log('Service deleteSize called with:', id);
       const deleted = await this.sizeRepo.softDelete(id);
-      console.log('Service deleted result:', deleted);
+      // // // console.log('Service deleted result:', deleted);
       return deleted;
     } catch (error) {
-      console.error('Error in deleteSize:', error);
+      // // console.error('Error in deleteSize:', error);
       throw error;
     }
   }

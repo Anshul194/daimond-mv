@@ -47,25 +47,25 @@ const RingsBuild = ({ props }) => {
   } = useSelector((state) => state.category);
   {
     {
-      console.log(categories);
+      // console.log(categories);
     }
   }
 
   const { items: Products, pagination } = useSelector((state) => state.product);
   {
     {
-      console.log("prodcuts : --", Products);
+      // console.log("prodcuts : --", Products);
     }
   }
 
-  console.log("Pagination:", pagination);
+  // console.log("Pagination:", pagination);
 
   const getData = async () => {
     if (categories.length === 0) {
       try {
         await dispatch(fetchCategories());
       } catch (error) {
-        console.error("Error fetching categories:", error);
+        // console.error("Error fetching categories:", error);
       }
     }
 
@@ -73,13 +73,13 @@ const RingsBuild = ({ props }) => {
       (cat) => cat.slug === location.slice(1).split("/")[0]
     );
     const categoryID = findCategory ? findCategory._id : null;
-    console.log("categories", categories);
-    console.log(
-      "findCategory",
-      findCategory + " LOcation",
-      location.slice(1).split("/")[0].toLowerCase()
-    );
-    console.log("categoryID", categoryID);
+    // console.log("categories", categories);
+    // console.log(
+    //   "findCategory",
+    //   findCategory + " LOcation",
+    //   location.slice(1).split("/")[0].toLowerCase()
+    // );
+    // console.log("categoryID", categoryID);
 
     const attributes = [
       "Shape",
@@ -105,7 +105,7 @@ const RingsBuild = ({ props }) => {
       attributeData[attributes[idx]] = response.data.data.data[0]?.terms;
     });
 
-    console.log("attributeData", attributeData);
+    // console.log("attributeData", attributeData);
 
     setGetAttribute(attributeData);
 
@@ -219,14 +219,14 @@ const RingsBuild = ({ props }) => {
   }, [categories, location]);
 
   const handleRingClick = (ring, index) => {
-    console.log("Ring clicked:", ring); // Debug log
+    // console.log("Ring clicked:", ring); // Debug log
     setSelectedRing({ ...ring, index });
     setIsModalOpen(true);
   };
 
   // Handle modal close - Enhanced with multiple cleanup methods
   const handleModalClose = () => {
-    console.log("Modal closing"); // Debug log
+    // console.log("Modal closing"); // Debug log
     setIsModalOpen(false);
     setSelectedRing(null);
 

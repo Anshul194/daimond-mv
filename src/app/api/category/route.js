@@ -25,7 +25,7 @@ export async function POST(request) {
     const result = await createCategory(form, admin);
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error('POST /category error:', err);
+    // console.error('POST /category error:', err);
     return NextResponse.json({ success: false, message: 'Invalid request' }, { status: 400 });
   }
 }
@@ -36,9 +36,9 @@ export async function GET(request) {
     // Connect to database first
     try {
       await dbConnect();
-      console.log('Database connected successfully for /category');
+      // console.log('Database connected successfully for /category');
     } catch (dbError) {
-      console.error('Database connection error in /category:', dbError.message);
+      // console.error('Database connection error in /category:', dbError.message);
       return NextResponse.json({ 
         success: false, 
         message: 'Database connection failed. Please check your MongoDB connection string and ensure MongoDB is running.',
@@ -54,13 +54,13 @@ export async function GET(request) {
       if (!authResult.error) admin = authResult.user;
     } catch (e) {
       // Ignore auth errors for public access
-      console.log('Auth check skipped (public access):', e.message);
+      // console.log('Auth check skipped (public access):', e.message);
       admin = null;
     }
 
     const { searchParams } = new URL(request.url);
     const query = Object.fromEntries(searchParams.entries());
-    console.log('GET /category - Query params:', query);
+    // console.log('GET /category - Query params:', query);
 
     // Vendors: only see their own categories
     if (admin && admin.role === 'vendor') {
@@ -68,13 +68,13 @@ export async function GET(request) {
     }
     // Superadmins: can filter by vendor if desired
     const result = await getCategories(query, admin);
-    console.log('GET /category - Result:', { status: result.status, bodyKeys: Object.keys(result.body || {}) });
+    // console.log('GET /category - Result:', { status: result.status, bodyKeys: Object.keys(result.body || {}) });
     // Return with body wrapper to match frontend expectation: response.data.body.data.result
     return NextResponse.json({ body: result.body }, { status: result.status });
   } catch (err) {
-    console.error('GET /category error:', err);
-    console.error('GET /category error message:', err.message);
-    console.error('GET /category error stack:', err.stack);
+    // console.error('GET /category error:', err);
+    // console.error('GET /category error message:', err.message);
+    // console.error('GET /category error stack:', err.stack);
     
     // Check if it's a database connection error
     if (err.message && (err.message.includes('ECONNREFUSED') || err.message.includes('MongoDB connection'))) {

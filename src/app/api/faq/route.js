@@ -18,7 +18,7 @@ export async function POST(request) {
 
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error('POST /faq error:', err);
+    // console.error('POST /faq error:', err);
     return NextResponse.json({ success: false, message: 'Invalid request' }, { status: 400 });
   }
 }
@@ -28,9 +28,9 @@ export async function GET(request) {
     // Connect to database first
     try {
       await dbConnect();
-      console.log('Database connected successfully for /faq');
+      // console.log('Database connected successfully for /faq');
     } catch (dbError) {
-      console.error('Database connection error in /faq:', dbError.message);
+      // console.error('Database connection error in /faq:', dbError.message);
       return NextResponse.json({ 
         success: false, 
         message: 'Database connection failed. Please check your MongoDB connection string and ensure MongoDB is running.',
@@ -40,14 +40,14 @@ export async function GET(request) {
 
     const { searchParams } = new URL(request.url);
     const query = Object.fromEntries(searchParams.entries());
-    console.log('GET /faq - Query params:', query);
+    // console.log('GET /faq - Query params:', query);
 
     const result = await getFaqs(query);
-    console.log('GET /faq - Result:', { status: result.status });
+    // console.log('GET /faq - Result:', { status: result.status });
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error('GET /faq error:', err);
-    console.error('GET /faq error stack:', err.stack);
+    // console.error('GET /faq error:', err);
+    // console.error('GET /faq error stack:', err.stack);
     
     // Check if it's a database connection error
     if (err.message && (err.message.includes('ECONNREFUSED') || err.message.includes('MongoDB connection'))) {

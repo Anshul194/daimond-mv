@@ -29,7 +29,7 @@ export async function PUT(request, context) {
     const authResult = await verifyAdminAccess(request);
     if (authResult.error) return authResult.error;
 
-    console.log("PUT /product/:id called with ID:", id);
+    // console.log("PUT /product/:id called with ID:", id);
 
     // ✅ Detect and parse content-type
     let data;
@@ -42,12 +42,12 @@ export async function PUT(request, context) {
       if (!rawBody) throw new Error("Empty JSON body");
 
       const json = JSON.parse(rawBody);
-      console.log("Received JSON body:", json);
+      // console.log("Received JSON body:", json);
       const formData = new FormData();
       Object.entries(json).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           formData.append(key, String(value));
-          console.log(`FormData append: ${key} = ${value}`);
+          // console.log(`FormData append: ${key} = ${value}`);
         }
       });
       data = formData;
@@ -56,16 +56,16 @@ export async function PUT(request, context) {
     }
 
     // ✅ Call the controller
-    console.log("Data to update keys:", Array.from(data.keys()));
+    // console.log("Data to update keys:", Array.from(data.keys()));
     // Log variant specific keys to see if they are actually indexed
     const variantKeys = Array.from(data.keys()).filter(k => k.includes('['));
-    console.log("Variant-related keys being sent:", variantKeys);
+    // console.log("Variant-related keys being sent:", variantKeys);
 
     const result = await updateProduct(id, data);
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.log("Error in PUT /product/:id:", err);
-    console.error("Update Product error:", err);
+    // console.log("Error in PUT /product/:id:", err);
+    // console.error("Update Product error:", err);
     return NextResponse.json(
       {
         success: false,
@@ -103,7 +103,7 @@ export async function GET(request, { params }) {
       status: 200,
     };
 
-    console.log("GET /product/:id called with params:", result);
+    // console.log("GET /product/:id called with params:", result);
     return NextResponse.json(result.body, {
       status: result.status,
       headers: {
@@ -111,7 +111,7 @@ export async function GET(request, { params }) {
       },
     });
   } catch (err) {
-    console.error("GET /product/:id error:", err);
+    // console.error("GET /product/:id error:", err);
     return NextResponse.json(
       { success: false, message: "Server error" },
       { status: 500 }
@@ -133,7 +133,7 @@ export async function DELETE(request, { params }) {
 
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error("DELETE /product/:id error:", err);
+    // console.error("DELETE /product/:id error:", err);
     return NextResponse.json(
       { success: false, message: "Server error" },
       { status: 500 }

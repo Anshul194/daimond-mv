@@ -9,7 +9,7 @@ class SubCategoryService {
 
  async getAllSubCategories(query) {
   try {
-    console.log("Query Parameters:", query);
+    // // console.log("Query Parameters:", query);
     const {
       page = 1,
       limit = 10,
@@ -32,7 +32,7 @@ class SubCategoryService {
     // Always apply vendor filter if present in query
     if (query.vendor) {
       filterConditions.vendor = query.vendor;
-      console.log('[DEBUG] Filtering subcategories for vendor:', query.vendor);
+      // // console.log('[DEBUG] Filtering subcategories for vendor:', query.vendor);
     }
 
     // Add filters
@@ -40,7 +40,7 @@ class SubCategoryService {
       filterConditions[key] = value;
     }
 
-    console.log('[DEBUG] Final filterConditions for subcategory query:', filterConditions);
+    // // console.log('[DEBUG] Final filterConditions for subcategory query:', filterConditions);
 
     // Add search with $regex
     const searchConditions = [];
@@ -66,7 +66,7 @@ class SubCategoryService {
 
     return subCategories;
   } catch (error) {
-    console.error("Error in getAllSubCategories:", error.message);
+    // // console.error("Error in getAllSubCategories:", error.message);
     throw new AppError("Cannot fetch subCategories", StatusCodes.INTERNAL_SERVER_ERROR);
   }
 }
@@ -76,7 +76,7 @@ class SubCategoryService {
     try {
       return await this.subCategoryRepo.findById(id);
     } catch (error) {
-      console.error('Error in getSubCategoryById:', error);
+      // // console.error('Error in getSubCategoryById:', error);
       throw error;
     }
   }
@@ -84,10 +84,10 @@ class SubCategoryService {
   async createSubCategory(data) {
     try {
       return await this.subCategoryRepo.create(data);
-      console.log('Service createSubCategory called with:', data);
+      // // console.log('Service createSubCategory called with:', data);
       
     } catch (error) {
-      console.error('Error in createSubCategory:', error);
+      // // console.error('Error in createSubCategory:', error);
       throw error;
     }
   }
@@ -96,31 +96,31 @@ class SubCategoryService {
     try {
       return await this.subCategoryRepo.findByName(name);
     } catch (error) {
-      console.error('Error in findByName:', error);
+      // // console.error('Error in findByName:', error);
       throw error;
     }
   }
 
   async updateSubCategory(id, data) {
     try {
-      console.log('Service updateSubCategory called with:', id, data);
+      // // console.log('Service updateSubCategory called with:', id, data);
       const updated = await this.subCategoryRepo.update(id, data);
-      console.log('Service updated result:', updated);
+      // // // console.log('Service updated result:', updated);
       return updated;
     } catch (error) {
-      console.error('Error in updateSubCategory:', error);
+      // // // console.error('Error in updateSubCategory:', error);
       throw error;
     }
   }
 
   async deleteSubCategory(id) {
     try {
-      console.log('Service deleteSubCategory called with:', id);
+      // // // console.log('Service deleteSubCategory called with:', id);
       const deleted = await this.subCategoryRepo.softDelete(id);
-      console.log('Service deleted result:', deleted);
+      // // // console.log('Service deleted result:', deleted);
       return deleted;
     } catch (error) {
-      console.error('Error in deleteSubCategory:', error);
+      // // console.error('Error in deleteSubCategory:', error);
       throw error;
     }
   }

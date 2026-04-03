@@ -11,13 +11,13 @@ export async function createDeliveryOption(form) {
   try {
     let iconUrl = '';
 
-    console.log('Create DeliveryOption form:', form);
+    // console.log('Create DeliveryOption form:', form);
     const title = form.get('title');
     const sub_title = form.get('sub_title') || '';
     const icon = form.get('icon'); // File object or string
    
 
-    console.log('Icon:', icon);
+    // console.log('Icon:', icon);
 
     const existing = await deliveryOptionService.findByTitle(title);
     if (existing) {
@@ -27,14 +27,14 @@ export async function createDeliveryOption(form) {
       };
     }
 
-    console.log('Icon type check:', icon instanceof File);
+    // console.log('Icon type check:', icon instanceof File);
 
     if (icon && icon instanceof File) {
       try {
         validateImageFile(icon);
-        console.log('Validating icon file:', icon);
+        // console.log('Validating icon file:', icon);
         iconUrl = await saveFile(icon, 'delivery-icons');
-        console.log('Icon saved at:', iconUrl);
+        // console.log('Icon saved at:', iconUrl);
       } catch (fileError) {
         return {
           status: 400,
@@ -61,14 +61,14 @@ export async function createDeliveryOption(form) {
 
     const newDeliveryOption = await deliveryOptionService.createDeliveryOption(value);
     await redis.del('allDeliveryOptions');
-    console.log('New DeliveryOption created:', newDeliveryOption);
+    // console.log('New DeliveryOption created:', newDeliveryOption);
 
     return {
       status: 201,
       body: successResponse(newDeliveryOption, 'Delivery option created'),
     };
   } catch (err) {
-    console.error('Create DeliveryOption error:', err.message);
+    // console.error('Create DeliveryOption error:', err.message);
     return {
       status: 500,
       body: errorResponse('Server error', 500),
@@ -78,7 +78,7 @@ export async function createDeliveryOption(form) {
 
 export async function getDeliveryOptions(query) {
   try {
-    console.log('Get DeliveryOptions query:', query);
+    // console.log('Get DeliveryOptions query:', query);
     const result = await deliveryOptionService.getAllDeliveryOptions(query);
 
     return {
@@ -86,7 +86,7 @@ export async function getDeliveryOptions(query) {
       body: successResponse(result, 'Delivery options fetched successfully'),
     };
   } catch (err) {
-    console.error('Get DeliveryOptions error:', err.message);
+    // console.error('Get DeliveryOptions error:', err.message);
     return {
       status: 500,
       body: errorResponse('Server error', 500),
@@ -108,7 +108,7 @@ export async function getDeliveryOptionById(id) {
       body: { success: true, message: 'Delivery option fetched', data: deliveryOption }
     };
   } catch (err) {
-    console.error('Get DeliveryOption error:', err.message);
+    // console.error('Get DeliveryOption error:', err.message);
     return {
       status: 500,
       body: { success: false, message: 'Server error' }
@@ -190,7 +190,7 @@ export async function updateDeliveryOption(id, data) {
       body: { success: true, message: 'Delivery option updated', data: updated }
     };
   } catch (err) {
-    console.error('Update DeliveryOption error:', err.message);
+    // console.error('Update DeliveryOption error:', err.message);
     return {
       status: 500,
       body: { success: false, message: 'Server error' }
@@ -216,7 +216,7 @@ export async function deleteDeliveryOption(id) {
       body: { success: true, message: 'Delivery option deleted', data: deleted }
     };
   } catch (err) {
-    console.error('Delete DeliveryOption error:', err.message);
+    // console.error('Delete DeliveryOption error:', err.message);
     return {
       status: 500,
       body: { success: false, message: 'Server error' }

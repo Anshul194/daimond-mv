@@ -12,13 +12,13 @@ export async function createBlogSubCategory(form) {
   try {
     let imageUrl = '';
 
-    console.log('Create BlogSubCategory form:', form);
+    // console.log('Create BlogSubCategory form:', form);
     const name = form.get('name');
     const BlogCategory = form.get('BlogCategory');
     const status = form.get('status') || 'active';
     const image = form.get('image'); // File object
 
-    console.log('Image:', image);
+    // console.log('Image:', image);
 
     const existing = await blogSubCategoryService.findByName(name);
     if (existing) {
@@ -28,15 +28,15 @@ export async function createBlogSubCategory(form) {
       };
     }
 
-    console.log('BlogSubCategory name:', name);
-    console.log('Image is File:', image instanceof File);
+    // console.log('BlogSubCategory name:', name);
+    // console.log('Image is File:', image instanceof File);
     
     if (image && image instanceof File) {
       try {
         validateImageFile(image);
-        console.log('Validating image file:', image);
+        // console.log('Validating image file:', image);
         imageUrl = await saveFile(image, 'blog-subcategory-images');
-        console.log('Image saved at:', imageUrl);
+        // console.log('Image saved at:', imageUrl);
       } catch (fileError) {
         return {
           status: 400,
@@ -61,14 +61,14 @@ export async function createBlogSubCategory(form) {
 
     const newBlogSubCategory = await blogSubCategoryService.createBlogSubCategory(value);
     await redis.del('allBlogSubCategories');
-    console.log('New BlogSubCategory created:', newBlogSubCategory);
+    // console.log('New BlogSubCategory created:', newBlogSubCategory);
 
     return {
       status: 201,
       body: successResponse(newBlogSubCategory, 'BlogSubCategory created'),
     };
   } catch (err) {
-    console.error('Create BlogSubCategory error:', err.message);
+    // console.error('Create BlogSubCategory error:', err.message);
     return {
       status: 500,
       body: errorResponse('Server error', 500),
@@ -78,7 +78,7 @@ export async function createBlogSubCategory(form) {
 
 export async function getBlogSubCategories(query) {
   try {
-    console.log('Get BlogSubCategories query:', query);
+    // console.log('Get BlogSubCategories query:', query);
     const result = await blogSubCategoryService.getAllBlogSubCategories(query);
 
     return {
@@ -86,7 +86,7 @@ export async function getBlogSubCategories(query) {
       body: successResponse(result, 'BlogSubCategories fetched successfully'),
     };
   } catch (err) {
-    console.error('Get BlogSubCategories error:', err.message);
+    // console.error('Get BlogSubCategories error:', err.message);
     return {
       status: 500,
       body: errorResponse('Server error', 500),
@@ -108,7 +108,7 @@ export async function getBlogSubCategoryById(id) {
       body: { success: true, message: 'BlogSubCategory fetched', data: blogSubCategory }
     };
   } catch (err) {
-    console.error('Get BlogSubCategory error:', err.message);
+    // console.error('Get BlogSubCategory error:', err.message);
     return {
       status: 500,
       body: { success: false, message: 'Server error' }
@@ -167,7 +167,7 @@ export async function updateBlogSubCategory(id, data) {
       body: { success: true, message: 'BlogSubCategory updated', data: updated }
     };
   } catch (err) {
-    console.error('Update BlogSubCategory error:', err.message);
+    // console.error('Update BlogSubCategory error:', err.message);
     return {
       status: 500,
       body: { success: false, message: 'Server error' }
@@ -193,7 +193,7 @@ export async function deleteBlogSubCategory(id) {
       body: { success: true, message: 'BlogSubCategory deleted', data: deleted }
     };
   } catch (err) {
-    console.error('Delete BlogSubCategory error:', err.message);
+    // console.error('Delete BlogSubCategory error:', err.message);
     return {
       status: 500,
       body: { success: false, message: 'Server error' }
@@ -221,7 +221,7 @@ export async function getSubCategoriesByCategoryId(categoryId) {
       }
     };
   } catch (err) {
-    console.error('Get SubCategories by Category error:', err.message);
+    // console.error('Get SubCategories by Category error:', err.message);
     return {
       status: 500,
       body: { success: false, message: 'Server error' }

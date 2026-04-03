@@ -9,7 +9,7 @@ class ReviewService {
 
   async getAllReviews(query) {
     try {
-      console.log("Query Parameters:", query);
+      // // console.log("Query Parameters:", query);
       const {
         page = 1,
         limit = 10,
@@ -69,7 +69,7 @@ class ReviewService {
         stats
       };
     } catch (error) {
-      console.error("Error in getAllReviews:", error.message);
+      // // console.error("Error in getAllReviews:", error.message);
       throw new AppError("Cannot fetch reviews", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
@@ -78,41 +78,41 @@ class ReviewService {
     try {
       return await this.reviewRepo.findById(id);
     } catch (error) {
-      console.error('Error in getReviewById:', error);
+      // // console.error('Error in getReviewById:', error);
       throw error;
     }
   }
 
   async createReview(data) {
     try {
-      console.log('Service createReview called with:', data);
+      // // console.log('Service createReview called with:', data);
       return await this.reviewRepo.create(data);
     } catch (error) {
-      console.error('Error in createReview:', error);
+      // // console.error('Error in createReview:', error);
       throw error;
     }
   }
 
   async updateReview(id, data) {
     try {
-      console.log('Service updateReview called with:', id, data);
+      // // console.log('Service updateReview called with:', id, data);
       const updated = await this.reviewRepo.update(id, data);
-      console.log('Service updated result:', updated);
+      // // console.log('Service updated result:', updated);
       return updated;
     } catch (error) {
-      console.error('Error in updateReview:', error);
+      // // console.error('Error in updateReview:', error);
       throw error;
     }
   }
 
   async deleteReview(id) {
     try {
-      console.log('Service deleteReview called with:', id);
+      // // console.log('Service deleteReview called with:', id);
       const deleted = await this.reviewRepo.softDelete(id);
-      console.log('Service deleted result:', deleted);
+      // // // console.log('Service deleted result:', deleted);
       return deleted;
     } catch (error) {
-      console.error('Error in deleteReview:', error);
+      // // // console.error('Error in deleteReview:', error);
       throw error;
     }
   }
@@ -123,7 +123,7 @@ class ReviewService {
       const filters = { product: productId, deletedAt: null };
       return await this.reviewRepo.getAll(filters, { createdAt: -1 }, query.page || 1, query.limit || 10);
     } catch (error) {
-      console.error('Error in getReviewsByProduct:', error);
+      // // console.error('Error in getReviewsByProduct:', error);
       throw error;
     }
   }
@@ -133,7 +133,7 @@ class ReviewService {
       const filters = { user: userId, deletedAt: null };
       return await this.reviewRepo.getAll(filters, { createdAt: -1 }, query.page || 1, query.limit || 10);
     } catch (error) {
-      console.error('Error in getReviewsByUser:', error);
+      // // console.error('Error in getReviewsByUser:', error);
       throw error;
     }
   }
@@ -143,7 +143,7 @@ class ReviewService {
       const filters = { isWebsiteReview: true, deletedAt: null };
       return await this.reviewRepo.getAll(filters, { createdAt: -1 }, query.page || 1, query.limit || 10);
     } catch (error) {
-      console.error('Error in getWebsiteReviews:', error);
+      // // console.error('Error in getWebsiteReviews:', error);
       throw error;
     }
   }

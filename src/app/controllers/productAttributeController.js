@@ -46,12 +46,12 @@ export async function createProductAttribute(form, admin = null) {
       i++;
     }
 
-    console.log(
-      "Creating Product Attribute with title:",
-      title,
-      "and terms:",
-      terms
-    );
+    // console.log(
+    //   "Creating Product Attribute with title:",
+    //   title,
+    //   "and terms:",
+    //   terms
+    // );
 
     // (existing code...)
 
@@ -97,7 +97,7 @@ export async function createProductAttribute(form, admin = null) {
       ),
     };
   } catch (err) {
-    console.error("Create Product Attribute error:", err.message);
+    // console.error("Create Product Attribute error:", err.message);
     return {
       status: 500,
       body: errorResponse("Server error", 500),
@@ -136,7 +136,7 @@ export async function getProductAttributes(query, admin = null) {
         query.vendor = query.vendor;
       }
     }
-    console.log("Get Product Attributes query:", query);
+    // console.log("Get Product Attributes query:", query);
     const result = await productAttributeService.getAllProductAttributes(query);
 
     // Normalize image paths in all terms
@@ -159,7 +159,7 @@ export async function getProductAttributes(query, admin = null) {
       },
     };
   } catch (err) {
-    console.error("Get Product Attributes error:", err.message);
+    // console.error("Get Product Attributes error:", err.message);
     return {
       status: 500,
       body: { success: false, message: "Internal server error" },
@@ -169,7 +169,7 @@ export async function getProductAttributes(query, admin = null) {
 
 export async function getProductAttributeByCategoryId(categoryId) {
   try {
-    console.log("Get Product Attribute by Category ID:", categoryId);
+    // console.log("Get Product Attribute by Category ID:", categoryId);
     const attribute =
       await productAttributeService.getProductAttributeByCategoryId(categoryId);
     if (!attribute) {
@@ -204,7 +204,7 @@ export async function getProductAttributeByCategoryId(categoryId) {
       },
     };
   } catch (err) {
-    console.error("Get Product Attribute by Category ID error:", err);
+    // console.error("Get Product Attribute by Category ID error:", err);
     return {
       status: 500,
       body: { success: false, message: "Internal server error" },
@@ -237,7 +237,7 @@ export async function getProductAttributeById(id) {
       },
     };
   } catch (err) {
-    console.error("Get Product Attribute error:", err);
+    // console.error("Get Product Attribute error:", err);
     return {
       status: 500,
       body: { success: false, message: "Internal server error" },
@@ -254,10 +254,10 @@ export async function updateProductAttribute(id, data) {
       for (const [index, term] of data.terms.entries()) {
         const termObj = { value: term.value?.trim() || "" };
 
-        console.log(`Processing term #${index}:`, term);
+        // console.log(`Processing term #${index}:`, term);
 
         // Handle image upload or path
-        console.log(`Term #${index} image type:`, typeof term.image);
+        // console.log(`Term #${index} image type:`, typeof term.image);
 
         if (
           term.image &&
@@ -369,7 +369,7 @@ export async function updateProductAttribute(id, data) {
       },
     };
   } catch (err) {
-    console.error("Update Product Attribute error:", err);
+    // console.error("Update Product Attribute error:", err);
     return {
       status: 500,
       body: { success: false, message: "Internal server error" },
@@ -396,7 +396,7 @@ export async function deleteProductAttribute(id) {
       },
     };
   } catch (err) {
-    console.error("Delete Product Attribute error:", err);
+    // console.error("Delete Product Attribute error:", err);
     return {
       status: 500,
       body: { success: false, message: "Internal server error" },

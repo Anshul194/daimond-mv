@@ -23,15 +23,15 @@ class ProductService {
   // Ensure Mongoose connection is ready before executing operations
   async ensureMongooseConnection() {
     if (mongoose.connection.readyState !== 1) {
-      console.log("Mongoose connection not ready, attempting to connect...");
+      // // console.log("Mongoose connection not ready, attempting to connect...");
       try {
         await mongoose.connect(process.env.MONGODB_URI, {
           useNewUrlParser: true,
           useUnifiedTopology: true,
         });
-        console.log("Mongoose connection established");
+        // // console.log("Mongoose connection established");
       } catch (error) {
-        console.error("Failed to connect to MongoDB:", error.message);
+        // // console.error("Failed to connect to MongoDB:", error.message);
         throw new AppError(
           "Database connection failed",
           StatusCodes.INTERNAL_SERVER_ERROR
@@ -43,10 +43,10 @@ class ProductService {
   async createProduct(data) {
     try {
       await this.ensureMongooseConnection();
-      console.log("Create Product data Services:", data);
+      // // console.log("Create Product data Services:", data);
       return await this.productRepo.create(data);
     } catch (error) {
-      console.error("Error in createProduct:", error.message);
+      // // console.error("Error in createProduct:", error.message);
       throw error;
     }
   }
@@ -54,10 +54,10 @@ class ProductService {
   async createInventory(data) {
     try {
       await this.ensureMongooseConnection();
-      console.log("Create Inventory data:", data);
+      // // console.log("Create Inventory data:", data);
       return await this.productRepo.createInventory(data);
     } catch (error) {
-      console.error("Error in createInventory:", error.message);
+      // // console.error("Error in createInventory:", error.message);
       throw error;
     }
   }
@@ -65,10 +65,10 @@ class ProductService {
   async createInventoryDetails(data) {
     try {
       await this.ensureMongooseConnection();
-      console.log("Create Inventory Details data:", data);
+      // // console.log("Create Inventory Details data:", data);
       return await this.productRepo.createInventoryDetails(data);
     } catch (error) {
-      console.error("Error in createInventoryDetails:", error.message);
+      // // console.error("Error in createInventoryDetails:", error.message);
       throw error;
     }
   }
@@ -76,13 +76,13 @@ class ProductService {
   async createInventoryDetailsAttributes(data) {
     try {
       await this.ensureMongooseConnection();
-      console.log("Create Inventory Details Attributes data:", data);
+      // // console.log("Create Inventory Details Attributes data:", data);
       return await this.productRepo.createInventoryDetailsAttributes(data);
     } catch (error) {
-      console.error(
-        "Error in createInventoryDetailsAttributes:",
-        error.message
-      );
+      // // console.error(
+      //   "Error in createInventoryDetailsAttributes:",
+      //   error.message
+      // );
       throw error;
     }
   }
@@ -90,15 +90,15 @@ class ProductService {
   async batchCreateInventoryDetails(dataArray) {
     try {
       await this.ensureMongooseConnection();
-      console.log("Batch Create Inventory Details:", dataArray.length, "items");
+      // // console.log("Batch Create Inventory Details:", dataArray.length, "items");
       const promises = dataArray.map((data) =>
         this.productRepo.createInventoryDetails(data)
       );
       const results = await Promise.all(promises);
-      console.log("Batch created inventory details:", results.length);
+      // // console.log("Batch created inventory details:", results.length);
       return results;
     } catch (error) {
-      console.error("Error in batchCreateInventoryDetails:", error.message);
+      // // console.error("Error in batchCreateInventoryDetails:", error.message);
       throw error;
     }
   }
@@ -106,11 +106,11 @@ class ProductService {
   async batchCreateInventoryDetailsAttributes(dataArray) {
     try {
       await this.ensureMongooseConnection();
-      console.log(
-        "Batch Create Inventory Details Attributes:",
-        dataArray.length,
-        "items"
-      );
+      // console.log(
+      //   "Batch Create Inventory Details Attributes:",
+      //   dataArray.length,
+      //   "items"
+      // );
       const groupedAttributes = dataArray.reduce((acc, attr) => {
         const key = attr.inventory_details_id;
         if (!acc[key]) acc[key] = [];
@@ -121,13 +121,13 @@ class ProductService {
         this.productRepo.createInventoryDetailsAttributes(attributeGroup)
       );
       const results = await Promise.all(promises);
-      console.log("Batch created attributes:", results.flat().length);
+      // console.log("Batch created attributes:", results.flat().length);
       return results.flat();
     } catch (error) {
-      console.error(
-        "Error in batchCreateInventoryDetailsAttributes:",
-        error.message
-      );
+      // console.error(
+      //   "Error in batchCreateInventoryDetailsAttributes:",
+      //   error.message
+      // );
       throw error;
     }
   }
@@ -156,10 +156,10 @@ class ProductService {
       }
       return createdDetails;
     } catch (error) {
-      console.error(
-        "Error in createInventoryDetailsWithAttributes:",
-        error.message
-      );
+      // console.error(
+      //   "Error in createInventoryDetailsWithAttributes:",
+      //   error.message
+      // );
       throw error;
     }
   }
@@ -167,12 +167,12 @@ class ProductService {
   async updateProduct(id, data, files = {}) {
     try {
       await this.ensureMongooseConnection();
-      console.log("Update Product data:", data);
+      // // console.log("Update Product data:", data);
       const { mainImage, itemVariants } = files;
 
-      console.log("Files received for update:", files);
+      // // console.log("Files received for update:", files);
 
-      console.log("Main image:", id);
+      // // console.log("Main image:", id);
 
       // Fetch existing product
       const product = await this.productRepo.findById(id);
@@ -226,9 +226,9 @@ class ProductService {
         updatedData.image = data.image;
       }
 
-      console.log("Updated product data:", updatedData);
+      // // console.log("Updated product data:", updatedData);
       const updatedProduct = await this.productRepo.update(id, updatedData);
-      console.log("final updatedProduct:", updatedProduct);
+      // // console.log("final updatedProduct:", updatedProduct);
       if (!updatedProduct)
         throw new AppError(
           "Product update failed",
@@ -262,7 +262,7 @@ class ProductService {
 
       return updatedProduct;
     } catch (error) {
-      console.log("Error in updateProduct:", error.message, error.stack);
+      // // console.log("Error in updateProduct:", error.message, error.stack);
       throw error;
     }
   }
@@ -288,7 +288,7 @@ class ProductService {
       for (const variant of itemVariants) {
         const { attributes, image, inventoryDetailsId, ...variantData } = variant;
 
-        console.log("Variant details : ==> " + inventoryDetailsId, variantData);
+        // // console.log("Variant details : ==> " + inventoryDetailsId, variantData);
 
         // Handle image upload
         let imageUrl = "";
@@ -299,7 +299,7 @@ class ProductService {
             "products",
             `item_${productId}_${inventoryDetailsId || Date.now()}`
           );
-          console.log("Variant image updated:", imageUrl);
+          // // console.log("Variant image updated:", imageUrl);
         }
 
         // Prepare detail data - only include defined fields
@@ -360,20 +360,20 @@ class ProductService {
       if (allAttributes.length > 0) {
         let existingAttributes = [];
         try {
-          console.log(
-            "Fetching existing attributes for inventory_details_id:",
-            createdDetails.map((d) => d._id)
-          );
+          // // console.log(
+          //   "Fetching existing attributes for inventory_details_id:",
+          //   createdDetails.map((d) => d._id)
+          // );
           existingAttributes = await ProductInventoryDetailAttribute.find({
             inventory_details_id: { $in: createdDetails.map((d) => d._id) },
           }).lean();
-          console.log("Fetched existing attributes:", existingAttributes.length);
+          // console.log("Fetched existing attributes:", existingAttributes.length);
         } catch (error) {
-          console.error(
-            "Error fetching existing attributes:",
-            error.message,
-            error.stack
-          );
+          // console.error(
+          //   "Error fetching existing attributes:",
+          //   error.message,
+          //   error.stack
+          // );
           throw new AppError(
             "Failed to fetch existing attributes",
             StatusCodes.INTERNAL_SERVER_ERROR
@@ -389,17 +389,17 @@ class ProductService {
 
           let createdAttr;
           if (existingAttr) {
-            console.log(
-              `Updating attribute ${existingAttr._id} for inventory_details_id: ${attr.inventory_details_id}`
-            );
+            // // console.log(
+            //   `Updating attribute ${existingAttr._id} for inventory_details_id: ${attr.inventory_details_id}`
+            // );
             createdAttr = await this.productRepo.updateInventoryDetailsAttributes(
               existingAttr._id,
               attr
             );
           } else {
-            console.log(
-              `Creating new attribute for inventory_details_id: ${attr.inventory_details_id}`
-            );
+            // console.log(
+            //   `Creating new attribute for inventory_details_id: ${attr.inventory_details_id}`
+            // );
             createdAttr = await this.productRepo.createInventoryDetailsAttributes(
               attr
             );
@@ -408,16 +408,16 @@ class ProductService {
         });
 
         const createdAttributes = await Promise.all(attributePromises);
-        console.log(`Processed ${createdAttributes.length} attributes`);
+        // console.log(`Processed ${createdAttributes.length} attributes`);
       }
 
       return createdDetails;
     } catch (error) {
-      console.error(
-        "Error in updateInventoryDetailsWithAttributes:",
-        error.message,
-        error.stack
-      );
+      // console.error(
+      //   "Error in updateInventoryDetailsWithAttributes:",
+      //   error.message,
+      //   error.stack
+      // );
       throw error;
     }
   }
@@ -427,7 +427,7 @@ class ProductService {
       await this.ensureMongooseConnection();
       return await this.productRepo.deleteInventoryDetails(id);
     } catch (error) {
-      console.error("Error in deleteInventoryDetails:", error.message);
+      // console.error("Error in deleteInventoryDetails:", error.message);
       throw error;
     }
   }
@@ -437,7 +437,7 @@ class ProductService {
       await this.ensureMongooseConnection();
       return await this.productRepo.deleteInventory(id);
     } catch (error) {
-      console.error("Error in deleteInventory:", error.message);
+      // console.error("Error in deleteInventory:", error.message);
       throw error;
     }
   }
@@ -447,7 +447,7 @@ class ProductService {
       await this.ensureMongooseConnection();
       return await this.productRepo.deleteInventoryDetailsAttribute(id);
     } catch (error) {
-      console.error("Error in deleteInventoryDetailsAttribute:", error.message);
+      // console.error("Error in deleteInventoryDetailsAttribute:", error.message);
       throw error;
     }
   }
@@ -486,7 +486,7 @@ class ProductService {
         .select("product_id")
         .lean();
 
-      console.log("Matching attributes:", matchingAttributes);
+      // console.log("Matching attributes:", matchingAttributes);
 
       const matchingProductIds = [
         ...new Set(matchingAttributes.map((attr) => String(attr.product_id))),
@@ -517,8 +517,8 @@ class ProductService {
       const totalCount = await this.productRepo.countDocuments(
         filterConditions
       );
-      console.log("filter conditions:", filterConditions);
-      console.log("Products fetched:", products);
+      // console.log("filter conditions:", filterConditions);
+      // console.log("Products fetched:", products);
       return {
         docs: products,
         total: totalCount,
@@ -527,7 +527,7 @@ class ProductService {
         totalPages: Math.ceil(totalCount / limitNum),
       };
     } catch (error) {
-      console.error("Error in getProductsByAttribute:", error.message);
+      // console.error("Error in getProductsByAttribute:", error.message);
       throw new AppError(
         "Cannot fetch products by attribute",
         StatusCodes.INTERNAL_SERVER_ERROR
@@ -563,12 +563,12 @@ class ProductService {
       } = queryObj;
 
       // Log all query parameters for debugging
-      console.log("=== getAllProducts Query Parameters ===");
-      console.log("include_category_ids:", include_category_ids);
-      console.log("exclude_category_ids:", exclude_category_ids);
-      console.log("in_stock:", in_stock, "type:", typeof in_stock);
-      console.log("page:", page, "limit:", limit);
-      console.log("========================================");
+      // console.log("=== getAllProducts Query Parameters ===");
+      // console.log("include_category_ids:", include_category_ids);
+      // console.log("exclude_category_ids:", exclude_category_ids);
+      // console.log("in_stock:", in_stock, "type:", typeof in_stock);
+      // console.log("page:", page, "limit:", limit);
+      // console.log("========================================");
 
       // Helper function to safely parse JSON strings
       const safeJsonParse = (str, defaultValue = {}) => {
@@ -578,7 +578,7 @@ class ProductService {
         try {
           return JSON.parse(str);
         } catch (e) {
-          console.warn(`Failed to parse JSON: ${str}, using default value`);
+          // console.warn(`Failed to parse JSON: ${str}, using default value`);
           return defaultValue;
         }
       };
@@ -664,7 +664,7 @@ class ProductService {
         const categoryIds = Array.isArray(include_category_ids)
           ? include_category_ids
           : include_category_ids.split(",").map(id => id.trim());
-        console.log("Parsed include_category_ids:", categoryIds);
+        // console.log("Parsed include_category_ids:", categoryIds);
 
         // Convert to ObjectIds - handle both ObjectId strings and numeric IDs
         const validCategoryIds = [];
@@ -675,13 +675,13 @@ class ProductService {
           if (mongoose.Types.ObjectId.isValid(id) && id.length === 24) {
             const objectId = new mongoose.Types.ObjectId(id);
             validCategoryIds.push(objectId);
-            console.log(`✅ Valid ObjectId category ID: ${id} -> ${objectId}`);
+            // console.log(`✅ Valid ObjectId category ID: ${id} -> ${objectId}`);
           } else if (!isNaN(id) && id.trim() !== '') {
             // It's a numeric ID - we'll need to look it up
             numericIds.push(parseInt(id));
-            console.log(`⚠️ Numeric category ID found (will try to map): ${id}`);
+            // console.log(`⚠️ Numeric category ID found (will try to map): ${id}`);
           } else {
-            console.log(`❌ Category ID "${id}" is not a valid ObjectId or numeric ID, skipping`);
+            // console.log(`❌ Category ID "${id}" is not a valid ObjectId or numeric ID, skipping`);
           }
         }
 
@@ -691,7 +691,7 @@ class ProductService {
             // Fetch all categories and try to match by some numeric field or index
             // Since we don't have a numeric ID field, we'll fetch all and use array index
             const allCategories = await Category.find({ deletedAt: null }).sort({ createdAt: 1 }).lean();
-            console.log(`Found ${allCategories.length} categories for numeric ID mapping`);
+            // console.log(`Found ${allCategories.length} categories for numeric ID mapping`);
 
             // Map numeric IDs (assuming they're 1-based indices or some other mapping)
             // If numeric IDs represent array positions, use them as indices
@@ -702,23 +702,23 @@ class ProductService {
                 const category = allCategories[categoryIndex];
                 if (category && category._id) {
                   validCategoryIds.push(new mongoose.Types.ObjectId(category._id));
-                  console.log(`Mapped numeric ID ${numericId} to ObjectId ${category._id}`);
+                  // console.log(`Mapped numeric ID ${numericId} to ObjectId ${category._id}`);
                 }
               }
             }
           } catch (mapError) {
-            console.error('Error mapping numeric category IDs:', mapError.message);
+            // console.error('Error mapping numeric category IDs:', mapError.message);
           }
         }
 
-        console.log("Valid include_category_ids (ObjectIds):", validCategoryIds);
-        console.log("Valid include_category_ids count:", validCategoryIds.length);
+        // console.log("Valid include_category_ids (ObjectIds):", validCategoryIds);
+        // console.log("Valid include_category_ids count:", validCategoryIds.length);
         if (validCategoryIds.length > 0) {
           filterConditions.category_id = { $in: validCategoryIds };
-          console.log("✅ Applied category filter:", JSON.stringify(filterConditions.category_id));
+          // console.log("✅ Applied category filter:", JSON.stringify(filterConditions.category_id));
         } else {
-          console.warn("⚠️ No valid ObjectId category IDs found - category filter will be skipped");
-          console.warn("⚠️ This means ALL products will be returned (not filtered by category)");
+          // console.warn("⚠️ No valid ObjectId category IDs found - category filter will be skipped");
+          // console.warn("⚠️ This means ALL products will be returned (not filtered by category)");
         }
       }
 
@@ -727,7 +727,7 @@ class ProductService {
         const categoryIds = Array.isArray(exclude_category_ids)
           ? exclude_category_ids
           : exclude_category_ids.split(",").map(id => id.trim());
-        console.log("Parsed exclude_category_ids:", categoryIds);
+        // console.log("Parsed exclude_category_ids:", categoryIds);
 
         // Convert to ObjectIds - handle both ObjectId strings and numeric IDs
         const validCategoryIds = [];
@@ -741,7 +741,7 @@ class ProductService {
             // It's a numeric ID - we'll need to look it up
             numericIds.push(parseInt(id));
           } else {
-            console.log(`Exclude category ID "${id}" is not a valid ObjectId or numeric ID, skipping`);
+            // console.log(`Exclude category ID "${id}" is not a valid ObjectId or numeric ID, skipping`);
           }
         }
 
@@ -755,16 +755,16 @@ class ProductService {
                 const category = allCategories[categoryIndex];
                 if (category && category._id) {
                   validCategoryIds.push(new mongoose.Types.ObjectId(category._id));
-                  console.log(`Mapped exclude numeric ID ${numericId} to ObjectId ${category._id}`);
+                  // console.log(`Mapped exclude numeric ID ${numericId} to ObjectId ${category._id}`);
                 }
               }
             }
           } catch (mapError) {
-            console.error('Error mapping numeric exclude category IDs:', mapError.message);
+            // console.error('Error mapping numeric exclude category IDs:', mapError.message);
           }
         }
 
-        console.log("Valid exclude_category_ids (ObjectIds):", validCategoryIds);
+        // console.log("Valid exclude_category_ids (ObjectIds):", validCategoryIds);
         if (validCategoryIds.length > 0) {
           if (filterConditions.category_id && filterConditions.category_id.$in) {
             // If we already have $in, filter out excluded IDs from the $in array
@@ -792,7 +792,7 @@ class ProductService {
             };
           }
         } else {
-          console.warn("No valid ObjectId exclude category IDs found - exclude filter will be skipped");
+          // console.warn("No valid ObjectId exclude category IDs found - exclude filter will be skipped");
         }
       }
 
@@ -825,9 +825,9 @@ class ProductService {
 
       // Handle in_stock filter - filter by inventory stock_status
       let inStockProductIds = null;
-      console.log("in_stock parameter:", in_stock, "type:", typeof in_stock);
+      // console.log("in_stock parameter:", in_stock, "type:", typeof in_stock);
       if (in_stock === "yes" || in_stock === true || in_stock === "true") {
-        console.log("Filtering for in-stock products...");
+        // console.log("Filtering for in-stock products...");
 
         // Query for inventories that are NOT out_of_stock
         // This includes: stock_status = "in_stock" OR stock_status is null/undefined (defaults to in_stock)
@@ -840,14 +840,14 @@ class ProductService {
           ]
         }).select("product stock_status").lean();
 
-        console.log(`Found ${inStockInventories.length} inventories that are in stock`);
+        // console.log(`Found ${inStockInventories.length} inventories that are in stock`);
 
         // Also check what stock_status values exist in the database
         const allInventories = await ProductInventory.find({}).select("product stock_status").limit(10).lean();
-        console.log("Sample inventory stock_status values:", allInventories.map(inv => ({
-          product: inv.product?.toString(),
-          stock_status: inv.stock_status
-        })));
+        // console.log("Sample inventory stock_status values:", allInventories.map(inv => ({
+        //   product: inv.product?.toString(),
+        //   stock_status: inv.stock_status
+        // })));
 
         // Get all product IDs that are NOT out_of_stock
         const outOfStockInventories = await ProductInventory.find({
@@ -859,7 +859,7 @@ class ProductService {
             return productId?.toString ? productId.toString() : String(productId);
           })
         );
-        console.log(`Found ${outOfStockProductIds.size} products that are out of stock`);
+        // console.log(`Found ${outOfStockProductIds.size} products that are out of stock`);
 
         // Convert product ObjectIds to strings - handle ObjectId properly
         inStockProductIds = inStockInventories
@@ -882,11 +882,11 @@ class ProductService {
         // Remove duplicates
         inStockProductIds = [...new Set(inStockProductIds)];
 
-        console.log("In-stock product IDs (first 10):", inStockProductIds.slice(0, 10));
-        console.log("Total unique in-stock products:", inStockProductIds.length);
+        // console.log("In-stock product IDs (first 10):", inStockProductIds.slice(0, 10));
+        // console.log("Total unique in-stock products:", inStockProductIds.length);
 
         if (inStockProductIds.length === 0) {
-          console.log("No products in stock, returning empty result");
+          // console.log("No products in stock, returning empty result");
           // No products in stock, return empty result
           return {
             docs: [],
@@ -897,7 +897,7 @@ class ProductService {
           };
         }
       } else {
-        console.log("in_stock filter not applied (value:", in_stock, ")");
+        // console.log("in_stock filter not applied (value:", in_stock, ")");
       }
 
       // --- [NEW] Nested Variant-Level Filtering (AND between categories, OR within) ---
@@ -905,10 +905,10 @@ class ProductService {
       const hasCaratFilters = carat_min !== undefined || carat_max !== undefined;
 
       if (hasAttrFilters || hasCaratFilters) {
-        console.log("Applying nested filtering for:", {
-          attributes: parsedAttributeFilters,
-          carat: { min: carat_min, max: carat_max }
-        });
+        // console.log("Applying nested filtering for:", {
+        //   attributes: parsedAttributeFilters,
+        //   carat: { min: carat_min, max: carat_max }
+        // });
 
         // 1. Fetch all matching attribute records
         const attrRegexList = parsedAttributeFilters.map(v => new RegExp(`^${v}$`, "i"));
@@ -959,7 +959,7 @@ class ProductService {
         // 3. Verify all provided filters matched at least something
         const unmatchedFilters = parsedAttributeFilters.filter(f => !matchedFilterValues.has(f.toLowerCase()));
         if (unmatchedFilters.length > 0) {
-          console.log("Some filters had no matches in database:", unmatchedFilters);
+          // console.log("Some filters had no matches in database:", unmatchedFilters);
           // If some attribute filters exist that literally don't exist in DB, no product can match them
           return {
             docs: [],
@@ -984,13 +984,13 @@ class ProductService {
           }
         }
 
-        console.log(`Nested filter found ${matchingProductIds.size} products from ${Object.keys(variantMatches).length} candidate variants`);
+        // console.log(`Nested filter found ${matchingProductIds.size} products from ${Object.keys(variantMatches).length} candidate variants`);
 
         // 5. Combine with in_stock and apply to filterConditions
         let finalIds = Array.from(matchingProductIds);
         if (inStockProductIds !== null) {
           finalIds = finalIds.filter(id => inStockProductIds.includes(id));
-          console.log(`Combining with in-stock: ${matchingProductIds.size} -> ${finalIds.length}`);
+          // console.log(`Combining with in-stock: ${matchingProductIds.size} -> ${finalIds.length}`);
         }
 
         if (finalIds.length === 0) {
@@ -1033,12 +1033,12 @@ class ProductService {
 
       const skip = (pageNum - 1) * limitNum;
 
-      console.log("=== FINAL FILTER CONDITIONS ===");
-      console.log(JSON.stringify(filterConditions, null, 2));
-      console.log("inStockProductIds count:", inStockProductIds ? inStockProductIds.length : null);
-      console.log("Skip:", skip, "Limit:", limitNum);
-      console.log("Sort:", parsedSort);
-      console.log("=================================");
+      // console.log("=== FINAL FILTER CONDITIONS ===");
+      // console.log(JSON.stringify(filterConditions, null, 2));
+      // console.log("inStockProductIds count:", inStockProductIds ? inStockProductIds.length : null);
+      // console.log("Skip:", skip, "Limit:", limitNum);
+      // console.log("Sort:", parsedSort);
+      // console.log("=================================");
 
       const products = await this.productRepo.findAll(
         filterConditions,
@@ -1047,22 +1047,22 @@ class ProductService {
         limitNum
       );
 
-      console.log(`✅ Fetched ${products.length} products from database`);
+      // console.log(`✅ Fetched ${products.length} products from database`);
       if (products.length === 0 && filterConditions.category_id) {
-        console.warn("⚠️ No products found with category filter. Checking if products exist without category filter...");
+        // console.warn("⚠️ No products found with category filter. Checking if products exist without category filter...");
         // Check if any products exist at all
         const totalProducts = await this.productRepo.countDocuments({ deletedAt: null });
-        console.log(`Total products in database (not deleted): ${totalProducts}`);
+        // console.log(`Total products in database (not deleted): ${totalProducts}`);
         // Check if products exist with this category_id
         const productsWithCategory = await this.productRepo.countDocuments({
           category_id: filterConditions.category_id,
           deletedAt: null
         });
-        console.log(`Products with category_id ${JSON.stringify(filterConditions.category_id)}: ${productsWithCategory}`);
+        // console.log(`Products with category_id ${JSON.stringify(filterConditions.category_id)}: ${productsWithCategory}`);
       }
 
       const totalCount = await this.productRepo.countDocuments(filterConditions);
-      console.log(`Total count: ${totalCount}`);
+      // console.log(`Total count: ${totalCount}`);
 
       return {
         docs: products,
@@ -1072,7 +1072,7 @@ class ProductService {
         totalPages: Math.ceil(totalCount / limitNum),
       };
     } catch (error) {
-      console.error("❌ Error in getAllProducts:", error.message);
+      // console.error("❌ Error in getAllProducts:", error.message);
       throw new AppError(
         "Cannot fetch products",
         StatusCodes.INTERNAL_SERVER_ERROR
@@ -1082,7 +1082,7 @@ class ProductService {
   async getProductById(id) {
     try {
       await this.ensureMongooseConnection();
-      // console.log("Get Product by ID:", categoryId, productSlug);
+      // // console.log("Get Product by ID:", categoryId, productSlug);
 
       //fetch category by ID
       // const id = new mongoose.Types.ObjectId(categoryId);
@@ -1096,11 +1096,11 @@ class ProductService {
         product: product?._id,
       }).populate("inventory_details_id");
 
-      console.log("Inventory details found:", inventoryDetails.length);
+      // console.log("Inventory details found:", inventoryDetails.length);
 
       return product;
     } catch (error) {
-      console.log("Error in getProductById:", error.message);
+      // console.log("Error in getProductById:", error.message);
       throw error;
     }
   }
@@ -1206,7 +1206,7 @@ class ProductService {
   //               ? JSON.parse(attrDef.terms)
   //               : [];
   //           } catch (e) {
-  //             console.warn("Failed to parse terms:", attrDef.terms, e.message);
+  //             // console.warn("Failed to parse terms:", attrDef.terms, e.message);
   //             terms = [];
   //           }
 
@@ -1217,7 +1217,7 @@ class ProductService {
   //               ? JSON.parse(attrDef.images)
   //               : [];
   //           } catch (e) {
-  //             console.warn("Failed to parse images:", attrDef.images, e.message);
+  //             // console.warn("Failed to parse images:", attrDef.images, e.message);
   //             images = [];
   //           }
 
@@ -1259,7 +1259,7 @@ class ProductService {
   //       additional_info_store,
   //     };
   //   } catch (error) {
-  //     console.error("Error in getProductByIdAndSlug:", error.message);
+  //     // console.error("Error in getProductByIdAndSlug:", error.message);
   //     throw error;
   //   }
   // }
@@ -1267,7 +1267,7 @@ class ProductService {
   async getProductByIdAndSlug(categorySlug, productSlug, id) {
     try {
       await this.ensureMongooseConnection();
-      console.log("MongoDB connection established.");
+      // console.log("MongoDB connection established.");
 
       let productQuery = {
         slug: productSlug,
@@ -1283,7 +1283,7 @@ class ProductService {
           throw new AppError("Category not found", StatusCodes.NOT_FOUND);
         }
         productQuery.category_id = category._id;
-        console.log("Category found:", category);
+        // console.log("Category found:", category);
       }
 
       if (id && mongoose.Types.ObjectId.isValid(id)) {
@@ -1300,14 +1300,14 @@ class ProductService {
         throw new AppError("Product not found", StatusCodes.NOT_FOUND);
       }
 
-      console.log("Product fetched:", product);
+      // console.log("Product fetched:", product);
 
       const inventories = await ProductInventory.find({
         product: product._id,
         deletedAt: null,
       }).lean();
 
-      console.log("Inventories:", inventories);
+      // console.log("Inventories:", inventories);
 
       const inventoryIds = inventories.map((inv) => inv._id);
 
@@ -1320,11 +1320,11 @@ class ProductService {
         .lean();
 
       const detailIds = inventoryDetails.map((d) => d.color);
-      console.log("Detail IDs for color:", detailIds);
+      // console.log("Detail IDs for color:", detailIds);
       const attributes = await ProductAttribute.find({
         title: "METAL TYPE",
       });
-      console.log("Attributes fetched:", attributes);
+      // console.log("Attributes fetched:", attributes);
 
       const metalTypes = detailIds.map((d) => {
         if (!attributes || attributes.length === 0 || !attributes[0].terms || !Array.isArray(attributes[0].terms)) {
@@ -1337,7 +1337,7 @@ class ProductService {
         return it;
       });
 
-      console.log("fetched metal types:", metalTypes);
+      // console.log("fetched metal types:", metalTypes);
 
       inventoryDetails = inventoryDetails.map((detail) => {
         let check = metalTypes.find((metal) => {
@@ -1350,7 +1350,7 @@ class ProductService {
         return detail;
       });
 
-      console.log("Inventory details fetched:", inventoryDetails);
+      // console.log("Inventory details fetched:", inventoryDetails);
 
       // Fetch all product attributes (including properties like Metal Type)
       const allProductAttributes = await ProductInventoryDetailAttribute.find({
@@ -1358,7 +1358,7 @@ class ProductService {
         deletedAt: null,
       }).lean();
 
-      console.log("All product attributes fetched:", allProductAttributes.length);
+      // console.log("All product attributes fetched:", allProductAttributes.length);
 
       const groupedAttributes = {};
       for (const attr of allProductAttributes) {
@@ -1416,7 +1416,7 @@ class ProductService {
                   ? JSON.parse(attrDef.terms)
                   : [];
             } catch (e) {
-              console.warn("Failed to parse terms:", attrDef.terms, e.message);
+              // console.warn("Failed to parse terms:", attrDef.terms, e.message);
               terms = [];
             }
 
@@ -1427,11 +1427,11 @@ class ProductService {
                   ? JSON.parse(attrDef.images)
                   : [];
             } catch (e) {
-              console.warn(
-                "Failed to parse images:",
-                attrDef.images,
-                e.message
-              );
+              // console.warn(
+              //   "Failed to parse images:",
+              //   attrDef.images,
+              //   e.message
+              // );
               images = [];
             }
 
@@ -1469,11 +1469,11 @@ class ProductService {
                   ? JSON.parse(attrDef.terms)
                   : [];
             } catch (e) {
-              console.warn(
-                "Failed to parse metal terms:",
-                attrDef.terms,
-                e.message
-              );
+              // console.warn(
+              //   "Failed to parse metal terms:",
+              //   attrDef.terms,
+              //   e.message
+              // );
               terms = [];
             }
 
@@ -1484,11 +1484,11 @@ class ProductService {
                   ? JSON.parse(attrDef.images)
                   : [];
             } catch (e) {
-              console.warn(
-                "Failed to parse metal images:",
-                attrDef.images,
-                e.message
-              );
+              // console.warn(
+              //   "Failed to parse metal images:",
+              //   attrDef.images,
+              //   e.message
+              // );
               images = [];
             }
 
@@ -1532,9 +1532,9 @@ class ProductService {
       });
       product.properties = properties;
 
-      console.log("Available attributes:", available_attributes);
-      console.log("Product properties:", properties);
-      console.log("Product inventory set:", product_inventory_set.length);
+      // console.log("Available attributes:", available_attributes);
+      // console.log("Product properties:", properties);
+      // console.log("Product inventory set:", product_inventory_set.length);
 
       return {
         product,
@@ -1543,7 +1543,7 @@ class ProductService {
         additional_info_store,
       };
     } catch (error) {
-      console.error("Error in getProductByIdAndSlug:", error.message);
+      // console.error("Error in getProductByIdAndSlug:", error.message);
       throw error;
     }
   }
@@ -1553,7 +1553,7 @@ class ProductService {
       await this.ensureMongooseConnection();
       return await this.productRepo.findByName(title);
     } catch (error) {
-      console.error("Error in findByName:", error.message);
+      // console.error("Error in findByName:", error.message);
       throw error;
     }
   }
@@ -1561,9 +1561,9 @@ class ProductService {
   async updateInventory(productId, data) {
     try {
       await this.ensureMongooseConnection();
-      console.log("Update Inventory data for product:", productId, data);
-      console.log("Stock status in data:", data.stock_status);
-      console.log("Manage stock in data:", data.manage_stock);
+      // console.log("Update Inventory data for product:", productId, data);
+      // console.log("Stock status in data:", data.stock_status);
+      // console.log("Manage stock in data:", data.manage_stock);
       const inventory = await ProductInventory.findOne({ product: productId });
       if (!inventory)
         throw new AppError("Inventory not found", StatusCodes.NOT_FOUND);
@@ -1599,23 +1599,23 @@ class ProductService {
         inventory.markModified('sku');
       }
 
-      console.log("Inventory before save:", {
-        stock_status: inventory.stock_status,
-        manage_stock: inventory.manage_stock,
-        stock_count: inventory.stock_count,
-        lowStockThreshold: inventory.lowStockThreshold
-      });
+      // console.log("Inventory before save:", {
+      //   stock_status: inventory.stock_status,
+      //   manage_stock: inventory.manage_stock,
+      //   stock_count: inventory.stock_count,
+      //   lowStockThreshold: inventory.lowStockThreshold
+      // });
 
       const saved = await inventory.save();
-      console.log("Inventory after save:", {
-        stock_status: saved.stock_status,
-        manage_stock: saved.manage_stock,
-        stock_count: saved.stock_count,
-        lowStockThreshold: saved.lowStockThreshold
-      });
+      // console.log("Inventory after save:", {
+      //   stock_status: saved.stock_status,
+      //   manage_stock: saved.manage_stock,
+      //   stock_count: saved.stock_count,
+      //   lowStockThreshold: saved.lowStockThreshold
+      // });
       return saved;
     } catch (error) {
-      console.error("Error in updateInventory:", error.message);
+      // console.error("Error in updateInventory:", error.message);
       throw error;
     }
   }
@@ -1623,10 +1623,10 @@ class ProductService {
   async updateInventoryDetails(id, data) {
     try {
       await this.ensureMongooseConnection();
-      console.log("Update Inventory Details data:", id, data);
+      // console.log("Update Inventory Details data:", id, data);
       return await this.productRepo.updateInventoryDetails(id, data);
     } catch (error) {
-      console.error("Error in updateInventoryDetails:", error.message);
+      // console.error("Error in updateInventoryDetails:", error.message);
       throw error;
     }
   }
@@ -1634,13 +1634,13 @@ class ProductService {
   async updateInventoryDetailsAttributes(id, data) {
     try {
       await this.ensureMongooseConnection();
-      console.log("Update Inventory Details Attributes data:", id, data);
+      // console.log("Update Inventory Details Attributes data:", id, data);
       return await this.productRepo.updateInventoryDetailsAttributes(id, data);
     } catch (error) {
-      console.error(
-        "Error in updateInventoryDetailsAttributes:",
-        error.message
-      );
+      // // console.error(
+      //   "Error in updateInventoryDetailsAttributes:",
+      //   error.message
+      // );
       throw error;
     }
   }
@@ -1653,7 +1653,7 @@ class ProductService {
         throw new AppError("Product not found", StatusCodes.NOT_FOUND);
       return deleted;
     } catch (error) {
-      console.error("Error in deleteProduct:", error.message);
+      // // console.error("Error in deleteProduct:", error.message);
       throw error;
     }
   }

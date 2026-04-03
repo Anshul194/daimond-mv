@@ -10,14 +10,14 @@ class DeliveryOptionService {
 
   async getAllDeliveryOptions(query) {
     try {
-      console.log("Query Parameters:", query);
+      // console.log("Query Parameters:", query);
       const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
 
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 
-      console.log("Page Number:", pageNum);
-      console.log("Limit Number:", limitNum);
+      // console.log("Page Number:", pageNum);
+      // console.log("Limit Number:", limitNum);
 
       // Parse JSON strings from query parameters to objects
       const parsedFilters = JSON.parse(filters);
@@ -51,7 +51,7 @@ class DeliveryOptionService {
 
       return deliveryOptions;
     } catch (error) {
-      console.log("error delivery options", error.message);
+      // console.log("error delivery options", error.message);
       throw new AppError("Cannot fetch data of all the delivery options", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
@@ -60,17 +60,17 @@ class DeliveryOptionService {
     try {
       return await this.deliveryOptionRepo.findById(id);
     } catch (error) {
-      console.error('Error in getDeliveryOptionById:', error);
+      // console.error('Error in getDeliveryOptionById:', error);
       throw error;
     }
   }
 
   async createDeliveryOption(data) {
     try {
-      console.log('Service createDeliveryOption called with:', data);
+      // console.log('Service createDeliveryOption called with:', data);
       return await this.deliveryOptionRepo.create(data);
     } catch (error) {
-      console.log('Error in createDeliveryOption:', error.message);
+      // console.log('Error in createDeliveryOption:', error.message);
       throw error;
     }
   }
@@ -79,31 +79,31 @@ class DeliveryOptionService {
     try {
       return await this.deliveryOptionRepo.findByTitle(title);
     } catch (error) {
-      console.error('Error in findByTitle:', error);
+      // console.error('Error in findByTitle:', error);
       throw error;
     }
   }
 
   async updateDeliveryOption(id, data) {
     try {
-      console.log('Service updateDeliveryOption called with:', id, data);
+      // console.log('Service updateDeliveryOption called with:', id, data);
       const updated = await this.deliveryOptionRepo.update(id, data);
-      console.log('Service updated result:', updated);
+      // console.log('Service updated result:', updated);
       return updated;
     } catch (error) {
-      console.error('Error in updateDeliveryOption:', error);
+      // console.error('Error in updateDeliveryOption:', error);
       throw error;
     }
   }
 
   async deleteDeliveryOption(id) {
     try {
-      console.log('Service deleteDeliveryOption called with:', id);
+      // console.log('Service deleteDeliveryOption called with:', id);
       const deleted = await this.deliveryOptionRepo.softDelete(id);
-      console.log('Service deleted result:', deleted);
+      // console.log('Service deleted result:', deleted);
       return deleted;
     } catch (error) {
-      console.error('Error in deleteDeliveryOption:', error);
+      // console.error('Error in deleteDeliveryOption:', error);
       throw error;
     }
   }

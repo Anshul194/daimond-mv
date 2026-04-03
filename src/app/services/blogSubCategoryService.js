@@ -10,14 +10,14 @@ class BlogSubCategoryService {
 
   async getAllBlogSubCategories(query) {
     try {
-      console.log("Query Parameters:", query);
+      // console.log("Query Parameters:", query);
       const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
 
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 
-      console.log("Page Number:", pageNum);
-      console.log("Limit Number:", limitNum);
+      // console.log("Page Number:", pageNum);
+      // console.log("Limit Number:", limitNum);
 
       // Parse JSON strings from query parameters to objects
       const parsedFilters = JSON.parse(filters);
@@ -51,7 +51,7 @@ class BlogSubCategoryService {
 
       return blogSubCategories;
     } catch (error) {
-      console.log("error blog subcategories", error.message);
+      // console.log("error blog subcategories", error.message);
       throw new AppError("Cannot fetch data of all the blog subcategories", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
@@ -60,17 +60,17 @@ class BlogSubCategoryService {
     try {
       return await this.blogSubCategoryRepo.findById(id);
     } catch (error) {
-      console.error('Error in getBlogSubCategoryById:', error);
+      // console.error('Error in getBlogSubCategoryById:', error);
       throw error;
     }
   }
 
   async createBlogSubCategory(data) {
     try {
-      console.log('Service createBlogSubCategory called with:', data);
+      // console.log('Service createBlogSubCategory called with:', data);
       return await this.blogSubCategoryRepo.create(data);
     } catch (error) {
-      console.log('Error in createBlogSubCategory:', error.message);
+      // console.log('Error in createBlogSubCategory:', error.message);
       throw error;
     }
   }
@@ -79,31 +79,31 @@ class BlogSubCategoryService {
     try {
       return await this.blogSubCategoryRepo.findByName(name);
     } catch (error) {
-      console.error('Error in findByName:', error);
+      // console.error('Error in findByName:', error);
       throw error;
     }
   }
 
   async updateBlogSubCategory(id, data) {
     try {
-      console.log('Service updateBlogSubCategory called with:', id, data);
+      // console.log('Service updateBlogSubCategory called with:', id, data);
       const updated = await this.blogSubCategoryRepo.update(id, data);
-      console.log('Service updated result:', updated);
+      // console.log('Service updated result:', updated);
       return updated;
     } catch (error) {
-      console.error('Error in updateBlogSubCategory:', error);
+      // console.error('Error in updateBlogSubCategory:', error);
       throw error;
     }
   }
 
   async deleteBlogSubCategory(id) {
     try {
-      console.log('Service deleteBlogSubCategory called with:', id);
+      // console.log('Service deleteBlogSubCategory called with:', id);
       const deleted = await this.blogSubCategoryRepo.softDelete(id);
-      console.log('Service deleted result:', deleted);
+      // console.log('Service deleted result:', deleted);
       return deleted;
     } catch (error) {
-      console.error('Error in deleteBlogSubCategory:', error);
+      // console.error('Error in deleteBlogSubCategory:', error);
       throw error;
     }
   }
@@ -111,7 +111,7 @@ async getSubCategoriesByCategoryId(categoryId) {
   try {
     return await this.blogSubCategoryRepo.getByCategoryId(categoryId);
   } catch (error) {
-    console.error('Service getSubCategoriesByCategoryId error:', error);
+    // console.error('Service getSubCategoriesByCategoryId error:', error);
     throw error;
   }
 }
@@ -119,17 +119,17 @@ async getSubCategoriesByCategoryId(categoryId) {
 async getByCategoryId(categoryId) {
   try {
     const categoryObjectId = new mongoose.Types.ObjectId(categoryId);
-    console.log('Converted ObjectId:', categoryObjectId);
+    // console.log('Converted ObjectId:', categoryObjectId);
 
     const result = await BlogSubCategory.find({
       BlogCategory: categoryObjectId,
       deletedAt: null,
     }).sort({ createdAt: -1 });
 
-    console.log('Found subcategories:', result.length);
+    // console.log('Found subcategories:', result.length);
     return result;
   } catch (error) {
-    console.error('Repo getByCategoryId error:', error);
+    // console.error('Repo getByCategoryId error:', error);
     throw error;
   }
 }

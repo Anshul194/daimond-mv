@@ -82,7 +82,7 @@ export async function createColorCode(body, user = null) {
 //       }
 //     };
 //   } catch (err) {
-//     console.error('Get ColorCodes error:', err.message);
+//     // console.error('Get ColorCodes error:', err.message);
 //     return {
 //       status: 500,
 //       body: {
@@ -95,7 +95,7 @@ export async function createColorCode(body, user = null) {
 
 export async function getColorCodes(query, user = null) {
   try {
-    console.log('Get ColorCodes query:', query);
+    // console.log('Get ColorCodes query:', query);
     let vendorId = null;
     if (user && user.role === 'vendor') {
       vendorId = (user._id || user.id).toString();
@@ -107,7 +107,7 @@ export async function getColorCodes(query, user = null) {
       body: successResponse(result, 'ColorCodes fetched successfully'),
     };
   } catch (err) {
-    console.error('Get ColorCodes error:', err.message);
+    // console.error('Get ColorCodes error:', err.message);
     return {
       status: 500,
       body: errorResponse('Server error', 500),
@@ -138,7 +138,7 @@ export async function getColorCodeById(id) {
       }
     };
   } catch (err) {
-    console.error('Get ColorCode error:', err.message);
+    // console.error('Get ColorCode error:', err.message);
     return {
       status: 500,
       body: {
@@ -191,7 +191,7 @@ export async function updateColorCode(id, data) {
       }
     };
   } catch (err) {
-    console.error('Update ColorCode error:', err.message);
+    // console.error('Update ColorCode error:', err.message);
     return {
       status: err.message.includes('already exists') ? 400 : 500,
       body: {
@@ -227,7 +227,7 @@ export async function deleteColorCode(id) {
       }
     };
   } catch (err) {
-    console.error('Delete ColorCode error:', err.message);
+    // console.error('Delete ColorCode error:', err.message);
     return {
       status: 500,
       body: {

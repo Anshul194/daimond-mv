@@ -40,7 +40,7 @@ export async function createCategory(form, admin = null) {
     // Always set vendor field from admin if vendor, or allow superadmin to set or leave null
     let vendorId = null;
 
-    console?.log("aDMIN", admin)
+    // console?.log("aDMIN", admin)
 
     if (admin && admin.role == 'vendor') {
       vendorId = admin?._id.toString();
@@ -69,7 +69,7 @@ export async function createCategory(form, admin = null) {
       body: successResponse(newCategory, 'Category created'),
     };
   } catch (err) {
-    console.error('Create Category error:', err.message);
+    // console.error('Create Category error:', err.message);
     return {
       status: 500,
       body: errorResponse('Server error', 500),
@@ -86,17 +86,17 @@ export async function getCategories(query, admin = null) {
     // Enforce vendor filter for vendors
     if (admin && admin.role === 'vendor') {
       const vendorId = (admin._id || admin.id).toString();
-      console.log('[DEBUG] Authenticated as vendor:', vendorId);
+      // console.log('[DEBUG] Authenticated as vendor:', vendorId);
       query = { ...query, vendor: vendorId };
     } else if (admin) {
       const superId = (admin._id || admin.id) ? (admin._id || admin.id).toString() : undefined;
-      console.log('[DEBUG] Authenticated as superadmin:', superId);
+      // console.log('[DEBUG] Authenticated as superadmin:', superId);
     } else {
-      console.log('[DEBUG] No admin info provided');
+      // console.log('[DEBUG] No admin info provided');
     }
-    console.log('[DEBUG] Final query to service:', query);
+    // console.log('[DEBUG] Final query to service:', query);
     const result = await categoryService.getAllCategories(query);
-    console.log('[DEBUG] Categories returned:', result);
+    // console.log('[DEBUG] Categories returned:', result);
     
     // Handle the result structure - it should have { result, currentPage, totalPages, totalDocuments }
     const categoriesData = result?.result || result || [];
@@ -110,8 +110,8 @@ export async function getCategories(query, admin = null) {
     // successResponse already returns { status, body: {...} }, so we return it directly
     return successResponse(responseData, 'Categories fetched successfully');
   } catch (err) {
-    console.error('Get Categories error:', err.message);
-    console.error('Get Categories error stack:', err.stack);
+    // console.error('Get Categories error:', err.message);
+    // console.error('Get Categories error stack:', err.stack);
     return {
       status: 500,
       body: errorResponse(err.message || 'Server error', 500),
@@ -135,7 +135,7 @@ export async function getCategoryById(id) {
       body: { success: true, message: 'Category fetched', data: category }
     };
   } catch (err) {
-    console.error('Get Category error:', err.message);
+    // console.error('Get Category error:', err.message);
     return {
       status: 500,
       body: { success: false, message: 'Server error' }
@@ -191,7 +191,7 @@ export async function updateCategory(id, data) {
       body: { success: true, message: 'Category updated', data: updated }
     };
   } catch (err) {
-    console.error('Update Category error:', err.message);
+    // console.error('Update Category error:', err.message);
     return {
       status: 500,
       body: { success: false, message: 'Server error' }
@@ -217,7 +217,7 @@ export async function deleteCategory(id) {
       body: { success: true, message: 'Category deleted', data: deleted }
     };
   } catch (err) {
-    console.error('Delete Category error:', err.message);
+    // console.error('Delete Category error:', err.message);
     return {
       status: 500,
       body: { success: false, message: 'Server error' }
@@ -241,7 +241,7 @@ export async function getAttributesByCategoryId(categoryId) {
       body: successResponse(attributes, 'Attributes fetched successfully')
     };
   } catch (err) {
-    console.error('Error fetching attributes for category:', err.message);
+    // console.error('Error fetching attributes for category:', err.message);
     return {
       status: 500,
       body: errorResponse('Failed to fetch attributes', 500)
@@ -285,7 +285,7 @@ export async function getNavbarCategoriesWithAttributes() {
       body: successResponse(result, 'Categories with attributes fetched'),
     };
   } catch (err) {
-    console.error('Navbar fetch error:', err.message);
+    // console.error('Navbar fetch error:', err.message);
     return {
       status: 500,
       body: errorResponse('Failed to fetch categories', 500),

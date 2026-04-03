@@ -25,7 +25,7 @@ export const createCollection = async (request) => {
             data: collection 
         };
     } catch (error) {
-        console.error('createCollection error:', error);
+        // console.error('createCollection error:', error);
         return { 
             status: 400, 
             success: false, 
@@ -63,7 +63,7 @@ export const getAllCollections = async (request) => {
             }
         };
     } catch (error) {
-        console.error('getAllCollections error:', error);
+        // console.error('getAllCollections error:', error);
         return { 
             status: 500, 
             success: false, 
@@ -113,7 +113,7 @@ export const updateCollection = async (req, { params }) => {
             data: collection 
         };
     } catch (error) {
-        console.error('updateCollection error:', error);
+        // console.error('updateCollection error:', error);
         return { 
             status: 400, 
             success: false, 
@@ -145,7 +145,7 @@ export const deleteCollection = async (req, { params }) => {
             message: 'Collection deleted successfully' 
         };
     } catch (error) {
-        console.error('deleteCollection error:', error);
+        // console.error('deleteCollection error:', error);
         return { 
             status: 500, 
             success: false, 

@@ -20,7 +20,7 @@ function ShowDiamond({
   handelSelectDiamond,
   ref,
 }) {
-  console.log("Filters in ShowDiamond:", filters);
+  // console.log("Filters in ShowDiamond:", filters);
   if (!isVisible) return null;
 
   const [data, setData] = React.useState([]);
@@ -39,14 +39,14 @@ function ShowDiamond({
         const response = await axiosInstance.get(
           `api/diamond/import?searchFields=${JSON.stringify(filters)}&limit=100`
         );
-        console.log(
-          "Response from diamond import API:",
-          response.data.body.data.docs
-        );
+        // console.log(
+        //   "Response from diamond import API:",
+        //   response.data.body.data.docs
+        // );
 
         setData(response.data.body.data.docs);
       } catch (error) {
-        console.error("Error fetching diamond data:", error);
+        // console.error("Error fetching diamond data:", error);
       }
     };
 
@@ -54,7 +54,7 @@ function ShowDiamond({
   }, [filters, appliedFilters]);
 
   const selectedDiamond = (data) => {
-    console.log("Selected diamond data: ==>", data);
+    // console.log("Selected diamond data: ==>", data);
     // setShowDetails(false);
     // setOpenDiamond(null);
     // handelSelectDiamond(data);
@@ -62,7 +62,7 @@ function ShowDiamond({
 
   const handleApplyFilters = (filterData) => {
     setAppliedFilters(filterData);
-    console.log("Applied filters:", filterData);
+    // console.log("Applied filters:", filterData);
     // You can combine these filters with your existing filters prop
     // and refetch the data here if needed
   };

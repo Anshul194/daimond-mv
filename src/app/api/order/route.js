@@ -25,7 +25,7 @@ export async function POST(req) {
 
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error("POST /subcategory error:", err);
+    // console.error("POST /subcategory error:", err);
     return NextResponse.json(
       { success: false, message: "Invalid request" },
       { status: 400 }
@@ -72,7 +72,7 @@ export async function GET(req) {
 
     return NextResponse.json(result.body, { status: 200 });
   } catch (err) {
-    console.error("GET /orders error:", err);
+    // console.error("GET /orders error:", err);
     return NextResponse.json(
       { success: false, message: "Invalid request" },
       { status: 400 }
@@ -86,10 +86,10 @@ export async function PUT(request) {
     await dbConnect();
     const authResult = await verifyAdminAccess(request);
     if (authResult.error) return authResult.error;
-    console.log("Admin access verified", authResult);
+    // console.log("Admin access verified", authResult);
 
     const { user: admin } = authResult;
-    console.log("Admin authenticated:", admin);
+    // console.log("Admin authenticated:", admin);
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -110,7 +110,7 @@ export async function PUT(request) {
     } else if (contentType?.includes("multipart/form-data")) {
       const formData = await request.formData();
       data = parseNestedFormData(formData);
-      console.log("Parsed form data for update:", data);
+      // console.log("Parsed form data for update:", data);
     } else {
       return NextResponse.json(
         {
@@ -133,7 +133,7 @@ export async function PUT(request) {
     const result = await updateProductAttribute(id, data);
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error("PUT /product-attributes error:", err);
+    // console.error("PUT /product-attributes error:", err);
     return NextResponse.json(
       { success: false, message: "Invalid request data" },
       { status: 400 }
@@ -159,7 +159,7 @@ export async function DELETE(request) {
     const result = await deleteProductAttribute(id);
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error("DELETE /product-attributes error:", err);
+    // console.error("DELETE /product-attributes error:", err);
     return NextResponse.json(
       { success: false, message: "Internal server error" },
       { status: 500 }

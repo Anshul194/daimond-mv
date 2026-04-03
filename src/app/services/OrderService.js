@@ -34,25 +34,25 @@ class OrderService {
   }
 
   async createOrder(body, type) {
-    console.log(
-      "Service: Creating order with body:",
-      JSON.stringify(body, null, 2),
-      "and type:",
-      type
-    );
+    // console.log(
+    //   "Service: Creating order with body:",
+    //   JSON.stringify(body, null, 2),
+    //   "and type:",
+    //   type
+    // );
     try {
       await dbConnect();
 
-      console.log("Order Data ====>  :", body);
+      // console.log("Order Data ====>  :", body);
       // ✅ Add this block to check/create user
-      console.log("Service: Checking or creating user by email:", body.email);
+      // console.log("Service: Checking or creating user by email:", body.email);
       let user = await User.findOne({ email: body.email });
       let isNewUser = false;
       if (!user) {
         isNewUser = true;
-        console.log(
-          `No user found with email ${body.email}, creating new user...`
-        );
+        // // console.log(
+        //   `No user found with email ${body.email}, creating new user...`
+        // );
         user = await User.create({
           email: body.email,
           name: body.name || "Guest User",
@@ -61,14 +61,14 @@ class OrderService {
           role: "user",
           status: "active",
         });
-        console.log("Service: New user created with ID:", user._id);
+        // console.log("Service: New user created with ID:", user._id);
       }
       body.user_id = user._id;
 
-      console.log(
-        "Service: Mongoose connection state:",
-        mongoose.connection.readyState
-      );
+      // console.log(
+      //   "Service: Mongoose connection state:",
+      //   mongoose.connection.readyState
+      // );
       if (mongoose.connection.readyState !== 1) {
         throw new AppError(
           "Database connection failed",
@@ -76,21 +76,21 @@ class OrderService {
         );
       }
       if (!mongoose.models.User) {
-        console.error(
-          "Service: User model is not registered. Available models:",
-          Object.keys(mongoose.models)
-        );
+        // console.error(
+        //   "Service: User model is not registered. Available models:",
+        //   Object.keys(mongoose.models)
+        // );
         throw new AppError(
           "User model not found",
           StatusCodes.INTERNAL_SERVER_ERROR
         );
       }
-      console.log("Service: Fetching cart content");
+      // console.log("Service: Fetching cart content");
       const cartContent = await orderHelpersServices.getCartContent(body, type);
-      console.log(
-        "Service: Cart content:",
-        JSON.stringify(cartContent, null, 2)
-      );
+      // console.log(
+      //   "Service: Cart content:",
+      //   JSON.stringify(cartContent, null, 2)
+      // );
 
       // Fetch products to get correct vendor IDs and normalize vendor values
       const productIds = cartContent.map((item) => item.id);
@@ -107,11 +107,11 @@ class OrderService {
           } else if (p.vendor === 'admin') {
             // keep 'admin' marker for legacy/global items
             vendorVal = 'admin';
-            console.warn(`Product ${pid} has vendor='admin' (legacy string). Treating as global.`);
+            // console.warn(`Product ${pid} has vendor='admin' (legacy string). Treating as global.`);
           } else {
             // Unknown vendor format
             vendorVal = null;
-            console.warn(`Product ${pid} has invalid vendor value:`, p.vendor);
+            // console.warn(`Product ${pid} has invalid vendor value:`, p.vendor);
           }
         } else if (p.vendor && p.vendor._id) {
           // If vendor is populated object
@@ -139,10 +139,10 @@ class OrderService {
       const groupedCart = await orderHelpersServices.groupCartByVendor(
         cartContent
       );
-      console.log(
-        "Service: Grouped cart:",
-        JSON.stringify(groupedCart, null, 2)
-      );
+      // console.log(
+      //   "Service: Grouped cart:",
+      //   JSON.stringify(groupedCart, null, 2)
+      // );
       const vendorKey = Object.keys(groupedCart).length === 1 ? Object.keys(groupedCart)[0] : null;
       const orderVendor = vendorKey && vendorKey !== "admin" && mongoose.Types.ObjectId.isValid(vendorKey) 
         ? new mongoose.Types.ObjectId(vendorKey) 
@@ -151,17 +151,17 @@ class OrderService {
       let totalShippingCharge = 0;
       let shippingCostData = {};
       if (type !== "pos") {
-        console.log("Service: Fetching shipping tax rate");
+        // console.log("Service: Fetching shipping tax rate");
         const taxRate = await orderHelpersServices.getShippingTaxRate();
-        console.log("Service: Tax rate:", taxRate);
+        // console.log("Service: Tax rate:", taxRate);
         shippingCostData = await orderHelpersServices.calculateShippingCost(
           body.shipping_cost,
           taxRate
         );
-        console.log(
-          "Service: Shipping cost data:",
-          JSON.stringify(shippingCostData, null, 2)
-        );
+        // console.log(
+        //   "Service: Shipping cost data:",
+        //   JSON.stringify(shippingCostData, null, 2)
+        // );
         for (const sc of shippingCostData.vendor || []) {
           totalShippingCharge += calculatePrice(sc.cost, taxRate, "shipping");
         }
@@ -170,16 +170,16 @@ class OrderService {
           taxRate,
           "shipping"
         );
-        console.log("Service: Total shipping charge:", totalShippingCharge);
+        // console.log("Service: Total shipping charge:", totalShippingCharge);
       }
-      console.log(
-        "Service: Creating Order with data:",
-        JSON.stringify(
-          { ...body, order_status: "pending", payment_status: "unpaid" },
-          null,
-          2
-        )
-      );
+      // console.log(
+      //   "Service: Creating Order with data:",
+      //   JSON.stringify(
+      //     { ...body, order_status: "pending", payment_status: "unpaid" },
+      //     null,
+      //     2
+      //   )
+      // );
 
       const order = await Order.create({
         ...body,
@@ -199,7 +199,7 @@ class OrderService {
         .populate("customerDetails.city")
         .populate("tax_id");
 
-      console.log("Service: OrderSession found: ===>", orderSession);
+      // console.log("Service: OrderSession found: ===>", orderSession);
       let invoice = null;
       try {
         invoice = await generateInvoicePdf({
@@ -218,54 +218,54 @@ class OrderService {
           });
         }
       } catch (invErr) {
-        console.warn("Service: Invoice generation failed, continuing without invoice:", invErr.message || invErr);
+        // console.warn("Service: Invoice generation failed, continuing without invoice:", invErr.message || invErr);
       }
-      console.log("Service: Order created:", order._id);
+      // console.log("Service: Order created:", order._id);
       order.order_number = await orderHelpersServices.generateUniqueOrderNumber(
         order._id
       );
       await order.save();
-      console.log("Service: Order number assigned:", order.order_number);
+      // console.log("Service: Order number assigned:", order.order_number);
       const orderAddress = await OrderAddress.create({
         ...body,
         order_id: order._id,
       });
-      console.log("Service: OrderAddress created:", orderAddress._id);
+      // console.log("Service: OrderAddress created:", orderAddress._id);
       await OrderTrack.create({
         order_id: order._id,
         name: "ordered",
         updated_by: body.user_id || null,
         table: "users",
       });
-      console.log("Service: OrderTrack created");
+      // console.log("Service: OrderTrack created");
       const taxType = await orderHelpersServices.determineTaxType(body, type);
-      console.log("Service: Tax type:", taxType);
+      // console.log("Service: Tax type:", taxType);
       const taxProducts = await orderHelpersServices.calculateTax(
         cartContent,
         body,
         type,
         taxType
       );
-      console.log(
-        "Service: Tax products:",
-        JSON.stringify(taxProducts, null, 2)
-      );
+      // console.log(
+      //   "Service: Tax products:",
+      //   JSON.stringify(taxProducts, null, 2)
+      // );
       let totalTaxAmount = 0;
       if (!groupedCart || Object.keys(groupedCart).length === 0) {
-        console.error(
-          "Service: Cart content:",
-          JSON.stringify(cartContent, null, 2)
-        );
-        console.error(
-          "Service: Grouped cart:",
-          JSON.stringify(groupedCart, null, 2)
-        );
+        // console.error(
+        //   "Service: Cart content:",
+        //   JSON.stringify(cartContent, null, 2)
+        // );
+        // console.error(
+        //   "Service: Grouped cart:",
+        //   JSON.stringify(groupedCart, null, 2)
+        // );
         throw new Error("No cart items found or cart grouping failed");
       }
       for (const [vendorId, items] of Object.entries(groupedCart)) {
-        console.log(
-          `Service: Processing vendor ${vendorId} with ${items.length} items`
-        );
+        // console.log(
+        //   `Service: Processing vendor ${vendorId} with ${items.length} items`
+        // );
         let subOrderTotal = 0;
         let subTaxAmount = 0;
         let subShippingCost =
@@ -276,10 +276,10 @@ class OrderService {
               : shippingCostData.admin?.cost || 0
             : 0;
         const orderItems = items.map((item) => {
-          console.log(
-            "Service: Processing item:",
-            JSON.stringify(item, null, 2)
-          );
+          // console.log(
+          //   "Service: Processing item:",
+          //   JSON.stringify(item, null, 2)
+          // );
           const taxAmount = taxProducts[item.id] || 0;
           const price = item.price * item.qty;
           totalAmount += price;
@@ -300,10 +300,10 @@ class OrderService {
             order_data: item.options,
           };
         });
-        console.log(
-          "Service: Order items for vendor:",
-          JSON.stringify(orderItems, null, 2)
-        );
+        // console.log(
+        //   "Service: Order items for vendor:",
+        //   JSON.stringify(orderItems, null, 2)
+        // );
         if (taxType === "zone_wise_tax") {
           subTaxAmount = (subOrderTotal * (taxProducts.percentage || 0)) / 100;
         }
@@ -324,20 +324,20 @@ class OrderService {
           payment_status: "unpaid",
           order_status: "pending",
         });
-        console.log("Service: SubOrder created:", subOrder._id);
+        // console.log("Service: SubOrder created:", subOrder._id);
         const subOrderItems = await SubOrderItem.insertMany(
           orderItems.map((item) => ({ ...item, sub_order_id: subOrder._id }))
         );
-        console.log(
-          `Service: SubOrderItems created: ${subOrderItems.length} items`
-        );
+        // console.log(
+        //   `Service: SubOrderItems created: ${subOrderItems.length} items`
+        // );
       }
       const couponAmount = await orderHelpersServices.calculateCoupon(
         body,
         totalAmount,
         cartContent
       );
-      console.log("Service: Coupon amount:", couponAmount);
+      // console.log("Service: Coupon amount:", couponAmount);
       const subTotalAfterDiscount = totalAmount - couponAmount;
       if (taxType === "zone_wise_tax") {
         totalTaxAmount =
@@ -345,13 +345,13 @@ class OrderService {
       }
       const finalAmount =
         subTotalAfterDiscount + totalTaxAmount + totalShippingCharge;
-      console.log("Service: Creating OrderPaymentMeta with:", {
-        sub_total: totalAmount,
-        coupon_amount: couponAmount,
-        shipping_cost: totalShippingCharge,
-        tax_amount: totalTaxAmount,
-        total_amount: finalAmount,
-      });
+      // console.log("Service: Creating OrderPaymentMeta with:", {
+      //   sub_total: totalAmount,
+      //   coupon_amount: couponAmount,
+      //   shipping_cost: totalShippingCharge,
+      //   tax_amount: totalTaxAmount,
+      //   total_amount: finalAmount,
+      // });
       await OrderPaymentMeta.create({
         order_id: order._id,
         sub_total: totalAmount,
@@ -360,17 +360,17 @@ class OrderService {
         tax_amount: totalTaxAmount,
         total_amount: finalAmount,
       });
-      console.log("Service: OrderPaymentMeta created");
+      // console.log("Service: OrderPaymentMeta created");
       if (body.payment_gateway === "Wallet") {
         await orderHelpersServices.updateUserWallet(
           body.user_id,
           finalAmount,
           order._id
         );
-        console.log("Service: User wallet updated");
+        // console.log("Service: User wallet updated");
       }
       await orderHelpersServices.updateInventory(order._id);
-      console.log("Service: Inventory updated");
+      // console.log("Service: Inventory updated");
       const responsePayload = {
         success: true,
         type: "success",
@@ -396,7 +396,7 @@ class OrderService {
             refreshTokenExp,
           };
         } catch (tokErr) {
-          console.warn("Service: Failed to generate tokens for guest user:", tokErr);
+          // console.warn("Service: Failed to generate tokens for guest user:", tokErr);
         }
       }
 
@@ -423,21 +423,21 @@ class OrderService {
 
           const emailRes = await sendEmail(to, subject, html, attachments);
           if (!emailRes || !emailRes.success) {
-            console.warn("Service: order confirmation email failed:", emailRes?.message || emailRes?.error);
+            // console.warn("Service: order confirmation email failed:", emailRes?.message || emailRes?.error);
           } else {
-            console.log("Service: order confirmation email sent to", to);
+            // console.log("Service: order confirmation email sent to", to);
           }
         } else {
-          console.warn("Service: No recipient email available for order confirmation");
+          // console.warn("Service: No recipient email available for order confirmation");
         }
       } catch (mailErr) {
-        console.warn("Service: Error sending confirmation email:", mailErr?.message || mailErr);
+        // console.warn("Service: Error sending confirmation email:", mailErr?.message || mailErr);
       }
 
       return responsePayload;
     } catch (error) {
-      console.log("Service: createOrder error:", error);
-      console.error("Service: createOrder error:", error.message, error.stack);
+      // console.log("Service: createOrder error:", error);
+      // console.error("Service: createOrder error:", error.message, error.stack);
       throw new AppError(
         "Failed to create order",
         StatusCodes.INTERNAL_SERVER_ERROR,
@@ -449,7 +449,7 @@ class OrderService {
   //getAllOrders for admin
   async getAllOrders(query, admin = null) {
     try {
-      console.log("Query Parameters:", query);
+      // console.log("Query Parameters:", query);
       const {
         page = 1,
         limit = 10,
@@ -461,10 +461,10 @@ class OrderService {
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 
-      // console.log("Filter Conditions:", filterConditions);
-      // console.log("Sort Conditions:", sortConditions);
-      console.log("Page Number:", pageNum);
-      console.log("Limit Number:", limitNum);
+      // // console.log("Filter Conditions:", filterConditions);
+      // // console.log("Sort Conditions:", sortConditions);
+      // console.log("Page Number:", pageNum);
+      // console.log("Limit Number:", limitNum);
 
       // Parse JSON strings from query parameters to objects
       const parsedFilters = JSON.parse(filters);
@@ -477,9 +477,9 @@ class OrderService {
       // Handle vendor filtering based on role
       if (admin && admin.role === 'vendor') {
         const subOrders = await SubOrder.find({ vendor_id: admin._id.toString() }).select('order_id').lean();
-        console.log('SubOrders for vendor:', subOrders);
+        // // console.log('SubOrders for vendor:', subOrders);
         const orderIds = subOrders.map(s => s.order_id);
-        console.log('OrderIds for vendor:', orderIds);
+        // // console.log('OrderIds for vendor:', orderIds);
         filterConditions._id = { $in: orderIds };
       } else {
         // For admin or superadmin, apply vendor filter if present in query
@@ -514,7 +514,7 @@ class OrderService {
         pageNum,
         limitNum
       );
-      console.log("Orders fetched:", JSON.stringify(orders, null, 2));
+      // // console.log("Orders fetched:", JSON.stringify(orders, null, 2));
 
       if (!orders || orders.length === 0) {
         return [];
@@ -577,7 +577,7 @@ class OrderService {
 
       return orders;
     } catch (error) {
-      console.log("error category", error.message);
+      // // console.log("error category", error.message);
       throw new AppError(
         "Cannot fetch data of all the courseCategories",
         StatusCodes.INTERNAL_SERVER_ERROR
@@ -588,9 +588,9 @@ class OrderService {
   async getOrdersByUserId(user_id) {
     try {
       await dbConnect();
-      console.log("Mongoose connection state:", mongoose.connection.readyState);
+      // // console.log("Mongoose connection state:", mongoose.connection.readyState);
       if (!mongoose.models.User) {
-        console.error("User model is not registered");
+        // // console.error("User model is not registered");
         throw new AppError(
           "User model not found",
           StatusCodes.INTERNAL_SERVER_ERROR
@@ -667,11 +667,11 @@ class OrderService {
       }));
       return orders;
     } catch (error) {
-      console.error(
-        "OrderService getOrdersByUserId error:",
-        error?.message,
-        error.stack
-      );
+      // console.error(
+      //   "OrderService getOrdersByUserId error:",
+      //   error?.message,
+      //   error.stack
+      // );
       throw new AppError(
         error.message || "Failed to fetch orders",
         error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
@@ -682,9 +682,9 @@ class OrderService {
   async getOrderById(id) {
     try {
       await dbConnect();
-      console.log("Mongoose connection state:", mongoose.connection.readyState);
+      // console.log("Mongoose connection state:", mongoose.connection.readyState);
       if (!mongoose.models.User) {
-        console.error("User model is not registered");
+        // console.error("User model is not registered");
         throw new AppError(
           "User model not found",
           StatusCodes.INTERNAL_SERVER_ERROR
@@ -728,10 +728,10 @@ class OrderService {
       // Log subOrderItems with null product_id for debugging
       subOrderItems.forEach((item, index) => {
         if (!item.product_id) {
-          console.warn(
-            `SubOrderItem at index ${index} has null product_id:`,
-            item
-          );
+          // console.warn(
+          //   `SubOrderItem at index ${index} has null product_id:`,
+          //   item
+          // );
         }
       });
       order = {
@@ -758,11 +758,11 @@ class OrderService {
       };
       return order;
     } catch (error) {
-      console.error(
-        "OrderService getOrderById error:",
-        error?.message,
-        error.stack
-      );
+      // console.error(
+      //   "OrderService getOrderById error:",
+      //   error?.message,
+      //   error.stack
+      // );
       throw new AppError(
         error.message || "Failed to fetch order",
         error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
@@ -773,9 +773,9 @@ class OrderService {
   async cancelOrder(id) {
     try {
       await dbConnect();
-      console.log("Mongoose connection state:", mongoose.connection.readyState);
+      // console.log("Mongoose connection state:", mongoose.connection.readyState);
       if (!mongoose.models.User) {
-        console.error("User model is not registered");
+        // console.error("User model is not registered");
         throw new AppError(
           "User model not found",
           StatusCodes.INTERNAL_SERVER_ERROR
@@ -845,11 +845,11 @@ class OrderService {
         order_payment_meta: orderPaymentMeta || null,
       };
     } catch (error) {
-      console.error(
-        "OrderService cancelOrder error:",
-        error.message,
-        error.stack
-      );
+      // console.error(
+      //   "OrderService cancelOrder error:",
+      //   error.message,
+      //   error.stack
+      // );
       throw new AppError(
         error.message || "Failed to cancel order",
         error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR
@@ -892,7 +892,7 @@ class OrderService {
       body: { success: true, message: "Order updated successfully", data: order },
     };
   } catch (error) {
-    console.error("OrderService updateOrderById error:", error.message, error.stack);
+    // console.error("OrderService updateOrderById error:", error.message, error.stack);
     throw new AppError(
       error.message || "Failed to update order",
       error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR

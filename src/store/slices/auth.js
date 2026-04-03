@@ -50,7 +50,7 @@ export const login = createAsyncThunk(
       );
 
       const data = response.data?.data;
-      console.log("Login response:", data);
+      // console.log("Login response:", data);
       // Store tokens in localStorage
       if (data?.accessToken) {
         localStorage.setItem("token", data?.accessToken);
@@ -78,8 +78,8 @@ export const signup = createAsyncThunk(
   "auth/signup",
   async (userData, { rejectWithValue }) => {
     try {
-      console.log("Trying to sign up with data:", userData);
-      console.log("API Base URL:", API_BASE_URL);
+      // console.log("Trying to sign up with data:", userData);
+      // console.log("API Base URL:", API_BASE_URL);
       const response = await axiosInstance.post(
         `${API_BASE_URL}/signup`,
         {
@@ -94,11 +94,11 @@ export const signup = createAsyncThunk(
           },
         }
       );
-      console.log("Signup response:", response);
+      // console.log("Signup response:", response);
 
       const data = response.data;
 
-      console.log("Signup data:", data);
+      // console.log("Signup data:", data);
       // Store tokens in localStorage
       if (data?.data?.accessToken) {
         localStorage.setItem("token", data?.data?.accessToken);
@@ -117,7 +117,7 @@ export const signup = createAsyncThunk(
         refreshToken: data?.data?.refreshToken,
       };
     } catch (error) {
-      console.log("tring signup", error.message);
+      // console.log("tring signup", error.message);
       return rejectWithValue(handleApiError(error));
     }
   }
@@ -159,8 +159,8 @@ export const verifyOtp = createAsyncThunk(
         }
       );
       const data = response.data.data;
-      console.log("Verify OTP response:", response);
-      console.log("Verify OTP response: --->", data);
+      // console.log("Verify OTP response:", response);
+      // console.log("Verify OTP response: --->", data);
 
       localStorage.setItem("accessToken", data?.accessToken);
       if (data?.refreshToken) {
@@ -286,7 +286,7 @@ export const changePassword = createAsyncThunk(
           },
         }
       );
-      console.log("Change password response:", response.data);
+      // console.log("Change password response:", response.data);
       return response.data;
     } catch (error) {
       return rejectWithValue(handleApiError(error));

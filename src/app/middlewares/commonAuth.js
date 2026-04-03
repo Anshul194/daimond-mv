@@ -29,7 +29,7 @@ export async function verifyTokenAndUser(request, userType = 'admin') {
     // Verify token is valid in Redis
     const redis = initRedis();
     const tokenStatus = await redis.get(`accessToken:${accessToken}`);
-    console.log('[Auth] Token status from Redis:', tokenStatus);
+    // console.log('[Auth] Token status from Redis:', tokenStatus);
 
     if (!tokenStatus || tokenStatus !== 'valid') {
       return {
@@ -45,7 +45,7 @@ export async function verifyTokenAndUser(request, userType = 'admin') {
     try {
       decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
     } catch (jwtError) {
-      console.error('JWT Verification Error:', jwtError);
+      // console.error('JWT Verification Error:', jwtError);
       return {
         error: NextResponse.json(
           { success: false, message: 'Invalid token format' },
@@ -56,10 +56,10 @@ export async function verifyTokenAndUser(request, userType = 'admin') {
 
     // Extract user ID from token
     const userId = decoded.id || decoded.userId || decoded.sub;
-    console.log('[Auth Debug] Extracted userId:', userId);
+    // console.log('[Auth Debug] Extracted userId:', userId);
 
     if (!userId) {
-      console.log('[Auth Debug] User ID missing in token payload:', decoded);
+      // console.log('[Auth Debug] User ID missing in token payload:', decoded);
       return {
         error: NextResponse.json(
           { success: false, message: 'User ID not found in token' },
@@ -77,7 +77,7 @@ export async function verifyTokenAndUser(request, userType = 'admin') {
     //   };
     // }
     if (!userId) {
-      console.log('[Auth] User ID not found in token');
+      // console.log('[Auth] User ID not found in token');
       return { error: NextResponse.json({ success: false, message: 'User ID not found in token' }, { status: 401 }) };
     }
 
@@ -92,7 +92,7 @@ export async function verifyTokenAndUser(request, userType = 'admin') {
       user = await User.findById(userId).select('-password');
       userModel = 'User';
     } else {
-      console.log('[Auth] Invalid user type specified:', userType);
+      // console.log('[Auth] Invalid user type specified:', userType);
       return {
 
         error: NextResponse.json(
@@ -102,9 +102,9 @@ export async function verifyTokenAndUser(request, userType = 'admin') {
       };
     }
 
-    console.log(`[Auth] Found user in ${userModel} collection:`, user);
+    // console.log(`[Auth] Found user in ${userModel} collection:`, user);
     if (!user) {
-      console.log(`[Auth] Access denied. ${userModel} not found.`);
+      // console.log(`[Auth] Access denied. ${userModel} not found.`);
       return {
         error: NextResponse.json(
           {
@@ -138,19 +138,19 @@ export async function verifyTokenAndUser(request, userType = 'admin') {
 
     // Return full admin document for admin users
     if (userType === 'admin') {
-      console.log('final [Auth] Authentication success for admin:', user);
+      // console.log('final [Auth] Authentication success for admin:', user);
       return { user: user.toObject ? user.toObject() : user };
     } else {
       // For userType === 'user', keep previous structure
-      console.log('final [Auth] Authentication success for user:', {
-        id: user._id,
-        email: user.email,
-        name: user.name,
-        userType,
-        createdAt: user.createdAt,
-        lastLogin: user.lastLogin,
-        status: user.status
-      });
+      // console.log('final [Auth] Authentication success for user:', {
+      //   id: user._id,
+      //   email: user.email,
+      //   name: user.name,
+      //   userType,
+      //   createdAt: user.createdAt,
+      //   lastLogin: user.lastLogin,
+      //   status: user.status
+      // });
       return {
         user: {
           id: user._id,
@@ -165,7 +165,7 @@ export async function verifyTokenAndUser(request, userType = 'admin') {
     }
 
   } catch (error) {
-    console.error('Authentication error:', error);
+    // console.error('Authentication error:', error);
     return {
       error: NextResponse.json(
         { success: false, message: 'Server error during authentication' },
@@ -223,7 +223,7 @@ export async function verifyAnyUserAccess(request) {
     return adminResult;
 
   } catch (error) {
-    console.error('Flexible authentication error:', error);
+    // console.error('Flexible authentication error:', error);
     return {
       error: NextResponse.json(
         { success: false, message: 'Server error during authentication' },
@@ -320,7 +320,7 @@ export async function getUserFromToken(accessToken) {
 
     return null;
   } catch (error) {
-    console.error('Error getting user from token:', error);
+    // console.error('Error getting user from token:', error);
     return null;
   }
 }

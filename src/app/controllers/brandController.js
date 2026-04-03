@@ -12,13 +12,13 @@ export async function createBrand(form, admin = null) {
   try {
     let logoUrl = '';
 
-    console.log('Create Brand form:', form);
+    // console.log('Create Brand form:', form);
     const name = form.get('name');
     const title = form.get('title');
     const description = form.get('description');
     const logo = form.get('logo'); // File object
 
-    console.log('Logo:', logo);
+    // console.log('Logo:', logo);
 
     const existing = await brandService.findByName(name);
     if (existing) {
@@ -28,15 +28,15 @@ export async function createBrand(form, admin = null) {
       };
     }
 
-    console.log('Brand name:', name);
-    console.log('Logo is File:', logo instanceof File);
+    // console.log('Brand name:', name);
+    // console.log('Logo is File:', logo instanceof File);
     
     if (logo && logo instanceof File) {
       try {
         validateImageFile(logo);
-        console.log('Validating logo file:', logo);
+        // console.log('Validating logo file:', logo);
         logoUrl = await saveFile(logo, 'brand-logos');
-        console.log('Logo saved at:', logoUrl);
+        // console.log('Logo saved at:', logoUrl);
       } catch (fileError) {
         return {
           status: 400,
@@ -48,7 +48,7 @@ export async function createBrand(form, admin = null) {
     // Always set vendor field from admin if vendor, or allow superadmin to set or leave null
     let vendorId = null;
 
-    console?.log("aDMIN", admin)
+    // console?.log("aDMIN", admin)
 
     if (admin && admin.role == 'vendor') {
       vendorId = admin._id.toString();
@@ -74,14 +74,14 @@ export async function createBrand(form, admin = null) {
 
     const newBrand = await brandService.createBrand(value);
     await redis.del('allBrands');
-    console.log('New Brand created:', newBrand);
+    // console.log('New Brand created:', newBrand);
 
     return {
       status: 201,
       body: successResponse(newBrand, 'Brand created'),
     };
   } catch (err) {
-    console.error('Create Brand error:', err.message);
+    // console.error('Create Brand error:', err.message);
     return {
       status: 500,
       body: errorResponse('Server error', 500),
@@ -101,7 +101,7 @@ export async function getBrands(query, admin = null) {
         query.vendor = query.vendor;
       }
     }
-    console.log('[DEBUG] Final query to service:', query);
+    // console.log('[DEBUG] Final query to service:', query);
     const result = await brandService.getAllBrands(query);
 
     return {
@@ -109,7 +109,7 @@ export async function getBrands(query, admin = null) {
       body: successResponse(result, 'Brands fetched successfully'),
     };
   } catch (err) {
-    console.error('Get Brands error:', err.message);
+    // console.error('Get Brands error:', err.message);
     return {
       status: 500,
       body: errorResponse('Server error', 500),
@@ -131,7 +131,7 @@ export async function getBrandById(id) {
       body: { success: true, message: 'Brand fetched', data: brand }
     };
   } catch (err) {
-    console.error('Get Brand error:', err.message);
+    // console.error('Get Brand error:', err.message);
     return {
       status: 500,
       body: { success: false, message: 'Server error' }
@@ -187,7 +187,7 @@ export async function updateBrand(id, data) {
       body: { success: true, message: 'Brand updated', data: updated }
     };
   } catch (err) {
-    console.error('Update Brand error:', err.message);
+    // console.error('Update Brand error:', err.message);
     return {
       status: 500,
       body: { success: false, message: 'Server error' }
@@ -213,7 +213,7 @@ export async function deleteBrand(id) {
       body: { success: true, message: 'Brand deleted', data: deleted }
     };
   } catch (err) {
-    console.error('Delete Brand error:', err.message);
+    // console.error('Delete Brand error:', err.message);
     return {
       status: 500,
       body: { success: false, message: 'Server error' }

@@ -9,7 +9,7 @@ class ProductAttributeService {
 
   async getAllProductAttributes(query) {
     try {
-      console.log("Query Parameters:", query);
+      // // console.log("Query Parameters:", query);
       // Ensure query is an object
       const queryObj = query || {};
       const {
@@ -31,7 +31,7 @@ class ProductAttributeService {
         try {
           return JSON.parse(str);
         } catch (e) {
-          console.warn(`Failed to parse JSON: ${str}, using default value`);
+          // // console.warn(`Failed to parse JSON: ${str}, using default value`);
           return defaultValue;
         }
       };
@@ -39,8 +39,8 @@ class ProductAttributeService {
       const pageNum = parseInt(page) || 1;
       const limitNum = parseInt(limit) || 10;
 
-      console.log("Page Number:", pageNum);
-      console.log("Limit Number:", limitNum);
+      // // console.log("Page Number:", pageNum);
+      // // console.log("Limit Number:", limitNum);
 
       // Parse JSON strings from query parameters to objects
       const parsedFilters = safeJsonParse(filters, {});
@@ -103,7 +103,7 @@ class ProductAttributeService {
       }
 
       // Execute query with dynamic filters, sorting, and pagination
-      console.log("[DEBUG] Final filterConditions for Attributes:", JSON.stringify(filterConditions, null, 2));
+      // // // console.log("[DEBUG] Final filterConditions for Attributes:", JSON.stringify(filterConditions, null, 2));
       const productAttributes = await this.productAttributeRepo.getAll(
         filterConditions,
         sortConditions,
@@ -111,14 +111,14 @@ class ProductAttributeService {
         limitNum
       );
 
-      console.log(`[DEBUG] Found ${productAttributes.data?.length || 0} attributes. Total: ${productAttributes.total}`);
+      // // // console.log(`[DEBUG] Found ${productAttributes.data?.length || 0} attributes. Total: ${productAttributes.total}`);
       if (productAttributes.data?.length > 0) {
-        console.log("[DEBUG] First attribute title:", productAttributes.data[0].title);
+        // // // console.log("[DEBUG] First attribute title:", productAttributes.data[0].title);
       }
 
       return productAttributes;
     } catch (error) {
-      console.error("Error in getAllProductAttributes:", error.message);
+      // // // console.error("Error in getAllProductAttributes:", error.message);
       throw new AppError(
         "Cannot fetch data of all the product attributes",
         StatusCodes.INTERNAL_SERVER_ERROR
@@ -130,7 +130,7 @@ class ProductAttributeService {
     try {
       return await this.productAttributeRepo.findById(id);
     } catch (error) {
-      console.error("Error in getProductAttributeById:", error);
+      // // // console.error("Error in getProductAttributeById:", error);
       throw error;
     }
   }
@@ -139,7 +139,7 @@ class ProductAttributeService {
     try {
       return await this.productAttributeRepo.findByCategoryId(categoryId);
     } catch (error) {
-      console.error("Error in getProductAttributeByCategoryId:", error);
+      // // // console.error("Error in getProductAttributeByCategoryId:", error);
       throw error;
     }
   }
@@ -148,7 +148,7 @@ class ProductAttributeService {
     try {
       return await this.productAttributeRepo.create(data);
     } catch (error) {
-      console.error("Error in createProductAttribute:", error);
+      // // // console.error("Error in createProductAttribute:", error);
       throw error;
     }
   }
@@ -157,7 +157,7 @@ class ProductAttributeService {
     try {
       return await this.productAttributeRepo.findByTitle(title);
     } catch (error) {
-      console.error("Error in findByTitle:", error);
+      // // console.error("Error in findByTitle:", error);
       throw error;
     }
   }
@@ -167,7 +167,7 @@ class ProductAttributeService {
       const updated = await this.productAttributeRepo.update(id, data);
       return updated;
     } catch (error) {
-      console.error("Error in updateProductAttribute:", error);
+      // // console.error("Error in updateProductAttribute:", error);
       throw error;
     }
   }
@@ -177,7 +177,7 @@ class ProductAttributeService {
       const deleted = await this.productAttributeRepo.softDelete(id);
       return deleted;
     } catch (error) {
-      console.error("Error in deleteProductAttribute:", error);
+      // // console.error("Error in deleteProductAttribute:", error);
       throw error;
     }
   }

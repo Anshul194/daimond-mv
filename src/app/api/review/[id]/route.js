@@ -43,15 +43,15 @@ export async function PUT(request, context) {
       images: form.getAll('images') || [],
     };
 
-    console.log('🔧 Incoming update data:', data);
-    console.log('👤 User ID:', user.id);
+    // console.log('🔧 Incoming update data:', data);
+    // console.log('👤 User ID:', user.id);
 
     const result = await updateReview(id, data, user.id);
-    console.log('✅ Update result:', result);
+    // console.log('✅ Update result:', result);
 
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error('PUT /review/:id error:', err);
+    // console.error('PUT /review/:id error:', err);
     return NextResponse.json({ success: false, message: 'Update failed', error: err.message }, { status: 500 });
   }
 }
@@ -72,13 +72,13 @@ export async function DELETE(request, context) {
       return NextResponse.json({ success: false, message: 'ID param missing' }, { status: 400 });
     }
 
-    console.log(`🗑️ Attempting to delete review with ID: ${params.id} by user ID: ${user.id}`);
+    // console.log(`🗑️ Attempting to delete review with ID: ${params.id} by user ID: ${user.id}`);
 
     const result = await deleteReview(params.id, user.id);
 
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error('🔥 DELETE /review/:id error:', err);
+    // console.error('🔥 DELETE /review/:id error:', err);
     return NextResponse.json({ success: false, message: 'Delete failed' }, { status: 400 });
   }
 }
@@ -101,7 +101,7 @@ export async function PATCH(request, context) {
 
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error('PATCH /review/:id error:', err);
+    // console.error('PATCH /review/:id error:', err);
     return NextResponse.json({ success: false, message: 'Update failed', error: err.message }, { status: 500 });
   }
 }

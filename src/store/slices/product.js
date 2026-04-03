@@ -103,8 +103,8 @@ export const fetchProductsByCategory = createAsyncThunk(
       }
 
       const finalUrl = `/api/product?${params.toString()}`;
-      console.log('Fetching products from URL:', finalUrl);
-      console.log('API Request params:', Object.fromEntries(params));
+      // console.log('Fetching products from URL:', finalUrl);
+      // console.log('API Request params:', Object.fromEntries(params));
 
       const response = await axiosInstance.get("/api/product", {
         params,
@@ -112,7 +112,7 @@ export const fetchProductsByCategory = createAsyncThunk(
           "content-type": "application/x-www-form-urlencoded",
         },
       });
-      console.log("response of engagement rings", response.data);
+      // console.log("response of engagement rings", response.data);
       return {
         items: response.data?.body?.data?.docs || [],
         pagination: {
@@ -123,7 +123,7 @@ export const fetchProductsByCategory = createAsyncThunk(
         },
       };
     } catch (err) {
-      console.log("Error fetching products:", err);
+      // console.log("Error fetching products:", err);
       return rejectWithValue(
         err.response?.data?.message || err.message || "Failed to fetch products"
       );
@@ -147,7 +147,7 @@ export const fetchProductsByCategoryWithPagination = createAsyncThunk(
       });
       return response.data?.body?.data?.docs;
     } catch (err) {
-      console.log("Error fetching products with pagination:", err);
+      // console.log("Error fetching products with pagination:", err);
       return rejectWithValue(
         err.response?.data?.message || err.message || "Failed to fetch products"
       );
@@ -168,7 +168,7 @@ export const fetchProductById = createAsyncThunk(
       // Mark that detailed data has been loaded
       return { ...productData, detailedDataLoaded: true };
     } catch (err) {
-      console.log("Error fetching product by id:", err);
+      // console.log("Error fetching product by id:", err);
       return rejectWithValue(
         err.response?.data?.message || err.message || "Failed to fetch product"
       );
@@ -196,7 +196,7 @@ export const fetchProductsByAttribute = createAsyncThunk(
       });
       return response.data?.body?.data?.docs;
     } catch (err) {
-      console.log("Error fetching products by attribute:", err);
+      // console.log("Error fetching products by attribute:", err);
       return rejectWithValue(
         err.response?.data?.message || err.message || "Failed to fetch products"
       );
@@ -284,7 +284,7 @@ export const getMoreProducts = createAsyncThunk(
       });
       return response.data?.body?.data?.docs;
     } catch (err) {
-      console.log("Error fetching more products:", err);
+      // console.log("Error fetching more products:", err);
       return rejectWithValue(
         err.response?.data?.message || err.message || "Failed to load more products"
       );
@@ -337,10 +337,10 @@ const productSlice = createSlice({
         state.items = [];
       })
       .addCase(fetchProductsByCategory.fulfilled, (state, action) => {
-        console.log(
-          "fetchProductsByCategory fulfilled with data:",
-          action.payload
-        );
+        // // console.log(
+        //   "fetchProductsByCategory fulfilled with data:",
+        //   action.payload
+        // );
         state.loading = false;
         // Replace items with new data (don't append)
         state.items = action.payload.items || [];
@@ -430,7 +430,7 @@ export const { clearProductError, clearAllErrors, clearState } =
 
 // Selectors
 export const selectProductById = (state, productId) =>
-  console.log("selectProductById called with productId:", productId) ||
+  // console.log("selectProductById called with productId:", productId) ||
   state.product.items.find((item) => item._id === productId);
 
 export const selectProductLoadingState = (state, productId) =>

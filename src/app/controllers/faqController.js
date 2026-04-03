@@ -42,7 +42,7 @@ export async function createFaq(data) {
       body: successResponse(faq, 'FAQ created'),
     };
   } catch (err) {
-    console.error('Create FAQ error:', err.message);
+    // console.error('Create FAQ error:', err.message);
     return {
       status: err.statusCode || 500,
       body: errorResponse(err.message || 'Server error'),
@@ -60,7 +60,7 @@ export async function getFaqs(query) {
       body: successResponse(faqs, 'FAQs fetched'),
     };
   } catch (err) {
-    console.error('Get FAQs error:', err.message);
+    // console.error('Get FAQs error:', err.message);
     return {
       status: err.statusCode || 500,
       body: errorResponse(err.message || 'Server error'),
@@ -82,7 +82,7 @@ export async function getFaqById(id) {
       body: successResponse(faq, 'FAQ fetched'),
     };
   } catch (err) {
-    console.error('Get FAQ by ID error:', err.message);
+    // console.error('Get FAQ by ID error:', err.message);
     return {
       status: err.statusCode || 500,
       body: errorResponse(err.message || 'Server error'),
@@ -116,7 +116,7 @@ export async function updateFaq(id, data) {
       body: successResponse(updatedFaq, 'FAQ updated'),
     };
   } catch (err) {
-    console.error('Update FAQ error:', err.message);
+    // console.error('Update FAQ error:', err.message);
     return {
       status: err.statusCode || 500,
       body: errorResponse(err.message || 'Server error'),
@@ -142,7 +142,7 @@ export async function deleteFaq(id) {
       body: successResponse(deletedFaq, 'FAQ deleted'),
     };
   } catch (err) {
-    console.error('Delete FAQ error:', err.message);
+    // console.error('Delete FAQ error:', err.message);
     return {
       status: err.statusCode || 500,
       body: errorResponse(err.message || 'Server error'),

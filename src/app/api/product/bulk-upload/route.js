@@ -38,9 +38,9 @@ export async function POST(req) {
       const categoryId = row.category_id || row.CategoryID;
 
       if (!name || !categoryId || !sku) {
-        console.warn(
-          `⚠️ Skipping row ${index + 1}: Missing name/category_id/sku`
-        );
+        // console.warn(
+        //   `⚠️ Skipping row ${index + 1}: Missing name/category_id/sku`
+        // );
         continue;
       }
 
@@ -173,7 +173,7 @@ export async function POST(req) {
         sold_count: row.sold_count || 0,
       });
 
-      console.log(row);
+      // console.log(row);
       const att = [];
       if (row.Shape) {
         att.push({
@@ -203,8 +203,8 @@ export async function POST(req) {
         });
       }
 
-      console.log("Inventory Attributes:", newInventory);
-      console.log("product :", newProduct);
+      // console.log("Inventory Attributes:", newInventory);
+      // console.log("product :", newProduct);
 
       await Promise.all(
         att.map(async (attribute) => {
@@ -228,7 +228,7 @@ export async function POST(req) {
       updatedProducts,
     });
   } catch (error) {
-    console.error("🔥 Bulk Upload Error:", error);
+    // console.error("🔥 Bulk Upload Error:", error);
     return new NextResponse(`Error: ${error.message}`, { status: 500 });
   }
 }

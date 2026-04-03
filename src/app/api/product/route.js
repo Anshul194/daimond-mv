@@ -16,7 +16,7 @@ export async function POST(request) {
     const result = await createProduct(form, user);
     return NextResponse.json({ body: result.body }, { status: result.status });
   } catch (err) {
-    console.error('POST /product error:', err);
+    // console.error('POST /product error:', err);
     return NextResponse.json({ success: false, message: 'Invalid request' }, { status: 400 });
   }
 }
@@ -26,9 +26,9 @@ export async function GET(request) {
     // Connect to database first
     try {
       await dbConnect();
-      console.log('Database connected successfully for /product');
+      // console.log('Database connected successfully for /product');
     } catch (dbError) {
-      console.error('Database connection error in /product:', dbError.message);
+      // console.error('Database connection error in /product:', dbError.message);
       return NextResponse.json({ 
         success: false, 
         message: 'Database connection failed. Please check your MongoDB connection string and ensure MongoDB is running.',
@@ -39,15 +39,15 @@ export async function GET(request) {
     const { user } = await withUser(request, 'admin');
     const { searchParams } = new URL(request.url);
     const query = Object.fromEntries(searchParams.entries());
-    console.log('GET /product - Query params:', query);
+    // console.log('GET /product - Query params:', query);
     const result = await getProducts(query, user);
-    console.log('GET /product - Result:', { status: result.status, bodyKeys: Object.keys(result.body || {}) });
+    // console.log('GET /product - Result:', { status: result.status, bodyKeys: Object.keys(result.body || {}) });
     // Return with body wrapper to match frontend expectation: response.data.body.data.docs
     return NextResponse.json({ body: result.body }, { status: result.status });
   } catch (err) {
-    console.error('GET /product error:', err);
-    console.error('GET /product error message:', err.message);
-    console.error('GET /product error stack:', err.stack);
+    // console.error('GET /product error:', err);
+    // console.error('GET /product error message:', err.message);
+    // console.error('GET /product error stack:', err.stack);
     
     // Check if it's a database connection error
     if (err.message && (err.message.includes('ECONNREFUSED') || err.message.includes('MongoDB connection'))) {

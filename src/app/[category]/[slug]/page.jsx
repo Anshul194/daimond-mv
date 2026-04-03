@@ -462,8 +462,8 @@ const ProductDetails = ({
   const isOnCart = cartItems?.some(
     (item) => item.pid_id === productData?.product?._id || item.pid_id === productData?._id
   );
-  console.log(productData);
-  console.log("Cart items:", cartItems);
+  // console.log(productData);
+  // console.log("Cart items:", cartItems);
 
   if (!productData) {
     return (
@@ -747,7 +747,7 @@ const ProductModal = ({ onClose, loading }) => {
       const response = await axiosInstance.get(
         `/api/product/${category}/${slug}`
       );
-      console.log("Product data fetched:", response.data.body.data.product);
+      // console.log("Product data fetched:", response.data.body.data.product);
 
       const product = response.data.body.data.product;
       setProductData(product);
@@ -765,9 +765,9 @@ const ProductModal = ({ onClose, loading }) => {
           ringSize: ringSizeId,
         });
 
-        console.log("Initial selected options set:", { metalType: metalTypeId, ringSize: ringSizeId });
+        // console.log("Initial selected options set:", { metalType: metalTypeId, ringSize: ringSizeId });
       } else {
-        console.warn("No inventory details found for product, selectedOptions will remain empty");
+        // console.warn("No inventory details found for product, selectedOptions will remain empty");
         // If no variants, set empty options - user will need to select manually
         setSelectedOptions({
           metalType: "",
@@ -775,7 +775,7 @@ const ProductModal = ({ onClose, loading }) => {
         });
       }
     } catch (error) {
-      console.error("Failed to fetch product data:", error);
+      // console.error("Failed to fetch product data:", error);
       toast.error("Failed to load product data");
     } finally {
       setIsLoadingProduct(false);
@@ -787,7 +787,7 @@ const ProductModal = ({ onClose, loading }) => {
   }, []);
 
   useEffect(() => {
-    console.log("Selected options changed:", selectedOptions);
+    // console.log("Selected options changed:", selectedOptions);
     const filteredMetals = productData?.inventory?.inventory_details.filter(
       (metal) =>
         metal.color?._id === selectedOptions?.metalType &&
@@ -808,20 +808,20 @@ const ProductModal = ({ onClose, loading }) => {
   // Handle escape key and body overflow
 
   const handelAddToCart = async () => {
-    console.log("Adding to cart with product data:", productData);
-    console.log("Selected options:", selectedOptions);
+    // console.log("Adding to cart with product data:", productData);
+    // console.log("Selected options:", selectedOptions);
 
     // Check if product data is still loading
     if (!productData) {
       toast.error("Product data is still loading. Please wait...");
-      console.error("Product data is missing - still loading");
+      // console.error("Product data is missing - still loading");
       return;
     }
 
     // Check if inventory exists
     if (!productData.inventory || !productData.inventory.inventory_details || productData.inventory.inventory_details.length === 0) {
       toast.error("Product inventory is not available");
-      console.error("Product inventory is missing");
+      // console.error("Product inventory is missing");
       return;
     }
 
@@ -830,7 +830,7 @@ const ProductModal = ({ onClose, loading }) => {
       toast.error(
         "Please select ring size and metal type before adding to cart"
       );
-      console.error("Selected options are missing:", { ringSize: selectedOptions.ringSize, metalType: selectedOptions.metalType });
+      // console.error("Selected options are missing:", { ringSize: selectedOptions.ringSize, metalType: selectedOptions.metalType });
       return;
     }
 
@@ -857,7 +857,7 @@ const ProductModal = ({ onClose, loading }) => {
       await dispatch(addCart(data));
       window.location.pathname = "/cart"; // Redirect to cart page
     } catch (error) {
-      console.error("Failed to add product to cart:", error);
+      // console.error("Failed to add product to cart:", error);
     }
   };
 
@@ -894,7 +894,7 @@ const ProductModal = ({ onClose, loading }) => {
   };
 
   const handelSelectDiamond = (diamond) => {
-    console.log("Selected diamond:", diamond);
+    // console.log("Selected diamond:", diamond);
     setSelectedDiamond(diamond);
   };
 

@@ -13,7 +13,7 @@ export const fetchCart = createAsyncThunk(
       //     "Content-Type": "application/json",
       //   },
       // });
-      // console.log("response", response.data);
+      // // console.log("response", response.data);
       // return response.data?.body?.data?.result || [];
       const existingCart = localStorage.getItem("cart");
       const existingCartData = existingCart ? JSON.parse(existingCart) : [];
@@ -28,11 +28,11 @@ export const addCart = createAsyncThunk(
   "cart/addCart",
   async (cardData, { rejectWithValue }) => {
     try {
-      console.log("cardData", cardData);
+      // console.log("cardData", cardData);
       const existingCart = localStorage.getItem("cart");
       const existingCartData = existingCart ? JSON.parse(existingCart) : [];
       // Check if the card already exists in the cart
-      console.log("existingCartData", existingCartData);
+      // console.log("existingCartData", existingCartData);
       const cardExists = existingCartData.some(
         (item) =>
           item.pid_id === cardData.pid_id &&
@@ -40,9 +40,9 @@ export const addCart = createAsyncThunk(
           item.selectedOptions.metalType === cardData.selectedOptions.metalType
       );
 
-      console.log("Card exists:", cardExists);
+      // console.log("Card exists:", cardExists);
       if (cardExists) {
-        console.log("Card already exists in the cart, updating quantity");
+        // console.log("Card already exists in the cart, updating quantity");
         // If the card already exists, update the quantity
         const updatedCart = existingCartData.map((item) =>
           item.id === cardData.pid_id
@@ -51,12 +51,12 @@ export const addCart = createAsyncThunk(
         );
         return localStorage.setItem("cart", JSON.stringify(updatedCart));
       } else {
-        console.log("Card does not exist in the cart, adding new card");
+        // console.log("Card does not exist in the cart, adding new card");
         // If the card does not exist, add it to the cart
         existingCartData.push(cardData);
 
-        console.log("Card added to the cart");
-        console.log("existingCartData after adding", existingCartData);
+        // console.log("Card added to the cart");
+        // console.log("existingCartData after adding", existingCartData);
       }
 
       localStorage.setItem("cart", JSON.stringify(existingCartData));
@@ -72,9 +72,9 @@ export const removeItemFromCart = createAsyncThunk(
     try {
       const existingCart = localStorage.getItem("cart");
       const existingCartData = existingCart ? JSON.parse(existingCart) : [];
-      console.log("pid_id to remove", pid_id);
+      // console.log("pid_id to remove", pid_id);
 
-      console.log("existingCartData before removal", existingCartData);
+      // console.log("existingCartData before removal", existingCartData);
 
       // Filter out the item with the given pid_id
       const updatedCart = existingCartData.filter(
@@ -84,11 +84,11 @@ export const removeItemFromCart = createAsyncThunk(
           item.selectedOptions.metalType === item.selectedOptions.metalType
       );
 
-      console.log("updatedCart after removal", updatedCart);
+      // console.log("updatedCart after removal", updatedCart);
       localStorage.setItem("cart", JSON.stringify(updatedCart));
       return updatedCart; // Return the updated cart
     } catch (error) {
-      console.log("Error removing item from cart:", error);
+      // console.log("Error removing item from cart:", error);
       return rejectWithValue(error.response?.data || "Error removing item");
     }
   }

@@ -8,25 +8,25 @@ const couponService = new CouponService();
 const redis = initRedis();
 
 export async function createOrder(body, type) {
-  console.log(
-    "Controller: Creating order with body:",
-    JSON.stringify(body, null, 2),
-    "and type:",
-    type
-  );
+  // console.log(
+  //   "Controller: Creating order with body:",
+  //   JSON.stringify(body, null, 2),
+  //   "and type:",
+  //   type
+  // );
   try {
     const result = await orderService.createOrder(body, type);
-    console.log(
-      "Controller: Order creation result:",
-      JSON.stringify(result, null, 2)
-    );
+    // console.log(
+    //   "Controller: Order creation result:",
+    //   JSON.stringify(result, null, 2)
+    // );
     return successResponse(result, 201);
   } catch (err) {
-    console.log(
-      "Controller: Error creating order:",
-      JSON.stringify(err, Object.getOwnPropertyNames(err), 2)
-    );
-    console.error("Controller: Error creating order:", err.message, err.stack);
+    // console.log(
+    //   "Controller: Error creating order:",
+    //   JSON.stringify(err, Object.getOwnPropertyNames(err), 2)
+    // );
+    // console.error("Controller: Error creating order:", err.message, err.stack);
     return errorResponse("Failed to create order", 500, err.message);
   }
 }
@@ -39,7 +39,7 @@ export async function getOrdersByUserId(user_id) {
     }
     return successResponse(orders, 200);
   } catch (err) {
-    console.error("Error fetching orders:", err.message, err.stack);
+    // console.error("Error fetching orders:", err.message, err.stack);
     return errorResponse("Failed to fetch orders", 500, err.message);
   }
 }
@@ -62,7 +62,7 @@ export async function getOrderById(id) {
       status: 200,
     };
   } catch (err) {
-    console.error("getOrderById error:", err.message, err.stack);
+    // console.error("getOrderById error:", err.message, err.stack);
     let statusCode = 500;
     if (err.message === "Invalid order ID format") {
       statusCode = 400;
@@ -87,7 +87,7 @@ export async function getAllOrders(query, admin = null) {
         query.vendor = query.vendor;
       }
     }
-    console.log('[DEBUG] Final query to service:', query);
+    // console.log('[DEBUG] Final query to service:', query);
     const response = await orderService.getAllOrders(query, admin);
     return {
       body: {
@@ -98,7 +98,7 @@ export async function getAllOrders(query, admin = null) {
       status: 200,
     };
   } catch (err) {
-    console.error("getAllOrders error:", err.message, err.stack);
+    // console.error("getAllOrders error:", err.message, err.stack);
     return {
       body: {
         success: false,
@@ -127,7 +127,7 @@ export async function cancelOrder(id) {
       status: 200,
     };
   } catch (err) {
-    console.error("cancelOrder error:", err.message, err.stack);
+    // console.error("cancelOrder error:", err.message, err.stack);
     let statusCode = 500;
     if (err.message === "Invalid order ID format") {
       statusCode = 400;

@@ -22,8 +22,8 @@ export async function createProduct(formData, user = null) {
   try {
     const data = formData;
 
-    console.log("Starting product creation...");
-    console.log("Received form data:", data);
+    // console.log("Starting product creation...");
+    // console.log("Received form data:", data);
 
     // Step 1: Parse and validate all data upfront
     const { productData, inventoryData, itemVariants } = await parseFormData(
@@ -33,8 +33,8 @@ export async function createProduct(formData, user = null) {
     if (formData.get("is_diamond")) {
       productData.is_diamond = formData.get("is_diamond") === "true";
     }
-    console.log("Parsed product data, including is_diamond:", productData);
-    console.log("Received form data:", itemVariants);
+    // console.log("Parsed product data, including is_diamond:", productData);
+    // console.log("Received form data:", itemVariants);
 
 
     // Step 2: Validate product data
@@ -69,7 +69,7 @@ export async function createProduct(formData, user = null) {
     // Step 4: Process all file uploads in parallel
     const fileUploadPromises = [];
     let mainImageUrls = [];
-    console.log("Processing file uploads...");
+    // console.log("Processing file uploads...");
 
     // Collect all possible image fields: "image", "image[0]", "image[1]", etc.
     const mainImages = [];
@@ -127,7 +127,7 @@ export async function createProduct(formData, user = null) {
       value.image = mainImageUrls;
     }
 
-    console.log("All images processed successfully:", value);
+    // console.log("All images processed successfully:", value);
 
 
     // Set vendor if user is a vendor
@@ -136,7 +136,7 @@ export async function createProduct(formData, user = null) {
     }
 
     // Step 5: Create product
-    console.log("Product data to be stored, including is_diamond:", value);
+    // console.log("Product data to be stored, including is_diamond:", value);
     product = await productService.createProduct(value);
 
     if (!product || !product._id) {
@@ -144,7 +144,7 @@ export async function createProduct(formData, user = null) {
     }
 
     createdResources.push({ type: "product", id: product._id });
-    console.log("Product created:", product._id);
+    // console.log("Product created:", product._id);
 
     // Step 6: Create inventory record
     // Generate SKU if not provided to avoid duplicate key errors
@@ -175,8 +175,8 @@ export async function createProduct(formData, user = null) {
     let inventoryDetailAttributes = [];
     let shapeTermsMap = new Map(); // Declare outside to use in response mapping
 
-    console.log("Creating inventory details in batch...");
-    console.log("Item variants to process:", itemVariants.length);
+    // console.log("Creating inventory details in batch...");
+    // console.log("Item variants to process:", itemVariants.length);
     if (itemVariants.length > 0) {
       const detailsResult = await createInventoryDetailsInBatch(
         product._id,
@@ -222,18 +222,18 @@ export async function createProduct(formData, user = null) {
         });
       }
     } catch (error) {
-      console.error("Error fetching shape terms:", error);
+      // console.error("Error fetching shape terms:", error);
     }
 
     // Step 8: Update Redis cache
     await updateProductCaches(product, value.name);
 
     const executionTime = Date.now() - startTime;
-    console.log(`Product creation completed in ${executionTime}ms`);
+    // console.log(`Product creation completed in ${executionTime}ms`);
 
-    console.log(
-      "inventory Details : " + JSON.stringify(inventoryDetails, null, 2)
-    );
+    // console.log(
+    //   "inventory Details : " + JSON.stringify(inventoryDetails, null, 2)
+    // );
 
     const propertyData = formData.get("properties");
     if (propertyData && inventoryDetails && inventoryDetails.length > 0 && inventoryDetails[0] && inventoryDetails[0]._id) {
@@ -250,7 +250,7 @@ export async function createProduct(formData, user = null) {
 
       await Promise.all(createAttributePromises);
     } else if (propertyData && (!inventoryDetails || inventoryDetails.length === 0)) {
-      console.warn("Properties data provided but no inventory details created. Skipping attribute creation.");
+      // console.warn("Properties data provided but no inventory details created. Skipping attribute creation.");
     }
     // Step 9: Construct response data
     const responseData = {
@@ -379,8 +379,8 @@ export async function createProduct(formData, user = null) {
       ),
     };
   } catch (err) {
-    console.error("Create Product error:", err.message);
-    console.log("Error stack trace:", err.stack);
+    // console.error("Create Product error:", err.message);
+    // console.log("Error stack trace:", err.stack);
     if (createdResources.length > 0) {
       await cleanupCreatedResources(createdResources);
     }
@@ -472,16 +472,16 @@ async function parseFormData(data) {
   const itemStockCounts = getBracketNotationValues("item_stock_count");
   const itemImages = getBracketNotationValues("item_image");
 
-  console.log("Parsed variant fields:", {
-    itemSizes: itemSizes.length,
-    itemColors: itemColors.length,
-    itemShapes: itemShapes.length,
-    itemCarats: itemCarats.length,
-    itemAdditionalPrices: itemAdditionalPrices.length,
-    itemExtraCosts: itemExtraCosts.length,
-    itemStockCounts: itemStockCounts.length,
-    itemImages: itemImages.length
-  });
+  // console.log("Parsed variant fields:", {
+  //   itemSizes: itemSizes.length,
+  //   itemColors: itemColors.length,
+  //   itemShapes: itemShapes.length,
+  //   itemCarats: itemCarats.length,
+  //   itemAdditionalPrices: itemAdditionalPrices.length,
+  //   itemExtraCosts: itemExtraCosts.length,
+  //   itemStockCounts: itemStockCounts.length,
+  //   itemImages: itemImages.length
+  // });
 
   // Calculate max length across all variant fields
   const maxLength = Math.max(
@@ -495,7 +495,7 @@ async function parseFormData(data) {
     itemImages.length
   );
 
-  console.log("Max length for variants:", maxLength);
+  // console.log("Max length for variants:", maxLength);
 
   for (let itemIndex = 0; itemIndex < maxLength; itemIndex++) {
     const size = itemSizes[itemIndex];
@@ -557,11 +557,11 @@ async function parseFormData(data) {
       });
       attrIndex++;
     }
-    console.log(`[DEBUG] Parsed attributes for item ${itemIndex}:`, variant.attributes);
+    // console.log(`[DEBUG] Parsed attributes for item ${itemIndex}:`, variant.attributes);
     itemVariants.push(variant);
   }
 
-  console.log("Parsed product data:", itemVariants);
+  // console.log("Parsed product data:", itemVariants);
 
   return { productData, inventoryData, itemVariants };
 }
@@ -569,12 +569,12 @@ async function parseFormData(data) {
 async function processImageUpload(imageFile, folder, identifier) {
   try {
     validateImageFile(imageFile);
-    console.log(`Processing ${identifier} image:`, imageFile.name);
+    // console.log(`Processing ${identifier} image:`, imageFile.name);
     const imageUrl = await saveFile(imageFile, folder);
-    console.log(`${identifier} image saved:`, imageUrl);
+    // console.log(`${identifier} image saved:`, imageUrl);
     return imageUrl;
   } catch (error) {
-    console.error(`${identifier} image upload failed:`, error.message);
+    // console.error(`${identifier} image upload failed:`, error.message);
     throw new Error(`${identifier} image upload error: ${error.message}`);
   }
 }
@@ -628,9 +628,9 @@ async function createInventoryDetailsInBatch(
         createdDetails[attr.inventory_detail_index]._id;
       delete attr.inventory_detail_index;
     });
-    console.log(
-      `Batch creating ${allAttributes.length} attributes for inventory details...`
-    );
+    // console.log(
+    //   `Batch creating ${allAttributes.length} attributes for inventory details...`
+    // );
 
     createdAttributes =
       await productService.batchCreateInventoryDetailsAttributes(allAttributes);
@@ -639,9 +639,9 @@ async function createInventoryDetailsInBatch(
     });
   }
 
-  console.log(
-    `Batch created ${inventoryDetails.length} inventory details and ${allAttributes.length} attributes`
-  );
+  // console.log(
+  //   `Batch created ${inventoryDetails.length} inventory details and ${allAttributes.length} attributes`
+  // );
   return { inventoryDetails: createdDetails, attributes: createdAttributes };
 }
 
@@ -660,11 +660,11 @@ async function updateProductCaches(product, productName) {
   pipeline.incr("products:count");
 
   await pipeline.exec();
-  console.log("Redis caches updated");
+  // console.log("Redis caches updated");
 }
 
 async function cleanupCreatedResources(createdResources) {
-  console.log("Starting cleanup of created resources...");
+  // console.log("Starting cleanup of created resources...");
 
   for (const resource of createdResources.reverse()) {
     try {
@@ -682,12 +682,12 @@ async function cleanupCreatedResources(createdResources) {
           await productService.deleteProduct(resource.id);
           break;
       }
-      console.log(`Cleaned up ${resource.type}: ${resource.id}`);
+      // console.log(`Cleaned up ${resource.type}: ${resource.id}`);
     } catch (cleanupError) {
-      console.error(
-        `Failed to cleanup ${resource.type} ${resource.id}:`,
-        cleanupError.message
-      );
+      // console.error(
+      //   `Failed to cleanup ${resource.type} ${resource.id}:`,
+      //   cleanupError.message
+      // );
     }
   }
 }
@@ -700,18 +700,18 @@ export async function updateProduct(id, formData) {
     // Step 1: Parse form data
     const { productData, inventoryData, itemVariants } =
       await parseUpdateFormData(formData);
-    console.log("Parsed form data:", {
-      productData,
-      inventoryData: {
-        ...inventoryData,
-        stock_status: inventoryData.stock_status,
-        manage_stock: inventoryData.manage_stock,
-      },
-      inventoryData,
-      itemVariants,
-    });
-    console.log("Inventory data stock_status:", inventoryData.stock_status);
-    console.log("Inventory data manage_stock:", inventoryData.manage_stock);
+    // console.log("Parsed form data:", {
+    //   productData,
+    //   inventoryData: {
+    //     ...inventoryData,
+    //     stock_status: inventoryData.stock_status,
+    //     manage_stock: inventoryData.manage_stock,
+    //   },
+    //   inventoryData,
+    //   itemVariants,
+    // });
+    // console.log("Inventory data stock_status:", inventoryData.stock_status);
+    // console.log("Inventory data manage_stock:", inventoryData.manage_stock);
 
     // Step 2: Validate product data
     const { error, value } = productUpdateValidator.validate(productData);
@@ -799,7 +799,7 @@ export async function updateProduct(id, formData) {
       itemVariants,
     });
     updatedResources.push({ type: "product", id: updatedProduct._id });
-    console.log("Product updated:", updatedProduct._id);
+    // console.log("Product updated:", updatedProduct._id);
 
     // Step 6: Update or create inventory
     let inventoryRecord = null;
@@ -840,9 +840,9 @@ export async function updateProduct(id, formData) {
     }
 
     // Log the final inventory record before response
-    console.log("Final inventory record stock_status:", inventoryRecord?.stock_status);
-    console.log("Final inventory record manage_stock:", inventoryRecord?.manage_stock);
-    console.log("Final inventory record full object:", JSON.stringify(inventoryRecord, null, 2));
+    // console.log("Final inventory record stock_status:", inventoryRecord?.stock_status);
+    // console.log("Final inventory record manage_stock:", inventoryRecord?.manage_stock);
+    // console.log("Final inventory record full object:", JSON.stringify(inventoryRecord, null, 2));
 
     // Step 7: Update or create inventory details & attributes
     let inventoryDetails = [];
@@ -936,7 +936,7 @@ export async function updateProduct(id, formData) {
         });
       }
     } catch (error) {
-      console.error("Error fetching shape terms:", error);
+      // console.error("Error fetching shape terms:", error);
     }
 
     // Step 8: Update Redis cache
@@ -946,7 +946,7 @@ export async function updateProduct(id, formData) {
     );
 
     const executionTime = Date.now() - startTime;
-    console.log(`Product update completed in ${executionTime}ms`);
+    // console.log(`Product update completed in ${executionTime}ms`);
 
     // Step 9: Construct response data
     // Added is_diamond to response data
@@ -1114,7 +1114,7 @@ export async function updateProduct(id, formData) {
           }
         }
       } catch (e) {
-        console.error("Error parsing properties:", e);
+        // console.error("Error parsing properties:", e);
       }
     }
 
@@ -1149,7 +1149,7 @@ export async function updateProduct(id, formData) {
       body: successResponse(responseData, "Product updated successfully"),
     };
   } catch (err) {
-    console.error("Update Product error:", err.message, err.stack);
+    // console.error("Update Product error:", err.message, err.stack);
     if (updatedResources.length > 0) {
       await cleanupCreatedResources(updatedResources);
     }
@@ -1161,8 +1161,8 @@ export async function updateProduct(id, formData) {
 }
 
 async function parseUpdateFormData(data) {
-  console.log("Parsing update form data...");
-  console.log("Received form data:", data);
+  // console.log("Parsing update form data...");
+  // console.log("Received form data:", data);
 
   // Helper to get the correct value for each variant index
   function getVariantValue(field, idx) {
@@ -1230,12 +1230,12 @@ async function parseUpdateFormData(data) {
   // Helper function to normalize stock_status values
   const normalizeStockStatus = (value) => {
     if (!value) {
-      console.log("normalizeStockStatus: value is falsy, returning undefined");
+      // console.log("normalizeStockStatus: value is falsy, returning undefined");
       return undefined;
     }
     // Convert to string, lowercase, and remove extra whitespace
     const normalized = String(value).toLowerCase().trim().replace(/\s+/g, ' ');
-    console.log(`normalizeStockStatus: input="${value}", normalized="${normalized}"`);
+    // console.log(`normalizeStockStatus: input="${value}", normalized="${normalized}"`);
 
     // Handle various formats: "Out of Stock" -> "out_of_stock", "in stock" -> "in_stock"
     // Check for "out of stock" pattern (must contain both "out" and "stock", and "out" should come before "stock")
@@ -1245,20 +1245,20 @@ async function parseUpdateFormData(data) {
 
     if (hasOut && hasStock && !hasIn) {
       // "out of stock", "out-of-stock", "outofstock", etc.
-      console.log("normalizeStockStatus: matched 'out' + 'stock' (without 'in'), returning 'out_of_stock'");
+      // console.log("normalizeStockStatus: matched 'out' + 'stock' (without 'in'), returning 'out_of_stock'");
       return "out_of_stock";
     }
     if (hasIn && hasStock && !hasOut) {
       // "in stock", "in-stock", "instock", etc.
-      console.log("normalizeStockStatus: matched 'in' + 'stock' (without 'out'), returning 'in_stock'");
+      // console.log("normalizeStockStatus: matched 'in' + 'stock' (without 'out'), returning 'in_stock'");
       return "in_stock";
     }
     // If already in correct format, return as is
     if (normalized === "out_of_stock" || normalized === "in_stock") {
-      console.log(`normalizeStockStatus: already in correct format, returning "${normalized}"`);
+      // console.log(`normalizeStockStatus: already in correct format, returning "${normalized}"`);
       return normalized;
     }
-    console.log("normalizeStockStatus: no match found, returning undefined");
+    // console.log("normalizeStockStatus: no match found, returning undefined");
     return undefined;
   };
 
@@ -1274,11 +1274,11 @@ async function parseUpdateFormData(data) {
 
   // Debug: Check what FormData contains
   const stockStatusRaw = data.get("stockStatus") || data.get("stock_status");
-  console.log("FormData stockStatus check:", {
-    "stockStatus": data.get("stockStatus"),
-    "stock_status": data.get("stock_status"),
-    "raw value": stockStatusRaw,
-  });
+  // console.log("FormData stockStatus check:", {
+  //   "stockStatus": data.get("stockStatus"),
+  //   "stock_status": data.get("stock_status"),
+  //   "raw value": stockStatusRaw,
+  // });
 
   const inventoryData = {
     sku: data.get("sku") || undefined,
@@ -1297,17 +1297,17 @@ async function parseUpdateFormData(data) {
       : undefined,
   };
 
-  console.log("Final inventoryData after parsing:", {
-    stock_status: inventoryData.stock_status,
-    manage_stock: inventoryData.manage_stock,
-    stock_count: inventoryData.stock_count,
-  });
+  // console.log("Final inventoryData after parsing:", {
+  //   stock_status: inventoryData.stock_status,
+  //   manage_stock: inventoryData.manage_stock,
+  //   stock_count: inventoryData.stock_count,
+  // });
 
-  console.log("Final inventoryData after parsing:", {
-    stock_status: inventoryData.stock_status,
-    manage_stock: inventoryData.manage_stock,
-    stock_count: inventoryData.stock_count,
-  });
+  // console.log("Final inventoryData after parsing:", {
+  //   stock_status: inventoryData.stock_status,
+  //   manage_stock: inventoryData.manage_stock,
+  //   stock_count: inventoryData.stock_count,
+  // });
 
   const itemVariants = [];
 
@@ -1349,17 +1349,17 @@ async function parseUpdateFormData(data) {
   const inventoryDetailsIds = getBracketNotationValues("inventoryDetailsId");
   const itemImages = getBracketNotationValues("item_image");
 
-  console.log("Parsed update variant fields:", {
-    itemSizes: itemSizes.length,
-    itemColors: itemColors.length,
-    itemShapes: itemShapes.length,
-    itemCarats: itemCarats.length,
-    itemAdditionalPrices: itemAdditionalPrices.length,
-    itemExtraCosts: itemExtraCosts.length,
-    itemStockCounts: itemStockCounts.length,
-    itemImages: itemImages.length,
-    inventoryDetailsIds: inventoryDetailsIds.length
-  });
+  // console.log("Parsed update variant fields:", {
+  //   itemSizes: itemSizes.length,
+  //   itemColors: itemColors.length,
+  //   itemShapes: itemShapes.length,
+  //   itemCarats: itemCarats.length,
+  //   itemAdditionalPrices: itemAdditionalPrices.length,
+  //   itemExtraCosts: itemExtraCosts.length,
+  //   itemStockCounts: itemStockCounts.length,
+  //   itemImages: itemImages.length,
+  //   inventoryDetailsIds: inventoryDetailsIds.length
+  // });
 
   // Calculate max length across all variant fields
   const maxLength = Math.max(
@@ -1374,7 +1374,7 @@ async function parseUpdateFormData(data) {
     inventoryDetailsIds.length
   );
 
-  console.log("Max length for update variants:", maxLength);
+  // console.log("Max length for update variants:", maxLength);
 
   for (let i = 0; i < maxLength; i++) {
     const size = itemSizes[i];
@@ -1386,7 +1386,7 @@ async function parseUpdateFormData(data) {
     // Skip if no variant fields are present and no ID (should keep existing if ID?)
     // Actually, if we have an ID but no other fields, it might be a partial update.
     // However, the current logic seems to rebuild the variant list.
-    console.log(`[DEBUG] Parsing update variant ${i}: size=${size}, color=${color}, shape=${shape}, carat=${carat}, id=${inventoryDetailsId}`);
+    // console.log(`[DEBUG] Parsing update variant ${i}: size=${size}, color=${color}, shape=${shape}, carat=${carat}, id=${inventoryDetailsId}`);
 
     const additionalPrice = itemAdditionalPrices[i];
     const extra_cost = itemExtraCosts[i];
@@ -1394,7 +1394,7 @@ async function parseUpdateFormData(data) {
     const image = itemImages[i];
 
     if (!size && !color && !shape && !carat && !inventoryDetailsId && !additionalPrice && !extra_cost && !stock_count && !image) {
-      console.log(`[DEBUG] Skipping empty variant at index ${i}`);
+      // console.log(`[DEBUG] Skipping empty variant at index ${i}`);
       continue;
     }
 
@@ -1444,7 +1444,7 @@ async function parseUpdateFormData(data) {
     itemVariants.push(variant);
   }
 
-  console.log(`[DEBUG] parseUpdateFormData completed. Returning ${itemVariants.length} variants.`);
+  // console.log(`[DEBUG] parseUpdateFormData completed. Returning ${itemVariants.length} variants.`);
   return { productData, inventoryData, itemVariants };
 }
 
@@ -1475,9 +1475,9 @@ async function updateInventoryDetailsInBatch(
 
   // Delete variants that are not in the update request
   if (variantsToDelete.length > 0) {
-    console.log(`[DEBUG] Deleting ${variantsToDelete.length} inventory details that were removed. Kept IDs:`, keptVariantIds);
+    // console.log(`[DEBUG] Deleting ${variantsToDelete.length} inventory details that were removed. Kept IDs:`, keptVariantIds);
     for (const detailToDelete of variantsToDelete) {
-      console.log(`[DEBUG] Deleting variant ID: ${detailToDelete._id}`);
+      // console.log(`[DEBUG] Deleting variant ID: ${detailToDelete._id}`);
       // Delete associated attributes first
       await ProductInventoryDetailAttribute.deleteMany({
         inventory_details_id: detailToDelete._id,
@@ -1487,12 +1487,12 @@ async function updateInventoryDetailsInBatch(
     }
   }
 
-  console.log(`[DEBUG] Processing ${itemVariants.length} variants in batch update...`);
+  // console.log(`[DEBUG] Processing ${itemVariants.length} variants in batch update...`);
 
   // Process variants that are being updated or created
   for (let i = 0; i < itemVariants.length; i++) {
     const variant = itemVariants[i];
-    console.log(`[DEBUG] Processing variant ${i}:`, JSON.stringify(variant));
+    // console.log(`[DEBUG] Processing variant ${i}:`, JSON.stringify(variant));
     const { inventoryDetailsId, image, attributes, ...variantData } = variant;
 
     // image is either a File object (new) or a string/array (existing)
@@ -1544,28 +1544,28 @@ async function updateInventoryDetailsInBatch(
       image: imageUrls,
     };
 
-    console.log(`[DEBUG] Variant ${i} detailData:`, JSON.stringify(detailData));
+    // console.log(`[DEBUG] Variant ${i} detailData:`, JSON.stringify(detailData));
 
     let createdDetail;
     try {
       if (inventoryDetailsId) {
-        console.log(`[DEBUG] Updating existing variant: ${inventoryDetailsId}`);
+        // console.log(`[DEBUG] Updating existing variant: ${inventoryDetailsId}`);
         createdDetail = await productService.updateInventoryDetails(
           inventoryDetailsId,
           detailData
         );
       } else {
-        console.log(`[DEBUG] Creating new variant for product: ${productId}`);
+        // console.log(`[DEBUG] Creating new variant for product: ${productId}`);
         createdDetail = await productService.createInventoryDetails(detailData);
       }
     } catch (opError) {
-      console.error(`[ERROR] Failed to ${inventoryDetailsId ? 'update' : 'create'} variant at index ${i}:`, opError);
-      console.log(`[DEBUG] Failed variant detailData:`, JSON.stringify(detailData));
+      // console.error(`[ERROR] Failed to ${inventoryDetailsId ? 'update' : 'create'} variant at index ${i}:`, opError);
+      // console.log(`[DEBUG] Failed variant detailData:`, JSON.stringify(detailData));
       throw opError;
     }
 
     if (createdDetail) {
-      console.log(`[DEBUG] Variant ${i} ${inventoryDetailsId ? 'updated' : 'created'} successfully with ID: ${createdDetail._id}`);
+      // console.log(`[DEBUG] Variant ${i} ${inventoryDetailsId ? 'updated' : 'created'} successfully with ID: ${createdDetail._id}`);
       inventoryDetails.push(createdDetail);
       updatedResources.push({
         type: "inventory_detail",
@@ -1576,7 +1576,7 @@ async function updateInventoryDetailsInBatch(
         // [FIX] Delete existing attributes for this specific variant to ensure clean update
         // This prevents duplicates and ensures the latest values are what the GET request finds first
         if (inventoryDetailsId) {
-          console.log(`[DEBUG] Clearing old attributes for variant ${inventoryDetailsId} before update`);
+          // console.log(`[DEBUG] Clearing old attributes for variant ${inventoryDetailsId} before update`);
           await ProductInventoryDetailAttribute.deleteMany({
             inventory_details_id: inventoryDetailsId,
             deletedAt: null
@@ -1589,7 +1589,7 @@ async function updateInventoryDetailsInBatch(
           inventory_details_id: createdDetail._id,
           product_id: productId,
         }));
-        console.log(`[DEBUG] Adding ${detailAttributes.length} attributes to allAttributes for variant ${createdDetail._id}`);
+        // console.log(`[DEBUG] Adding ${detailAttributes.length} attributes to allAttributes for variant ${createdDetail._id}`);
         allAttributes.push(...detailAttributes);
       }
 
@@ -1598,17 +1598,17 @@ async function updateInventoryDetailsInBatch(
 
   let createdAttributes = [];
   if (allAttributes.length > 0) {
-    console.log(`[DEBUG] Total attributes to process: ${allAttributes.length}`);
+    // console.log(`[DEBUG] Total attributes to process: ${allAttributes.length}`);
     const variantIds = inventoryDetails.map((d) => d._id);
     const existingAttributes = await ProductInventoryDetailAttribute.find({
       inventory_details_id: { $in: variantIds },
     });
-    console.log(`[DEBUG] Found ${existingAttributes.length} existing attributes in DB for these variants`);
+    // console.log(`[DEBUG] Found ${existingAttributes.length} existing attributes in DB for these variants`);
 
     // [FIX] Since we already deleted existing attributes for updated variants above,
     // we should just create all of them to avoid duplicate checks and logic issues.
     for (const attr of allAttributes) {
-      console.log(`[DEBUG] Creating attribute: "${attr.attribute_name}" with value: "${attr.attribute_value}" for variant: ${attr.inventory_details_id}`);
+      // console.log(`[DEBUG] Creating attribute: "${attr.attribute_name}" with value: "${attr.attribute_value}" for variant: ${attr.inventory_details_id}`);
       const createdAttr = await productService.createInventoryDetailsAttributes(attr);
       if (createdAttr) {
 
@@ -1618,9 +1618,9 @@ async function updateInventoryDetailsInBatch(
     }
   }
 
-  console.log(
-    `[DEBUG] updateInventoryDetailsInBatch completed. Updated/Created ${inventoryDetails.length} details and ${createdAttributes.length} attributes`
-  );
+  // console.log(
+  //   `[DEBUG] updateInventoryDetailsInBatch completed. Updated/Created ${inventoryDetails.length} details and ${createdAttributes.length} attributes`
+  // );
   return { inventoryDetails, attributes: createdAttributes };
 }
 
@@ -1633,7 +1633,7 @@ export async function getProductsByAttribute(query) {
       body: successResponse(products, "Products fetched by attribute"),
     };
   } catch (err) {
-    console.error("Get Products by Attribute error:", err.message);
+    // console.error("Get Products by Attribute error:", err.message);
     return {
       status: err.statusCode || 500,
       body: errorResponse(err.message || "Server error"),
@@ -1649,7 +1649,7 @@ export async function getProducts(query, user = null) {
       body: { success: true, message: 'Products fetched successfully', data: result }
     };
   } catch (err) {
-    console.error('Get Products error:', err.message, err.stack);
+    // console.error('Get Products error:', err.message, err.stack);
     return {
       status: 500,
       body: {
@@ -1679,7 +1679,7 @@ export async function getProductById(id, slug) {
       body: successResponse(product, "Product fetched"),
     };
   } catch (err) {
-    console.error("Get Product by ID error:", err.message);
+    // console.error("Get Product by ID error:", err.message);
     return {
       status: err.statusCode || 500,
       body: errorResponse(err.message || "Server error"),
@@ -1688,7 +1688,7 @@ export async function getProductById(id, slug) {
 }
 
 export async function deleteProduct(id) {
-  console.log(`Delete Product called with ID: ${id}`);
+  // console.log(`Delete Product called with ID: ${id}`);
   try {
     const deletedProduct = await productService.deleteProduct(id);
     if (!deletedProduct) {
@@ -1705,7 +1705,7 @@ export async function deleteProduct(id) {
       body: successResponse(deletedProduct, "Product deleted"),
     };
   } catch (err) {
-    console.error("Delete Product error:", err.message);
+    // console.error("Delete Product error:", err.message);
     return {
       status: err.statusCode || 500,
       body: errorResponse(err.message || "Server error"),

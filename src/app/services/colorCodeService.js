@@ -9,21 +9,21 @@ class ColorCodeService {
   //   try {
   //     return await this.colorCodeRepo.findAll();
   //   } catch (error) {
-  //     console.error('Service getAllColorCodes error:', error.message);
+  //     // console.error('Service getAllColorCodes error:', error.message);
   //     throw error;
   //   }
   // }
 
   async getAllColorCodes(query, vendorId = null) {
   try {
-    console.log("Query Parameters:", query);
+    // console.log("Query Parameters:", query);
     const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
 
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
 
-    console.log("Page Number:", pageNum);
-    console.log("Limit Number:", limitNum);
+    // console.log("Page Number:", pageNum);
+    // console.log("Limit Number:", limitNum);
 
     // Parse JSON strings to objects
     const parsedFilters = JSON.parse(filters);
@@ -68,7 +68,7 @@ class ColorCodeService {
 
     return colorCodes;
   } catch (error) {
-    console.error('Service getAllColorCodes error:', error.message);
+    // console.error('Service getAllColorCodes error:', error.message);
     throw new AppError("Cannot fetch color codes", StatusCodes.INTERNAL_SERVER_ERROR);
   }
 }
@@ -78,7 +78,7 @@ class ColorCodeService {
     try {
       return await this.colorCodeRepo.findById(id);
     } catch (error) {
-      console.error('Service getColorCodeById error:', error.message);
+      // console.error('Service getColorCodeById error:', error.message);
       throw error;
     }
   }
@@ -87,31 +87,31 @@ class ColorCodeService {
     try {
       return await this.colorCodeRepo.create(data);
     } catch (error) {
-      console.error('Service createColorCode error:', error.message);
+      // console.error('Service createColorCode error:', error.message);
       throw error;
     }
   }
 
   async updateColorCode(id, data) {
     try {
-      console.log('Service updateColorCode called with:', id, data);
+      // console.log('Service updateColorCode called with:', id, data);
       const updated = await this.colorCodeRepo.update(id, data);
-      console.log('Service updated result:', updated);
+      // console.log('Service updated result:', updated);
       return updated;
     } catch (error) {
-      console.error('Service updateColorCode error:', error.message);
+      // console.error('Service updateColorCode error:', error.message);
       throw error;
     }
   }
 
   async deleteColorCode(id) {
     try {
-      console.log('Service deleteColorCode called with:', id);
+      // console.log('Service deleteColorCode called with:', id);
       const deleted = await this.colorCodeRepo.permanentDelete(id);
-      console.log('Service deleted result:', deleted);
+      // console.log('Service deleted result:', deleted);
       return deleted;
     } catch (error) {
-      console.error('Service deleteColorCode error:', error.message);
+      // console.error('Service deleteColorCode error:', error.message);
       throw error;
     }
   }

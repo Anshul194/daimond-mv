@@ -8,7 +8,7 @@ export async function GET(request, { params }) {
     
     // Next.js 15 requires awaiting params
     const resolvedParams = await params;
-    console.log('🔧 Params received:', resolvedParams);
+    // console.log('🔧 Params received:', resolvedParams);
 
     const { categoryId } = resolvedParams || {};
     
@@ -19,14 +19,14 @@ export async function GET(request, { params }) {
       );
     }
 
-    console.log('GET /blog-subcategory/by-category - categoryId:', categoryId);
+    // console.log('GET /blog-subcategory/by-category - categoryId:', categoryId);
     const result = await getSubCategoriesByCategoryId(categoryId);
-    console.log('GET /blog-subcategory/by-category - Result:', { status: result.status });
+    // console.log('GET /blog-subcategory/by-category - Result:', { status: result.status });
 
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error('Route error:', err);
-    console.error('Route error stack:', err.stack);
+    // console.error('Route error:', err);
+    // console.error('Route error stack:', err.stack);
     return NextResponse.json({ success: false, message: err.message || 'Internal server error' }, { status: 500 });
   }
 }

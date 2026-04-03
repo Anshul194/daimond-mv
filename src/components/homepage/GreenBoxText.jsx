@@ -66,7 +66,27 @@ export default function GreenBoxText() {
         ]);
 
         if (!statsRes.ok || !contentRes.ok) {
-          throw new Error(`Fetch failed: ${statsRes.status} / ${contentRes.status}`);
+          console.warn(`GreenBox fetch non-ok: ${statsRes.status} / ${contentRes.status}`);
+
+          // Try to parse any successful response, otherwise use fallback
+          const statsData = statsRes.ok ? await statsRes.json() : null;
+          const contentData = contentRes.ok ? await contentRes.json() : null;
+
+          const statsBody = statsData?.body || statsData;
+          const contentBody = contentData?.body || contentData;
+
+          setDynamicStats((statsBody && statsBody.success && statsBody.data?.length > 0)
+            ? statsBody.data
+            : FALLBACK_STATS
+          );
+
+          setContent((contentBody && contentBody.success && contentBody.data)
+            ? contentBody.data
+            : FALLBACK_CONTENT
+          );
+
+          setLoading(false);
+          return;
         }
 
         const statsData = await statsRes.json();

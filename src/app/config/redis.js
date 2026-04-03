@@ -3,7 +3,7 @@ import Redis from 'ioredis';
 export default function initRedis() {
   // Check if Redis environment variables are configured
   if (!process.env.REDIS_HOST || !process.env.REDIS_PORT) {
-    console.warn('⚠️  Redis environment variables not configured. Redis features will be disabled.');
+    // console.warn('⚠️  Redis environment variables not configured. Redis features will be disabled.');
     // Return a mock Redis client that doesn't crash the app
     return {
       get: async () => null,
@@ -28,17 +28,17 @@ export default function initRedis() {
   });
 
   redis.on('connect', () => {
-    console.log('✅ Redis connected globally');
+    // console.log('✅ Redis connected globally');
   });
 
   redis.on('error', (err) => {
-    console.error('❌ Redis connection error:', err.message);
+    // console.error('❌ Redis connection error:', err.message);
     // Don't crash the app on Redis errors
   });
 
   // Try to connect, but don't block if it fails
   redis.connect().catch(err => {
-    console.error('❌ Redis initial connection failed:', err.message);
+    // console.error('❌ Redis initial connection failed:', err.message);
   });
 
   return redis;

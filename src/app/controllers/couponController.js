@@ -41,7 +41,7 @@ export async function createCoupon(request, user = null) {
     const response = successResponse(coupon, 'Coupon created successfully');
     return Response.json(response.body, { status: response.status });
   } catch (err) {
-    console.error('Create Coupon error:', err.message);
+    // console.error('Create Coupon error:', err.message);
     return Response.json(errorResponse('Server error', 500), { status: 500 });
   }
 }
@@ -85,7 +85,7 @@ export async function getCoupons(request, user = null) {
     const response = successResponse(coupons, 'Coupons fetched successfully');
     return Response.json(response.body, { status: response.status });
   } catch (err) {
-    console.error('Get Coupons error:', err.message);
+    // console.error('Get Coupons error:', err.message);
     return Response.json(errorResponse('Server error', 500), { status: 500 });
   }
 }
@@ -164,7 +164,7 @@ export async function updateCoupon(request, { params }, user = null) {
     const response = successResponse(coupon, 'Coupon updated successfully');
     return Response.json(response.body, { status: response.status });
   } catch (err) {
-    console.error('Update Coupon error:', err.message);
+    // console.error('Update Coupon error:', err.message);
     return Response.json(errorResponse('Server error', 500), { status: 500 });
   }
 }
@@ -193,7 +193,7 @@ export async function deleteCoupon(request, { params }, user = null) {
     const response = successResponse(coupon, 'Coupon deleted successfully');
     return Response.json(response.body, { status: response.status });
   } catch (err) {
-    console.error('Delete Coupon error:', err.message);
+    // console.error('Delete Coupon error:', err.message);
     return Response.json(errorResponse('Server error', 500), { status: 500 });
   }
 }
@@ -216,7 +216,7 @@ export async function validateCouponAPI(request) {
     const result = await couponService.validateCoupon(code, orderTotal, userEmail);
     return Response.json({ success: true, ...result });
   } catch (err) {
-    console.error('Validate Coupon error:', err.message);
+    // console.error('Validate Coupon error:', err.message);
     return Response.json(errorResponse('Server error', 500), { status: 500 });
   }
 }
@@ -244,7 +244,7 @@ export async function applyCouponToOrder(request) {
     
     return Response.json(successResponse({ discount, coupon }, 'Coupon applied successfully'));
   } catch (err) {
-    console.error('Apply Coupon error:', err.message);
+    // console.error('Apply Coupon error:', err.message);
     return Response.json(errorResponse('Server error', 500), { status: 500 });
   }
 }

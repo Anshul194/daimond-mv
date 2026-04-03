@@ -177,10 +177,10 @@ const CheckoutPage = () => {
     const getTax = async () => {
       try {
         const response = await axiosInstance.get("/api/ActiveTax");
-        console.log("Tax data response: ===>", response.data);
+        // console.log("Tax data response: ===>", response.data);
         setTaxData(response.data.options);
       } catch (error) {
-        console.error("Error fetching tax data:", error);
+        // console.error("Error fetching tax data:", error);
         toast.error("Failed to fetch tax data.");
       }
     };
@@ -211,7 +211,7 @@ const CheckoutPage = () => {
       });
 
       const data = await res.data;
-      console.log("Coupon validation response:", data);
+      // console.log("Coupon validation response:", data);
       if (data.valid) {
         setCouponApplied(true);
         // toast.success("Coupon applied successfully!");
@@ -222,7 +222,7 @@ const CheckoutPage = () => {
           orderTotal: originalTotal,
         });
 
-        console.log("Coupon data response: Apply", res2.data);
+        // console.log("Coupon data response: Apply", res2.data);
         setCouponData(res2.data);
       } else {
         // toast.error("Invalid coupon code.");
@@ -230,7 +230,7 @@ const CheckoutPage = () => {
         setErrorCoupon(data.message || "Invalid coupon code.");
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       // toast.error("An error occurred while validating the coupon.");
     } finally {
       setLoadingCoupon(false);
@@ -289,14 +289,14 @@ const CheckoutPage = () => {
         selectedDiamond: item?.selectedDiamond?._id,
       }));
 
-      console.log("calling stripe checkout with items:", newCartItems);
-      console.log("Coupon data:", couponData?.discount);
-      console.log(
-        "tax value: ",
-        couponData?.discount
-          ? ((originalTotal - couponData?.discount || 0) * ApplicableTax) / 100
-          : (originalTotal * ApplicableTax) / 100
-      );
+      // console.log("calling stripe checkout with items:", newCartItems);
+      // console.log("Coupon data:", couponData?.discount);
+      // console.log(
+      //   "tax value: ",
+      //   couponData?.discount
+      //     ? ((originalTotal - couponData?.discount || 0) * ApplicableTax) / 100
+      //     : (originalTotal * ApplicableTax) / 100
+      // );
 
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
@@ -335,7 +335,7 @@ const CheckoutPage = () => {
         throw new Error(data.error || "Stripe session creation failed");
       }
     } catch (error) {
-      console.error(error);
+      // console.error(error);
       toast.error("Payment failed. Please try again.");
     } finally {
       setProcessingPayment(false);
@@ -352,12 +352,12 @@ const CheckoutPage = () => {
 
   const calculateTotalWithTax = (total, discount = 0) => {
     const discountedTotal = total - discount;
-    console.log("Discounted Total:", discountedTotal);
-    console.log("Applicable Tax:", ApplicableTax);
-    console.log(
-      "Total with Tax:",
-      discountedTotal + (discountedTotal * ApplicableTax) / 100
-    );
+    // console.log("Discounted Total:", discountedTotal);
+    // console.log("Applicable Tax:", ApplicableTax);
+    // console.log(
+    //   "Total with Tax:",
+    //   discountedTotal + (discountedTotal * ApplicableTax) / 100
+    // );
     return (discountedTotal + (discountedTotal * ApplicableTax) / 100).toFixed(
       2
     );

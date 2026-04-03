@@ -36,17 +36,17 @@ export async function GET(request, { params }) {
       }
 
       const result = await getProductAttributeByCategoryId(categoryId);
-      console.log("Get Product Attribute by Category ID result:", result);
+      // console.log("Get Product Attribute by Category ID result:", result);
       return NextResponse.json(result.body, { status: result.status });
     }
     
     // If no category parameter, return all product attributes
     const result = await getProductAttributes(query);
-    console.log("Get Product Attributes result:", result);
+    // console.log("Get Product Attributes result:", result);
 
     return NextResponse.json(result.body, { status: result.status });
   } catch (error) {
-    console.error("Error in GET /product-attributes:", error);
+    // console.error("Error in GET /product-attributes:", error);
     return NextResponse.json(
       { success: false, message: error.message || "Internal server error" },
       { status: 500 }

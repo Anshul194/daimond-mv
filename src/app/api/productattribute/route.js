@@ -17,9 +17,9 @@ export async function GET(request) {
     // Connect to database first
     try {
       await dbConnect();
-      console.log('Database connected successfully for /productattribute');
+      // console.log('Database connected successfully for /productattribute');
     } catch (dbError) {
-      console.error('Database connection error in /productattribute:', dbError.message);
+      // console.error('Database connection error in /productattribute:', dbError.message);
       return NextResponse.json({ 
         success: false, 
         message: 'Database connection failed. Please check your MongoDB connection string and ensure MongoDB is running.',
@@ -34,7 +34,7 @@ export async function GET(request) {
          authResult = await verifyTokenAndUser(request, 'admin');
          if (!authResult.error) admin = authResult.user;
        } catch (e) {
-        console?.log('No admin authentication, proceeding as public',e?.message);
+        // console?.log('No admin authentication, proceeding as public',e?.message);
          // Ignore auth errors for public access
          admin = null;
        }
@@ -62,16 +62,16 @@ export async function GET(request) {
       query.filters = '{}';
     }
 
-    console?.log('[DEBUG] Incoming query params:', query);
-    console?.log('[DEBUG] Parsed filters:', query.filters);
-    console?.log('[DEBUG] Admin info:', admin);
+    // console?.log('[DEBUG] Incoming query params:', query);
+    // console?.log('[DEBUG] Parsed filters:', query.filters);
+    // console?.log('[DEBUG] Admin info:', admin);
 
     const result = id ? await getProductAttributeById(id) : await getProductAttributes(query, admin);
-    console.log('GET /productattribute - Result:', { status: result.status });
+    // console.log('GET /productattribute - Result:', { status: result.status });
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error('GET /product-attributes error:', err);
-    console.error('GET /product-attributes error stack:', err.stack);
+    // console.error('GET /product-attributes error:', err);
+    // console.error('GET /product-attributes error stack:', err.stack);
     
     // Check if it's a database connection error
     if (err.message && (err.message.includes('ECONNREFUSED') || err.message.includes('MongoDB connection'))) {
@@ -105,7 +105,7 @@ export async function POST(request) {
 
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error('POST /subcategory error:', err);
+    // console.error('POST /subcategory error:', err);
     return NextResponse.json({ success: false, message: 'Invalid request' }, { status: 400 });
   }
 }
@@ -118,10 +118,10 @@ export async function PUT(request) {
     await dbConnect();
      const authResult = await verifyAdminAccess(request);
     if (authResult.error) return authResult.error;
-    console.log('Admin access verified', authResult);
+    // console.log('Admin access verified', authResult);
 
     const { user: admin } = authResult;
-    console.log('Admin authenticated:', admin);
+    // console.log('Admin authenticated:', admin);
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
@@ -142,7 +142,7 @@ export async function PUT(request) {
     } else if (contentType?.includes('multipart/form-data')) {
       const formData = await request.formData();
       data = parseNestedFormData(formData);
-      console.log('Parsed form data for update:', data);
+      // console.log('Parsed form data for update:', data);
     } else {
       return NextResponse.json(
         { success: false, message: 'Unsupported content type. Use application/json or multipart/form-data' },
@@ -162,7 +162,7 @@ export async function PUT(request) {
     const result = await updateProductAttribute(id, data);
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error('PUT /product-attributes error:', err);
+    // console.error('PUT /product-attributes error:', err);
     return NextResponse.json(
       { success: false, message: 'Invalid request data' },
       { status: 400 }
@@ -188,7 +188,7 @@ export async function DELETE(request) {
     const result = await deleteProductAttribute(id);
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error('DELETE /product-attributes error:', err);
+    // console.error('DELETE /product-attributes error:', err);
     return NextResponse.json(
       { success: false, message: 'Internal server error' },
       { status: 500 }

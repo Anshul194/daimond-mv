@@ -39,7 +39,7 @@ export async function PUT(request, context) {
     const result = await updateCategory(id, data);
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error('PUT /category/:id error:', err);
+    // console.error('PUT /category/:id error:', err);
     return NextResponse.json({ success: false, message: 'Update failed' }, { status: 400 });
   }
 }
@@ -63,7 +63,7 @@ export async function DELETE(request, context) {
     const result = await deleteCategory(params.id, admin.id);
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error('DELETE /category/:id error:', err);
+    // console.error('DELETE /category/:id error:', err);
     return NextResponse.json({ success: false, message: 'Delete failed' }, { status: 400 });
   }
 }

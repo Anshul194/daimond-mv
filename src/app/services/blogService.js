@@ -9,7 +9,7 @@ class BlogService {
     try {
       return await this.blogRepo.create(data);
     } catch (err) {
-      console.error('BlogService.create error:', err);
+      // console.error('BlogService.create error:', err);
       throw err;
     }
   }
@@ -18,7 +18,7 @@ class BlogService {
     try {
       return await this.blogRepo.update(id, data);
     } catch (err) {
-      console.error('BlogService.update error:', err);
+      // console.error('BlogService.update error:', err);
       throw err;
     }
   }
@@ -27,7 +27,7 @@ class BlogService {
     try {
       return await this.blogRepo.softDelete(id);
     } catch (err) {
-      console.error('BlogService.delete error:', err);
+      // console.error('BlogService.delete error:', err);
       throw err;
     }
   }
@@ -36,7 +36,7 @@ class BlogService {
     try {
       return await this.blogRepo.findById(id);
     } catch (err) {
-      console.error('BlogService.getById error:', err);
+      // console.error('BlogService.getById error:', err);
       throw err;
     }
   }
@@ -45,7 +45,7 @@ class BlogService {
     try {
       return await this.blogRepo.findBySlug(slug);
     } catch (err) {
-      console.error('BlogService.getBySlug error:', err);
+      // console.error('BlogService.getBySlug error:', err);
       throw err;
     }
   }
@@ -73,7 +73,7 @@ class BlogService {
 
     return await this.blogRepo.getAll(parsedFilters, parsedSort, parseInt(page), parseInt(limit));
   } catch (err) {
-    console.error('BlogService.getAll error:', err);
+    // console.error('BlogService.getAll error:', err);
     throw err;
   }
 }
@@ -83,7 +83,7 @@ class BlogService {
   try {
     return await this.blogRepo.getBlogsByCategoryId(categoryId);
   } catch (err) {
-    console.error('BlogService.getBlogsByCategoryId error:', err);
+    // console.error('BlogService.getBlogsByCategoryId error:', err);
     throw err;
   }
 }
@@ -91,7 +91,7 @@ async getBlogsBySubCategoryId(subCategoryId) {
     try {
       return await this.blogRepo.getBlogsBySubCategoryId(subCategoryId);
     } catch (err) {
-      console.error('BlogService.getBlogsBySubCategoryId error:', err);
+      // console.error('BlogService.getBlogsBySubCategoryId error:', err);
       throw err;
     }
   }

@@ -18,7 +18,7 @@ export async function POST(request) {
 
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
-    console.error('POST /brands error:', err);
+    // console.error('POST /brands error:', err);
     return NextResponse.json({ success: false, message: 'Invalid request' }, { status: 400 });
   }
 }
@@ -42,15 +42,15 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const query = Object.fromEntries(searchParams.entries());
 
-    console?.log('[DEBUG] Incoming query params:', query);
-    console?.log('[DEBUG] Admin info:', admin);
+    // console?.log('[DEBUG] Incoming query params:', query);
+    // console?.log('[DEBUG] Admin info:', admin);
 
     // Pass query to service
     const result = await getBrands(query, admin);
     return NextResponse.json(result.body, { status: result.status });
 
   } catch (err) {
-    console.error('GET /brands error:', err);
+    // console.error('GET /brands error:', err);
     return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
   }
 }
