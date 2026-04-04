@@ -13,6 +13,36 @@ const HeroSection = () => {
   const leftImageRef = useRef(null);
   const rightImageRef = useRef(null);
   const ctaRef = useRef(null);
+  const [currentIndex, setCurrentIndex] = React.useState(0);
+  const [isHovered, setIsHovered] = React.useState(false);
+  const touchStartX = useRef(null);
+  const touchDeltaX = useRef(0);
+
+  const handleTouchStart = (e) => {
+    if (!e.touches || e.touches.length === 0) return;
+    touchStartX.current = e.touches[0].clientX;
+    touchDeltaX.current = 0;
+  };
+
+  const handleTouchMove = (e) => {
+    if (!touchStartX.current || !e.touches || e.touches.length === 0) return;
+    touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStartX.current == null) return;
+    const delta = touchDeltaX.current;
+    const threshold = 50; // px
+    if (Math.abs(delta) > threshold && banners.length > 1) {
+      if (delta < 0) {
+        setCurrentIndex((p) => (p + 1) % banners.length);
+      } else {
+        setCurrentIndex((p) => (p - 1 + banners.length) % banners.length);
+      }
+    }
+    touchStartX.current = null;
+    touchDeltaX.current = 0;
+  };
 
   useEffect(() => {
     const fetchBanners = async () => {
@@ -92,11 +122,8 @@ const HeroSection = () => {
     return () => ctx.revert();
   }, []);
 
-  if (loading) return <div className="w-full h-[85vh] lg:h-[90vh] bg-black/5 flex items-center justify-center">
-    <div className="w-10 h-10 border-4 border-[#00736C] border-t-transparent rounded-full animate-spin"></div>
-  </div>;
-
-  const currentBanner = banners.length > 0 ? banners[0] : {
+  // current banner based on index
+  const currentBanner = banners.length > 0 ? banners[currentIndex % banners.length] : {
     title: "Make a <br /> <span class=\"italic\">statement.</span>",
     subtitle: "Exquisite engagement rings crafted for your forever.",
     image: "/images/left-banner.webp",
@@ -108,12 +135,45 @@ const HeroSection = () => {
     buttonSecondaryLink: "/shop-all-jewelry"
   };
 
+  // prepare CTA arrays
+  const desktopButtons = [];
+  if (currentBanner.buttonPrimaryText) desktopButtons.push({ text: currentBanner.buttonPrimaryText, href: currentBanner.buttonPrimaryLink, primary: true });
+  if (currentBanner.buttonSecondaryText) desktopButtons.push({ text: currentBanner.buttonSecondaryText, href: currentBanner.buttonSecondaryLink, primary: false });
+
+  const mobileButtons = [];
+  if (currentBanner.mobileButton1Text) mobileButtons.push({ text: currentBanner.mobileButton1Text, href: currentBanner.mobileButton1Link });
+  if (currentBanner.mobileButton2Text) mobileButtons.push({ text: currentBanner.mobileButton2Text, href: currentBanner.mobileButton2Link });
+
+  const mobileFallback = mobileButtons.length ? mobileButtons : desktopButtons;
+
+  // autoplay
+  useEffect(() => {
+    if (loading) return;
+    if (banners.length <= 1) return;
+    const id = setInterval(() => {
+      if (!isHovered) setCurrentIndex((p) => (p + 1) % banners.length);
+    }, 5000);
+    return () => clearInterval(id);
+  }, [loading, banners.length, isHovered]);
+
+  if (loading) return <div className="w-full h-[85vh] lg:h-[90vh] bg-black/5 flex items-center justify-center">
+    <div className="w-10 h-10 border-4 border-[#00736C] border-t-transparent rounded-full animate-spin"></div>
+  </div>;
+
   return (
-    <div ref={heroRef} className="w-full h-[85vh] lg:h-[90vh] flex overflow-hidden">
+    <div
+      ref={heroRef}
+      className="w-full h-[85vh] lg:h-[90vh] flex overflow-hidden"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Left Panel - Main Hero */}
       <div className="relative w-full lg:w-1/2 overflow-hidden h-full">
         {/* Background Image */}
-        <div ref={leftImageRef} className="absolute inset-0 w-full h-full">
+        <div ref={leftImageRef} className="absolute inset-0 w-full h-full transition-opacity duration-700">
           <Image
             src={currentBanner.image}
             alt="Engagement Ring Hero"
@@ -150,32 +210,76 @@ const HeroSection = () => {
               </div>
             </div>
 
-            {/* Main Heading - Static */}
+            {/* Main Heading - Dynamic from banner.title */}
             <h1
               className="text-4xl md:text-5xl lg:text-7xl !font-light font-arizona !text-white leading-[1.1] mb-4 drop-shadow-lg"
-            >
-              Make a <br /> <span className="italic">statement.</span>
-            </h1>
+              dangerouslySetInnerHTML={{ __html: currentBanner.title || 'Make a <br /> <span class="italic">statement.</span>' }}
+            />
 
-            {/* Subheading - Static */}
-            <p className="text-lg md:text-xl !text-white/90 font-gintoNormal max-w-sm font-light leading-relaxed drop-shadow-md">
-              Exquisite engagement rings crafted for your forever.
-            </p>
+            {/* Subheading - Dynamic from banner.subtitle */}
+            <p className="text-lg md:text-xl !text-white/90 font-gintoNormal max-w-sm font-light leading-relaxed drop-shadow-md"
+              dangerouslySetInnerHTML={{ __html: currentBanner.subtitle || 'Exquisite engagement rings crafted for your forever.' }}
+            />
           </div>
 
-          {/* CTA Buttons - Static */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Link href="/engagement-rings/build-ring">
-              <button className="bg-[#00736C] w-full !h-[65px] sm:w-[200px] hover:bg-[#005F5B] text-white py-4 px-8 text-xs font-semibold tracking-widest transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl uppercase">
-                EXPLORE ENGAGEMENT
-              </button>
-            </Link>
-            <Link href="/shop-all-jewelry">
-              <button className="border !h-[65px] border-white/50 backdrop-blur-sm w-full sm:w-[150px] hover:bg-white/10 text-white py-4 px-8 text-xs font-semibold tracking-widest transition-all duration-300 transform hover:translate-y-[-2px] uppercase">
-                JEWELRY
-              </button>
-            </Link>
+          {/* CTA Buttons - dynamic */}
+          <div className="w-full">
+            <div className="hidden sm:flex gap-4">
+              {desktopButtons.length ? desktopButtons.map((b, idx) => {
+                const base = b.primary
+                  ? 'bg-[#00736C] w-full !h-[65px] sm:w-[200px] hover:bg-[#005F5B] text-white py-4 px-8 hover:shadow-xl uppercase'
+                  : 'border !h-[65px] border-white/50 backdrop-blur-sm w-full sm:w-[150px] hover:bg-white/10 text-white py-4 px-8 uppercase';
+                const cls = `${base} text-xs font-semibold tracking-widest transition-all duration-300 transform hover:translate-y-[-2px]`;
+                return (
+                  <Link key={idx} href={b.href || '#'} className={cls}>
+                    {b.text}
+                  </Link>
+                );
+              }) : (
+                <>
+                  <Link href="/engagement-rings/build-ring" className="bg-[#00736C] w-full !h-[65px] sm:w-[200px] hover:bg-[#005F5B] text-white py-4 px-8 text-xs font-semibold tracking-widest transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl uppercase">EXPLORE ENGAGEMENT</Link>
+                  <Link href="/shop-all-jewelry" className="border !h-[65px] border-white/50 backdrop-blur-sm w-full sm:w-[150px] hover:bg-white/10 text-white py-4 px-8 text-xs font-semibold tracking-widest transition-all duration-300 transform hover:translate-y-[-2px] uppercase">JEWELRY</Link>
+                </>
+              )}
+            </div>
+
+            <div className="flex sm:hidden flex-col gap-4">
+              {mobileFallback.length ? mobileFallback.map((b, idx) => (
+                <Link key={idx} href={b.href || '#'} className="bg-[#00736C] w-full h-[56px] hover:bg-[#005F5B] text-white py-3 px-6 text-sm font-semibold tracking-widest transition-all duration-300 uppercase flex items-center justify-center">{b.text}</Link>
+              )) : (
+                <Link href="/engagement-rings/build-ring" className="bg-[#00736C] w-full h-[56px] hover:bg-[#005F5B] text-white py-3 px-6 text-sm font-semibold tracking-widest transition-all duration-300 uppercase flex items-center justify-center">EXPLORE ENGAGEMENT</Link>
+              )}
+            </div>
           </div>
+          {/* Carousel controls */}
+          {banners.length > 1 && (
+            <div className="absolute bottom-6 left-6 flex items-center gap-3 z-30">
+              <button
+                onClick={() => setCurrentIndex((p) => (p - 1 + banners.length) % banners.length)}
+                className="w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20"
+                aria-label="Previous"
+              >
+                ‹
+              </button>
+              <div className="flex items-center gap-2">
+                {banners.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentIndex(i)}
+                    className={i === currentIndex ? 'w-2 h-2 rounded-full bg-white' : 'w-2 h-2 rounded-full bg-white/30'}
+                    aria-label={`Go to slide ${i + 1}`}
+                  />
+                ))}
+              </div>
+              <button
+                onClick={() => setCurrentIndex((p) => (p + 1) % banners.length)}
+                className="w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20"
+                aria-label="Next"
+              >
+                ›
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
