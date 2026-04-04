@@ -19,6 +19,11 @@ export async function createProduct(formData, user = null) {
   let product = null;
   const createdResources = [];
 
+  console.log('Create Product called');
+  try {
+    if (formData && typeof formData.get === 'function') console.log('  Received product name:', formData.get('name'));
+  } catch (e) {}
+
   try {
     const data = formData;
 
@@ -36,6 +41,13 @@ export async function createProduct(formData, user = null) {
     // console.log("Parsed product data, including is_diamond:", productData);
     // console.log("Received form data:", itemVariants);
 
+
+    // Step 2: Normalize vendor field (allow null/undefined to be omitted)
+    if (productData && (productData.vendor === null || productData.vendor === undefined)) {
+      delete productData.vendor;
+    } else if (productData && productData.vendor && typeof productData.vendor !== 'string') {
+      productData.vendor = String(productData.vendor);
+    }
 
     // Step 2: Validate product data
     const { error, value } = productCreateValidator.validate(productData);
@@ -175,8 +187,7 @@ export async function createProduct(formData, user = null) {
     let inventoryDetailAttributes = [];
     let shapeTermsMap = new Map(); // Declare outside to use in response mapping
 
-    // console.log("Creating inventory details in batch...");
-    // console.log("Item variants to process:", itemVariants.length);
+    console.log("Creating inventory details in batch... Item variants:", itemVariants.length);
     if (itemVariants.length > 0) {
       const detailsResult = await createInventoryDetailsInBatch(
         product._id,
@@ -696,6 +707,11 @@ export async function updateProduct(id, formData) {
   const startTime = Date.now();
   const updatedResources = [];
 
+  console.log(`Update Product called - id: ${id}`);
+  try {
+    if (formData && typeof formData.get === 'function') console.log('  Received name:', formData.get('name'));
+  } catch (e) {}
+
   try {
     // Step 1: Parse form data
     const { productData, inventoryData, itemVariants } =
@@ -712,6 +728,13 @@ export async function updateProduct(id, formData) {
     // });
     // console.log("Inventory data stock_status:", inventoryData.stock_status);
     // console.log("Inventory data manage_stock:", inventoryData.manage_stock);
+
+    // Step 2: Normalize vendor field for updates
+    if (productData && (productData.vendor === null || productData.vendor === undefined)) {
+      delete productData.vendor;
+    } else if (productData && productData.vendor && typeof productData.vendor !== 'string') {
+      productData.vendor = String(productData.vendor);
+    }
 
     // Step 2: Validate product data
     const { error, value } = productUpdateValidator.validate(productData);
@@ -1643,6 +1666,7 @@ export async function getProductsByAttribute(query) {
 
 export async function getProducts(query, user = null) {
   try {
+    console.log('GET /api/products - query:', query);
     const result = await productService.getAllProducts(query, user);
     return {
       status: 200,
@@ -1663,6 +1687,7 @@ export async function getProducts(query, user = null) {
 
 export async function getProductById(id, slug) {
   try {
+    console.log(`GET /api/product/:id/:slug - id: ${id}, slug: ${slug}`);
     // id is the category slug, slug is the product slug
     const product = await productService.getProductByIdAndSlug(
       id,
@@ -1688,7 +1713,7 @@ export async function getProductById(id, slug) {
 }
 
 export async function deleteProduct(id) {
-  // console.log(`Delete Product called with ID: ${id}`);
+  console.log(`Delete Product called with ID: ${id}`);
   try {
     const deletedProduct = await productService.deleteProduct(id);
     if (!deletedProduct) {

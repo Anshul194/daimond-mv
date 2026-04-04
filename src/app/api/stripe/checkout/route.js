@@ -15,6 +15,7 @@ export async function POST(req) {
       couponDiscount,
       tax,
       tax_id,
+      taxPercent,
     } = await req.json();
 
     console.log("Received data:", {
@@ -25,7 +26,16 @@ export async function POST(req) {
       couponDiscount,
       tax,
       tax_id,
+      taxPercent,
     });
+
+    // Defensive server-side tax computation: if `tax` is falsy or zero, compute from totalAmount and taxPercent
+    const parsedTotal = Number(totalAmount) || 0;
+    const parsedTax = Number(tax) || 0;
+    const parsedTaxPercent = Number(taxPercent) || 0;
+    const effectiveTaxAmount = parsedTax > 0 ? parsedTax : Math.round((parsedTotal * parsedTaxPercent) / 100 * 100) / 100;
+
+    console.log('Computed tax values:', { parsedTotal, parsedTax, parsedTaxPercent, effectiveTaxAmount });
 
     const line_items = cartItems.map((item) => ({
       price_data: {
@@ -45,7 +55,9 @@ export async function POST(req) {
       totalAmount,
       couponCode: couponCode || "N/A",
       couponDiscount: couponDiscount || 0,
-      tax,
+      // Store the effective tax amount and percent computed server-side
+      tax: effectiveTaxAmount,
+      taxPercent: parsedTaxPercent,
       tax_id,
     });
 
@@ -68,9 +80,9 @@ export async function POST(req) {
           price_data: {
             currency: "inr",
             product_data: {
-              name: "Tax (32%)",
+              name: `Tax (${parsedTaxPercent}%)`,
             },
-            unit_amount: Math.round(tax * 100),
+            unit_amount: Math.max(0, Math.round(effectiveTaxAmount * 100)),
           },
           quantity: 1,
         },
@@ -84,6 +96,13 @@ export async function POST(req) {
         order_id: orderSession._id.toString(), // Store order session ID in metadata
       },
     });
+
+    // Save Stripe session id back to orderSession for correlation
+    try {
+      await OrderSession.findByIdAndUpdate(orderSession._id, { sessionId: session.id });
+    } catch (e) {
+      console.warn('Failed to save sessionId to OrderSession:', e.message);
+    }
 
     return Response.json({ id: session.id });
   } catch (error) {

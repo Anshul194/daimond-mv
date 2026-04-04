@@ -254,6 +254,8 @@ const CheckoutPage = () => {
   );
 
   const handlePayment = async () => {
+    console.log('handlePayment invoked');
+
     if (Details.name === "" || Details.email === "" || Details.phone === "") {
       toast.error("Please fill in all required fields.");
       return;
@@ -276,6 +278,13 @@ const CheckoutPage = () => {
     try {
       const stripe = await stripePromise;
 
+      // Defensive tax calculation: if ApplicableTax is not set, fall back to first available tax rate
+      const fallbackTaxPercent = (taxData && taxData.length > 0 && taxData[0].rate) ? taxData[0].rate : 0;
+      const taxPercentToUse = ApplicableTax || fallbackTaxPercent || 0;
+
+      const baseTotal = originalTotal - (couponData?.discount || 0);
+      const computedTaxAmount = ((baseTotal * taxPercentToUse) / 100);
+
       const newCartItems = cartItems.map((item) => ({
         pid_id: item.pid_id,
         pid_name: item.pid_name,
@@ -290,7 +299,13 @@ const CheckoutPage = () => {
       }));
 
       // console.log("calling stripe checkout with items:", newCartItems);
-      // console.log("Coupon data:", couponData?.discount);
+      // Log computed amounts for debugging
+      console.log('Stripe checkout payload:', {
+        baseTotal,
+        taxPercentToUse,
+        computedTaxAmount,
+        couponDiscount: couponData?.discount || 0,
+      });
       // console.log(
       //   "tax value: ",
       //   couponData?.discount
@@ -305,13 +320,11 @@ const CheckoutPage = () => {
         },
         body: JSON.stringify({
           cartItems: newCartItems,
-
-          tax: couponData?.discount
-            ? ((originalTotal - couponData?.discount || 0) * ApplicableTax) /
-              100
-            : (originalTotal * ApplicableTax) / 100,
+          // Send computed tax and percent to server (defensive values)
+          tax: computedTaxAmount,
+          taxPercent: taxPercentToUse,
           tax_id: ApplicableTaxId,
-          totalAmount: originalTotal - (couponData?.discount || 0),
+          totalAmount: baseTotal,
           couponCode: couponApplied ? couponData.coupon.code : null,
           couponDiscount: couponApplied ? couponData.discount : 0,
           customerDetails: {
@@ -327,12 +340,22 @@ const CheckoutPage = () => {
         }),
       });
 
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        const text = await res.text();
+        console.error('Non-JSON response from /api/stripe/checkout:', res.status, text);
+        throw new Error('Invalid response from payment server');
+      }
 
-      if (data.id) {
+      console.log('Stripe response:', res.status, data);
+
+      if (data && data.id) {
         await stripe.redirectToCheckout({ sessionId: data.id });
       } else {
-        throw new Error(data.error || "Stripe session creation failed");
+        console.error('Stripe session creation failed', data);
+        throw new Error(data?.error || "Stripe session creation failed");
       }
     } catch (error) {
       // console.error(error);
@@ -555,11 +578,8 @@ const CheckoutPage = () => {
                   <div className="space-y-3 mb-6">
                     <div className="space-y-4 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
                       {cartItems.map((item, index) => (
-                        <div key={item.pid_id} className="border-black last:border-b-0">
-                          <div
-                            key={`${item.pid_id}-product`}
-                            className="flex items-center space-x-4 pb-4 last:pb-0"
-                          >
+                        <div key={`${item.pid_id}-${index}`} className="border-black last:border-b-0">
+                          <div className="flex items-center space-x-4 pb-4 last:pb-0">
                             <img
                               src={item.pid_image}
                               alt={item.title}
@@ -777,6 +797,7 @@ const CheckoutPage = () => {
                     </div>
                   </div>
                   <button
+                    type="button"
                     onClick={handlePayment}
                     disabled={processingPayment}
                     className="w-full bg-black text-white py-3 rounded-lg font-medium hover:bg-[#004643] transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-[#004643]/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"

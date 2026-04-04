@@ -45,25 +45,35 @@ export async function createBrand(form, admin = null) {
       }
     }
 
-    // Always set vendor field from admin if vendor, or allow superadmin to set or leave null
-    let vendorId = null;
-
-    // console?.log("aDMIN", admin)
+    // Always set vendor field from admin if vendor, or allow superadmin to set or omit
+    let vendorId = undefined;
 
     if (admin && admin.role == 'vendor') {
       vendorId = admin._id.toString();
     } else if (admin && admin.role == 'superadmin') {
-      // Allow superadmin to set vendor or leave null
-      vendorId = form.get('vendor') || null;
+      // Allow superadmin to set vendor or leave it unset/empty
+      const v = form.get('vendor');
+      if (v !== null && v !== undefined && v !== '') {
+        // Support special keyword 'own' to assign vendor to the requester
+        if (typeof v === 'string' && v.trim().toLowerCase() === 'own') {
+          vendorId = admin._id.toString();
+        } else {
+          vendorId = typeof v === 'string' ? v : String(v);
+        }
+      } else {
+        vendorId = undefined;
+      }
     }
 
-    const { error, value } = brandCreateValidator.validate({
+    const payload = {
       name,
       title,
       description,
       logo: logoUrl,
-      vendor: vendorId,
-    });
+    };
+    if (vendorId !== undefined) payload.vendor = vendorId;
+
+    const { error, value } = brandCreateValidator.validate(payload);
 
     if (error) {
       return {
@@ -139,7 +149,7 @@ export async function getBrandById(id) {
   }
 }
 
-export async function updateBrand(id, data) {
+export async function updateBrand(id, data, admin = null) {
   try {
     let logoUrl = '';
     const { logo, ...fields } = data;
@@ -157,11 +167,26 @@ export async function updateBrand(id, data) {
     }
 
     const cleanedFields = Object.entries(fields).reduce((acc, [key, value]) => {
-      if (value !== '') acc[key] = value;
+      if (value !== '' && value !== null && value !== undefined) acc[key] = value;
       return acc;
     }, {});
 
     const payload = logoUrl ? { ...cleanedFields, logo: logoUrl } : cleanedFields;
+
+    // Normalize vendor if present
+    if (payload.vendor !== undefined && payload.vendor !== null) {
+      if (typeof payload.vendor === 'string' && payload.vendor.trim().toLowerCase() === 'own') {
+        // set to requesting admin's id when 'own' is provided
+        if (admin && (admin._id || admin.id)) {
+          payload.vendor = (admin._id || admin.id).toString();
+        } else {
+          // no admin context - remove vendor to avoid validation errors
+          delete payload.vendor;
+        }
+      } else if (typeof payload.vendor !== 'string') {
+        payload.vendor = String(payload.vendor);
+      }
+    }
 
     const { error, value } = brandUpdateValidator.validate(payload);
     if (error) {

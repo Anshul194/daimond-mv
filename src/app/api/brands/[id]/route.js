@@ -44,7 +44,7 @@ export async function PUT(request, context) {
       logo: form.get('logo') || null,
     };
 
-    const result = await updateBrand(id, data);
+    const result = await updateBrand(id, data, admin);
     return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
     console.error('PUT /brands/:id error:', err);
@@ -62,8 +62,7 @@ export async function DELETE(request, context) {
     if (authResult.error) return authResult.error;
 
     const { user: admin } = authResult;
-    const { params } = await context;
-
+    const params = await context.params;
 
     if (!params || !params.id) {
       return NextResponse.json({ success: false, message: 'ID param missing' }, { status: 400 });
