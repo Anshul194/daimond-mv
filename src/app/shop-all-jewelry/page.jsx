@@ -473,10 +473,16 @@ const ShopAllJewelry = () => {
       // // console.warn(`Category "${categoryName}" has no ID and cannot be filtered`);
       return; // Prevent clicking items with no ID
     }
-    // // console.log(`Category clicked: ${categoryName} (ID: ${categoryId})`);
+    console.log(`Category clicked: ${categoryName} (ID: ${categoryId})`);
     // Always set the selected category (don't toggle off)
     setSelectedCategory(categoryId);
+    // Open the filter modal immediately so users see filter options for this category
+    setShowFilterModal(true);
   };
+
+  useEffect(() => {
+    console.log('showFilterModal changed ->', showFilterModal);
+  }, [showFilterModal]);
 
   const handlePageChange = () => {
     const nextPage = currentPage + 1;

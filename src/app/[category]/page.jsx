@@ -61,18 +61,23 @@ const RingsBuild = ({ props }) => {
   // console.log("Pagination:", pagination);
 
   const getData = async () => {
-    if (categories.length === 0) {
+    // Ensure we have categories; use the dispatch result immediately to avoid a race
+    let currentCats = categories;
+    if (!currentCats || currentCats.length === 0) {
       try {
-        await dispatch(fetchCategories());
+        const res = await dispatch(fetchCategories());
+        currentCats = res.payload || [];
       } catch (error) {
         // console.error("Error fetching categories:", error);
+        currentCats = [];
       }
     }
 
-    const findCategory = categories.find(
+    const findCategory = currentCats.find(
       (cat) => cat.slug === location.slice(1).split("/")[0]
     );
     const categoryID = findCategory ? findCategory._id : null;
+    console.log('Resolved category slug ->', location.slice(1).split('/')[0], 'categoryID ->', categoryID);
     // console.log("categories", categories);
     // console.log(
     //   "findCategory",
@@ -147,13 +152,14 @@ const RingsBuild = ({ props }) => {
         setCurrentCategoryData(subcategories.data.body.data);
       } else {
         setCurrentCategoryData(findCategory);
-        await dispatch(
+        const res = await dispatch(
           fetchProductsByCategory({
             categoryId: categoryID,
             gender: gender ? gender : "both",
             attributeFilter,
           })
         );
+        console.log('fetchProductsByCategory result ->', res);
       }
     }
 

@@ -124,6 +124,11 @@ const productSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    featured: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
     deletedAt: {
       type: Date,
       default: null,

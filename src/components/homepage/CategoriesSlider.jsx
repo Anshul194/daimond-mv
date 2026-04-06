@@ -12,10 +12,11 @@ const SliderBoxTwo = () => {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const sliderRef = useRef(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   const dispatch = useDispatch();
   const {
-    data: categories,
+    data: categories = [],
     status,
     error,
   } = useSelector((state) => state.category);
@@ -45,17 +46,29 @@ const SliderBoxTwo = () => {
 
   useEffect(() => {
     updateItemsPerView();
+    let timeout;
     const handleResize = () => {
-      // Simple debounce
-      let timeout;
       clearTimeout(timeout);
       timeout = setTimeout(updateItemsPerView, 100);
     };
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      clearTimeout(timeout);
+    };
   }, [updateItemsPerView]);
 
   const maxSlides = Math.max(0, categories.length - itemsPerView);
+
+  // Autoplay: advance slides automatically, pause on hover or drag
+  useEffect(() => {
+    if (maxSlides <= 0) return;
+    if (isPaused || isDragging) return;
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev >= maxSlides ? 0 : prev + 1));
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [isPaused, isDragging, maxSlides]);
 
   const nextSlide = useCallback(() => {
     if (currentSlide < maxSlides) {
@@ -165,7 +178,7 @@ const SliderBoxTwo = () => {
       </div>
 
       {/* Slider Container */}
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden" onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)}>
         <div
           ref={sliderRef}
           className={`flex transition-transform duration-500 ease-in-out ${isDragging ? "cursor-grabbing" : "cursor-grab"
@@ -232,6 +245,50 @@ const SliderBoxTwo = () => {
             </Link>
           ))}
         </div>
+        {/* Navigation Arrows */}
+        {currentSlide < maxSlides && (
+          <button
+            onClick={nextSlide}
+            className="absolute right-5 top-2/4 transform -translate-y-2/3 translate-x-4 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200 z-10"
+            aria-label="Next slide"
+          >
+            <svg
+              className="w-6 h-6 text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+        )}
+
+        {currentSlide > 0 && (
+          <button
+            onClick={prevSlide}
+            className="absolute left-5 top-2/4 transform -translate-y-2/3 -translate-x-4 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200 z-10"
+            aria-label="Previous slide"
+          >
+            <svg
+              className="w-6 h-6 text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );

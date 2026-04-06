@@ -170,6 +170,9 @@ const baseProductSchema = {
    is_diamond: Joi.boolean().default(false).messages({
     "boolean.base": "Is diamond must be a boolean.",
   }),
+  featured: Joi.boolean().default(false).messages({
+    "boolean.base": "Featured must be a boolean.",
+  }),
 };
 
 // 🎯 Create Validator
@@ -200,6 +203,7 @@ export const productCreateValidator = Joi.object({
   taxClass: baseProductSchema.taxClass,
   gender: baseProductSchema.gender,
   is_diamond: baseProductSchema.is_diamond,
+  featured: baseProductSchema.featured,
 });
 
 // 🎯 Update Validator (all fields optional for updates)
@@ -230,4 +234,5 @@ export const productUpdateValidator = Joi.object({
   taxClass: baseProductSchema.taxClass.optional(),
   gender: baseProductSchema.gender,
   is_diamond: baseProductSchema.is_diamond.optional(),
+  featured: baseProductSchema.featured.optional(),
 });

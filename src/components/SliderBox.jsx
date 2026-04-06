@@ -18,6 +18,7 @@ const SliderBox = ({
   categoryId = null, // Required when type is "products"
   title = "Shop Lab Diamond Engagement Rings by Style",
   subtitle = "Discover our signature setting styles, including solitaire, trilogy, halo, toi et moi and bezel.",
+  featured = false,
   ...otherProps
 }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -73,7 +74,13 @@ const SliderBox = ({
   // Fetch data on mount based on type
   useEffect(() => {
     if (type === "products" && categoryId) {
-      dispatch(fetchProductsByCategory(categoryId));
+      // Build payload object expected by the thunk
+      const payload = typeof categoryId === "string" ? { categoryId } : { ...categoryId };
+      // If this slider is the featured block, request only featured products
+      if (featured === true || (title && title.toLowerCase().includes("featured"))) {
+        payload.featured = true;
+      }
+      dispatch(fetchProductsByCategory(payload));
     } else if (type === "styles") {
       dispatch(fetchAttributesByTitle());
     }

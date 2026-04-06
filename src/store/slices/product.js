@@ -61,6 +61,11 @@ export const fetchProductsByCategory = createAsyncThunk(
         params.append("in_stock", "yes");
       }
 
+      // Add featured filter when requested
+      if (data.featured === true || data.featured === "true") {
+        params.append("featured", "true");
+      }
+
       // Add page parameter
       if (data.page) {
         params.append("page", data.page);

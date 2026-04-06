@@ -11,7 +11,8 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request, { params }) {
   await dbConnect();
-  const result = await getBlogById(params.id);
+  const p = await params;
+  const result = await getBlogById(p.id);
   return NextResponse.json(result.body, { status: result.status });
 }
 
@@ -21,8 +22,9 @@ export async function PUT(request, { params }) {
   const authResult = await verifyAdminAccess(request);
   if (authResult.error) return authResult.error;
 
+  const p = await params;
   const form = await request.formData();
-  const result = await updateBlog(params.id, form);
+  const result = await updateBlog(p.id, form);
 
   return NextResponse.json(result.body, { status: result.status });
 }
@@ -33,6 +35,7 @@ export async function DELETE(request, { params }) {
   const authResult = await verifyAdminAccess(request);
   if (authResult.error) return authResult.error;
 
-  const result = await deleteBlog(params.id);
+  const p = await params;
+  const result = await deleteBlog(p.id);
   return NextResponse.json(result.body, { status: result.status });
 }

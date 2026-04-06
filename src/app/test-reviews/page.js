@@ -3,7 +3,7 @@ import Reviews from "@/components/homepage/Reviews";
 
 export default function TestReviewsPage() {
     // Testing with a sample category/product ID from your featured section
-    const testProductId = "6854fc895e53f236d75c07af";
+    const testProductId = "6965f0e64b452b08aeeb4b11";
 
     return (
         <div className="py-20">

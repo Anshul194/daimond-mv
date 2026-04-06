@@ -12,21 +12,31 @@ export async function GET(request, { params }) {
 
     const { categoryId } = resolvedParams || {};
     
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-access-token, x-refresh-token, cache-control, pragma, expires, if-modified-since'
+    };
+
     if (!categoryId) {
       return NextResponse.json(
         { success: false, message: 'categoryId is required' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
     // console.log('GET /blog-subcategory/by-category - categoryId:', categoryId);
     const result = await getSubCategoriesByCategoryId(categoryId);
-    // console.log('GET /blog-subcategory/by-category - Result:', { status: result.status });
 
-    return NextResponse.json(result.body, { status: result.status });
+    return NextResponse.json(result.body, { status: result.status, headers: corsHeaders });
   } catch (err) {
     // console.error('Route error:', err);
     // console.error('Route error stack:', err.stack);
-    return NextResponse.json({ success: false, message: err.message || 'Internal server error' }, { status: 500 });
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-access-token, x-refresh-token, cache-control, pragma, expires, if-modified-since'
+    };
+    return NextResponse.json({ success: false, message: err.message || 'Internal server error' }, { status: 500, headers: corsHeaders });
   }
 }

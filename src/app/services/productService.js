@@ -212,6 +212,9 @@ class ProductService {
       if (data.is_diamond !== undefined)
         updatedData.is_diamond = data.is_diamond;
 
+      // Ensure 'featured' flag from update payload is applied
+      if (data.featured !== undefined) updatedData.featured = data.featured;
+
       // Handle taxClass based on isTaxable
       if (data.isTaxable !== undefined) {
         if (data.isTaxable === true || data.taxClass !== undefined) {
@@ -560,6 +563,7 @@ class ProductService {
         sort_by,
         attribute_filters,
         gender,
+        featured,
       } = queryObj;
 
       // Log all query parameters for debugging
@@ -653,6 +657,15 @@ class ProductService {
       }
       // Merge in any additional filters
       Object.assign(filterConditions, parsedFilters);
+
+      // Handle featured filter if provided
+      if (featured !== undefined && featured !== null) {
+        if (featured === "true" || featured === true) {
+          filterConditions.featured = true;
+        } else if (featured === "false" || featured === false) {
+          filterConditions.featured = false;
+        }
+      }
 
       // Handle gender filter
       if (gender && gender !== 'both') {

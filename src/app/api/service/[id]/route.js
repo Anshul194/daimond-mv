@@ -6,7 +6,7 @@ import { verifyAdminAccess } from '../../../middlewares/commonAuth.js';
 export async function GET(request, { params }) {
     try {
         await dbConnect();
-        const { id } = params;
+        const { id } = await params;
         const result = await getServiceById(id);
         return NextResponse.json(result.body, { status: result.status });
     } catch (err) {
@@ -20,7 +20,7 @@ export async function PUT(request, { params }) {
         const authResult = await verifyAdminAccess(request);
         if (authResult.error) return authResult.error;
 
-        const { id } = params;
+        const { id } = await params;
         const result = await updateService(id, request);
         return NextResponse.json(result.body, { status: result.status });
     } catch (err) {
@@ -34,7 +34,7 @@ export async function DELETE(request, { params }) {
         const authResult = await verifyAdminAccess(request);
         if (authResult.error) return authResult.error;
 
-        const { id } = params;
+        const { id } = await params;
         const result = await deleteService(id);
         return NextResponse.json(result.body, { status: result.status });
     } catch (err) {

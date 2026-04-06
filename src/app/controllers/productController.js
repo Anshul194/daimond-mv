@@ -290,6 +290,7 @@ export async function createProduct(formData, user = null) {
       isTaxable: product.isTaxable,
       taxClass: product.taxClass,
       is_diamond: product.is_diamond,
+      featured: product.featured || false,
       deleted_at: product.deleted_at,
       _id: product._id,
       created_at: product.created_at,
@@ -437,6 +438,14 @@ async function parseFormData(data) {
     isTaxable: data.get("isTaxable"),
     taxClass: data.get("taxClass"),
   };
+
+  // Parse `featured` flag from form data if provided
+  try {
+    const featuredRaw = data.get && data.get("featured");
+    if (featuredRaw !== null && featuredRaw !== undefined) {
+      productData.featured = featuredRaw === "true" || featuredRaw === true;
+    }
+  } catch (e) {}
 
   const inventoryData = {
     sku: data.get("sku"),
@@ -999,6 +1008,7 @@ export async function updateProduct(id, formData) {
       isTaxable: updatedProduct.isTaxable,
       taxClass: updatedProduct.taxClass,
       is_diamond: updatedProduct.is_diamond,
+      featured: updatedProduct.featured || false,
       deleted_at: updatedProduct.deleted_at,
       _id: updatedProduct._id,
       created_at: updatedProduct.created_at,
@@ -1247,6 +1257,9 @@ async function parseUpdateFormData(data) {
     // Added is_diamond parsing
     is_diamond: data.get("is_diamond")
       ? data.get("is_diamond") === "true"
+      : undefined,
+    featured: data.get("featured")
+      ? data.get("featured") === "true"
       : undefined,
   };
 

@@ -42,12 +42,14 @@ export default function Home() {
 
       <SliderBox
         type="products"
-        categoryId="6854fc895e53f236d75c07af"
+        categoryId="6965f0e64b452b08aeeb4b11"
         title="Featured Engagement Rings"
+        featured={true}
         subtitle="Shop from our range of lab diamond, coloured sapphire and moissanite engagement rings."
         className="bg-gray-50"
         style={{ marginBottom: "2rem" }}
       />
+
       <Collections className="!flex-row" />
       <SliderBoxTwo />
       <Collections className="!flex-row-reverse" />
