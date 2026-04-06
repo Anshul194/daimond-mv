@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Filter from "./Filter";
 import RingsGrid from "@/components/RingGrid";
 import Modal from "@/components/modal/Modal";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "@/store/slices/categorySlice";
 import {
@@ -27,6 +27,7 @@ const RingsBuild = ({ props }) => {
   const [currentCategoryData, setCurrentCategoryData] = useState(null);
   const [getAttribute, setGetAttribute] = useState(null);
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const shape = searchParams.get("shape");
   const style = searchParams.get("style");
@@ -95,12 +96,20 @@ const RingsBuild = ({ props }) => {
       "BAND",
     ];
 
-    // Use Promise.all to fetch all attributes in parallel
+    // Use Promise.all to fetch all attributes in parallel. If categoryID is not available,
+    // fetch attribute terms globally (without category filter) so the Filter can still render.
     const responses = await Promise.all(
       attributes.map((attribute) => {
+        const filterObj = categoryID
+          ? { category_id: categoryID, title: attribute }
+          : { title: attribute };
+        const filterStr = JSON.stringify(filterObj).replace(/"/g, '\"');
         return axiosInstance.get(
-          `/api/productattribute?filters={"category_id":"${categoryID}","title":"${attribute}"}`
-        );
+          `/api/productattribute?filters={"title":"${attribute}"}${categoryID ? `&categoryId=${categoryID}` : ''}`
+        ).catch((err) => {
+          // If the endpoint doesn't support the above query, try a fallback without category filter
+          return axiosInstance.get(`/api/productattribute?filters={"title":"${attribute}"}`);
+        });
       })
     );
 
