@@ -4,11 +4,11 @@ import Joi from 'joi';
 const baseSizeSchema = {
   name: Joi.string()
     .trim()
-    .min(2)
+    .min(1)
     .max(100)
     .messages({
       'string.empty': 'Size name is required.',
-      'string.min': 'Size name must be at least 2 characters.',
+      'string.min': 'Size name must be at least 1 character.',
       'string.max': 'Size name must be at most 100 characters.'
     }),
 
