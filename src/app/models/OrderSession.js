@@ -15,8 +15,7 @@ const OrderSessionSchema = new mongoose.Schema(
         pid_price: Number,
         quantity: Number,
         selectedOptions: {
-          ringSize: String,
-          metalType: String,
+          type: mongoose.Schema.Types.Mixed,
         },
         selectedDiamond: {
           type: mongoose.Schema.Types.ObjectId,

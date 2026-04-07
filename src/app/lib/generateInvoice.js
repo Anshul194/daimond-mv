@@ -1,8 +1,6 @@
 import fs from "fs";
 import path from "path";
 import { mkdir } from "fs/promises";
-import puppeteer from "puppeteer";
-import PDFDocument from "pdfkit";
 
 // Generates a PDF invoice using HTML and saves it to public/invoice
 //        customerData: orderSession.customerDetails,
@@ -333,6 +331,7 @@ export default async function generateInvoicePdf(data) {
     }
 
         try {
+            const { default: puppeteer } = await import("puppeteer");
             const browser = await puppeteer.launch(launchOptions);
             const page = await browser.newPage();
 
@@ -347,6 +346,7 @@ export default async function generateInvoicePdf(data) {
 
             // Fallback: generate a simple PDF using PDFKit
             try {
+                const { default: PDFDocument } = await import("pdfkit");
                 const doc = new PDFDocument({ size: "A4", margin: 50 });
                 const stream = fs.createWriteStream(filePath);
                 doc.pipe(stream);

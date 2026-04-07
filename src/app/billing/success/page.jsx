@@ -55,6 +55,7 @@ function SuccessPageContent() {
         email: data.orderData?.customerDetails?.email,
         phone: data.orderData?.customerDetails?.phone,
         payment_gateway: "stripe",
+        payment_status: "paid",
         invoice_number: invoiceNumber,
         orderSessionId: data.orderData._id,
         cart: cartData.map((item) => ({
