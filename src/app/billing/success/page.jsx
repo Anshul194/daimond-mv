@@ -41,7 +41,7 @@ function SuccessPageContent() {
         payment_track: data.session?.payment_intent,
         transaction_id: data.session.id,
         type: "web",
-        user_id: "685d0d7e5646c7440625c5a6",
+        user_id: data.session?.metadata?.user_id || "685d0d7e5646c7440625c5a6",
         shipping_cost: {
           admin: { cost: 50 },
           vendor: [{ vendor_id: "64db8f3a1a823c1e22e2a6e2", cost: 30 }],
@@ -65,9 +65,17 @@ function SuccessPageContent() {
           options: {
             variant_id: "64db8f3a1a823c1e22e2a777",
             type: "product",
-            regular_price: item.amount_total,
+            regular_price: item.pid_price,
             tax_options_sum_rate: 10,
             vendor_id: "64db8f3a1a823c1e22e2a6e2",
+            variant: {
+              size: item.selectedOptions?.ringSize || "",
+              color: item.selectedOptions?.metalType || "",
+              setting_style: item.selectedOptions?.setting_style || "",
+              setting_profile: item.selectedOptions?.setting_profile || "",
+              band_type: item.selectedOptions?.band_type || "",
+              accents: item.selectedOptions?.accents || "",
+            },
           },
         })),
       };
@@ -135,11 +143,11 @@ function SuccessPageContent() {
             <div className="space-y-3">
               <button
                 onClick={() => {
-                  window.location.href = "/";
+                  window.location.href = "/my-orders";
                 }}
                 className="w-full bg-black text-white py-3 rounded-lg font-medium transition-all duration-300"
               >
-                Back To Home
+                Go to My Orders
               </button>
               <button
                 onClick={() => {

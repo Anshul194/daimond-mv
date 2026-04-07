@@ -91,21 +91,69 @@ const Cart = () => {
 
                   {/* Product Details - Compact */}
                   <div className="space-y-1 mb-4 text-start">
-                    <div className="flex items-center mb-1">
-                      <span className="text-gray-600 font-semibold text-[10px]">
-                        metal type:
-                      </span>
-                      <span className="ml-1 text-gray-800 text-[10px]">
-                        {item?.selectedOptions?.metalType?.color?.value}
-                      </span>
-                    </div>
-                    <div className="flex items-center mb-1">
-                      <span className="text-gray-600 font-semibold text-[10px]">
-                        Size
-                      </span>
-                      <span className="ml-1 text-gray-800 text-[10px]">
-                        {item?.selectedOptions?.ringSize?.size_code}
-                      </span>
+                    <div className="flex flex-wrap gap-x-3 gap-y-1">
+                      {item?.selectedOptions?.metalType && (
+                        <div className="flex items-center">
+                          <span className="text-gray-600 font-semibold text-[10px]">
+                            metal type:
+                          </span>
+                          <span className="ml-1 text-gray-800 text-[10px]">
+                            {item?.selectedOptions?.metalType?.color?.value ||
+                              item.selectedOptions.metalType}
+                          </span>
+                        </div>
+                      )}
+                      {item?.selectedOptions?.ringSize && (
+                        <div className="flex items-center">
+                          <span className="text-gray-600 font-semibold text-[10px]">
+                            Size
+                          </span>
+                          <span className="ml-1 text-gray-800 text-[10px]">
+                            {item?.selectedOptions?.ringSize?.size_code ||
+                              item.selectedOptions.ringSize}
+                          </span>
+                        </div>
+                      )}
+                      {item?.selectedOptions?.setting_style && (
+                        <div className="flex items-center">
+                          <span className="text-gray-600 font-semibold text-[10px]">
+                            Style
+                          </span>
+                          <span className="ml-1 text-gray-800 text-[10px]">
+                            {item.selectedOptions.setting_style}
+                          </span>
+                        </div>
+                      )}
+                      {item?.selectedOptions?.setting_profile && (
+                        <div className="flex items-center">
+                          <span className="text-gray-600 font-semibold text-[10px]">
+                            Profile
+                          </span>
+                          <span className="ml-1 text-gray-800 text-[10px]">
+                            {item.selectedOptions.setting_profile}
+                          </span>
+                        </div>
+                      )}
+                      {item?.selectedOptions?.band_type && (
+                        <div className="flex items-center">
+                          <span className="text-gray-600 font-semibold text-[10px]">
+                            Band
+                          </span>
+                          <span className="ml-1 text-gray-800 text-[10px]">
+                            {item.selectedOptions.band_type}
+                          </span>
+                        </div>
+                      )}
+                      {item?.selectedOptions?.accents && (
+                        <div className="flex items-center">
+                          <span className="text-gray-600 font-semibold text-[10px]">
+                            Accents
+                          </span>
+                          <span className="ml-1 text-gray-800 text-[10px]">
+                            {item.selectedOptions.accents}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -142,21 +190,70 @@ const Cart = () => {
                             <h2 className="text-lg font-medium text-gray-800  tracking-wide font-gintoNord">
                               {item.pid_name}
                             </h2>
-                            <div className="flex items-center mb-1">
-                              <span className="text-gray-600 font-semibold text-[10px]">
-                                metal type:
-                              </span>
-                              <span className="ml-1 text-gray-800 text-[10px]">
-                                {item?.selectedOptions?.metalType?.color?.value}
-                              </span>
-                            </div>
-                            <div className="flex items-center mb-1">
-                              <span className="text-gray-600 font-semibold text-[10px]">
-                                Size
-                              </span>
-                              <span className="ml-1 text-gray-800 text-[10px]">
-                                {item?.selectedOptions?.ringSize?.size_code}
-                              </span>
+                            <div className="flex flex-wrap gap-x-3 gap-y-1 mb-1">
+                              {item?.selectedOptions?.metalType && (
+                                <div className="flex items-center">
+                                  <span className="text-gray-600 font-semibold text-[10px]">
+                                    metal type:
+                                  </span>
+                                  <span className="ml-1 text-gray-800 text-[10px]">
+                                    {item?.selectedOptions?.metalType?.color
+                                      ?.value || item.selectedOptions.metalType}
+                                  </span>
+                                </div>
+                              )}
+                              {item?.selectedOptions?.ringSize && (
+                                <div className="flex items-center">
+                                  <span className="text-gray-600 font-semibold text-[10px]">
+                                    Size
+                                  </span>
+                                  <span className="ml-1 text-gray-800 text-[10px]">
+                                    {item?.selectedOptions?.ringSize
+                                      ?.size_code ||
+                                      item.selectedOptions.ringSize}
+                                  </span>
+                                </div>
+                              )}
+                              {item?.selectedOptions?.setting_style && (
+                                <div className="flex items-center">
+                                  <span className="text-gray-600 font-semibold text-[10px]">
+                                    Style
+                                  </span>
+                                  <span className="ml-1 text-gray-800 text-[10px]">
+                                    {item.selectedOptions.setting_style}
+                                  </span>
+                                </div>
+                              )}
+                              {item?.selectedOptions?.setting_profile && (
+                                <div className="flex items-center">
+                                  <span className="text-gray-600 font-semibold text-[10px]">
+                                    Profile
+                                  </span>
+                                  <span className="ml-1 text-gray-800 text-[10px]">
+                                    {item.selectedOptions.setting_profile}
+                                  </span>
+                                </div>
+                              )}
+                              {item?.selectedOptions?.band_type && (
+                                <div className="flex items-center">
+                                  <span className="text-gray-600 font-semibold text-[10px]">
+                                    Band
+                                  </span>
+                                  <span className="ml-1 text-gray-800 text-[10px]">
+                                    {item.selectedOptions.band_type}
+                                  </span>
+                                </div>
+                              )}
+                              {item?.selectedOptions?.accents && (
+                                <div className="flex items-center">
+                                  <span className="text-gray-600 font-semibold text-[10px]">
+                                    Accents
+                                  </span>
+                                  <span className="ml-1 text-gray-800 text-[10px]">
+                                    {item.selectedOptions.accents}
+                                  </span>
+                                </div>
+                              )}
                             </div>
                           </div>
 

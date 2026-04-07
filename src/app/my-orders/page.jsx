@@ -192,7 +192,35 @@ const OrderHistoryPage = () => {
                               <h4 className="font-medium text-gray-900">
                                 {item?.product_id?.name}
                               </h4>
-                              <p className="text-sm text-gray-600">
+                              <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+                                {item?.variant?.size && (
+                                  <span>Size: {item.variant.size}</span>
+                                )}
+                                {item?.variant?.color && (
+                                  <span>Metal: {item.variant.color}</span>
+                                )}
+                                {item?.variant?.shape && (
+                                  <span>Shape: {item.variant.shape}</span>
+                                )}
+                                {item?.variant?.carat && (
+                                  <span>Carat: {item.variant.carat}</span>
+                                )}
+                                {item?.variant?.setting_style && (
+                                  <span>Style: {item.variant.setting_style}</span>
+                                )}
+                                {item?.variant?.setting_profile && (
+                                  <span>
+                                    Profile: {item.variant.setting_profile}
+                                  </span>
+                                )}
+                                {item?.variant?.band_type && (
+                                  <span>Band: {item.variant.band_type}</span>
+                                )}
+                                {item?.variant?.accents && (
+                                  <span>Accents: {item.variant.accents}</span>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-600 mt-1">
                                 Quantity: {item?.quantity}
                               </p>
                             </div>

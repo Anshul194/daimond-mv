@@ -125,6 +125,7 @@ const CheckoutPage = () => {
   } = useSelector((state) => state.region); // Access region state
   const couponState = useSelector((state) => state.coupon);
   const checkoutState = useSelector((state) => state.checkout);
+  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     dispatch(fetchCart()); // Fetch cart items on mount
@@ -291,10 +292,20 @@ const CheckoutPage = () => {
         pid_image: item.pid_image,
         pid_price: item.pid_price,
         quantity: item.quantity,
-        selectedOptions: item.selectedOptions ? {
-          ringSize: item.selectedOptions.ringSize?._id || item.selectedOptions.ringSize,
-          metalType: item.selectedOptions.metalType?._id || item.selectedOptions.metalType,
-        } : null,
+        selectedOptions: item.selectedOptions
+          ? {
+              ringSize:
+                item.selectedOptions.ringSize?._id ||
+                item.selectedOptions.ringSize,
+              metalType:
+                item.selectedOptions.metalType?._id ||
+                item.selectedOptions.metalType,
+              setting_style: item.selectedOptions.setting_style,
+              setting_profile: item.selectedOptions.setting_profile,
+              band_type: item.selectedOptions.band_type,
+              accents: item.selectedOptions.accents,
+            }
+          : null,
         selectedDiamond: item?.selectedDiamond?._id,
       }));
 
@@ -325,6 +336,7 @@ const CheckoutPage = () => {
           taxPercent: taxPercentToUse,
           tax_id: ApplicableTaxId,
           totalAmount: baseTotal,
+          user_id: user?._id || user?.id,
           couponCode: couponApplied ? couponData.coupon.code : null,
           couponDiscount: couponApplied ? couponData.discount : 0,
           customerDetails: {
