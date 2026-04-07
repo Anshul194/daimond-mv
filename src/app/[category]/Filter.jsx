@@ -145,13 +145,13 @@ const JewelryFilter = ({ Data }) => {
     return (
       <div className="w-full max-w-7xl mx-auto p-6 bg-white">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {Data?.Style && Data?.Style.length > 0 && (
+          {Data?.["SETTING"] && Data?.["SETTING"].length > 0 && (
             <div className="">
               <h3 className="text-xs font-medium text-gray-600 tracking-wide font-gintoNord mb-4">
-                SETTING STYLE ?
+                SETTING ?
               </h3>
               <div className="flex w-full overflow-x-scroll">
-                {Data?.Style?.map((profile, index) => (
+                {Data?.["SETTING"]?.map((profile, index) => (
                   <div
                     key={profile._id || profile.id || `style-${index}`}
                     onClick={() =>
@@ -408,13 +408,13 @@ const JewelryFilter = ({ Data }) => {
       {/* Bottom Three Sections Row */}
       <div className="grid grid-cols-1 lg:grid-cols-6 gap-6 mb-8">
         {/* Setting Style - take 3 out of 6 columns (half) */}
-        {Data?.Style && Data?.Style.length > 0 && (
+        {Data?.["SETTING"] && Data?.["SETTING"].length > 0 && (
           <div className="lg:col-span-3 w-fit">
             <h3 className="text-[10px] font-medium text-gray-600 tracking-wide font-gintoNord mb-4">
               SETTING STYLE ?
             </h3>
             <div className="flex max-sm:w-[90vw] max-sm:overflow-x-auto">
-              {Data?.Style?.map((profile, index) => (
+              {Data?.["SETTING"]?.map((profile, index) => (
                 <div
                   key={profile._id || profile.id || `style-${index}`}
                   onClick={() => handleStyleSelect(profile.value.toLowerCase())}
@@ -496,13 +496,13 @@ const JewelryFilter = ({ Data }) => {
         )}
 
         {/* Setting Profile - take 1 out of 6 columns */}
-        {Data?.["SETTING"] && Data?.["SETTING"].length > 0 && (
+        {Data?.["SETTING PROFILE"] && Data?.["SETTING PROFILE"].length > 0 && (
           <div className="lg:col-span-1">
             <h3 className="text-[10px] font-medium text-gray-600 tracking-wide font-gintoNord mb-4">
               SETTING PROFILE ?
             </h3>
             <div className="flex gap-4">
-              {Data?.["SETTING"]?.map((profile, index) => (
+              {Data?.["SETTING PROFILE"]?.map((profile, index) => (
                 <div
                   key={profile._id || profile.id || `setting-${index}`}
                   onClick={() =>

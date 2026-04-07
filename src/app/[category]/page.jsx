@@ -90,10 +90,10 @@ const RingsBuild = ({ props }) => {
 
     const attributes = [
       "Shape",
-      "Style",
       "METAL TYPE",
       "BAND TYPE",
       "SETTING",
+      "SETTING PROFILE",
       "BAND",
       "ACCENTS",
     ];
