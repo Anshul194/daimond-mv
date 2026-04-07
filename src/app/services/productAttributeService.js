@@ -51,20 +51,19 @@ class ProductAttributeService {
       const filterConditions = { deletedAt: null };
 
       // Include global attributes (vendor: null) when filtering by vendor
-      if (queryObj.vendor) {
+      if (queryObj.vendor && /^[0-9a-fA-F]{24}$/.test(queryObj.vendor)) {
         filterConditions.$and = filterConditions.$and || [];
         filterConditions.$and.push({
           $or: [
             { vendor: queryObj.vendor },
             { vendor: null },
-            { vendor: "" },
             { vendor: { $exists: false } }
           ]
         });
       }
 
       // Support direct id filtering
-      if (queryObj.id) {
+      if (queryObj.id && /^[0-9a-fA-F]{24}$/.test(queryObj.id)) {
         filterConditions._id = queryObj.id;
       }
 
