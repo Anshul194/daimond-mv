@@ -10,6 +10,7 @@ const JewelryFilter = ({ Data }) => {
   const [selectedSetting, setSelectedSetting] = useState("");
   const [selectedBand, setSelectedBand] = useState("");
   const [selectedProfile, setSelectedProfile] = useState("");
+  const [selectedAccents, setSelectedAccents] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
   const [twoTone, setTwoTone] = useState(false);
   const [shapeStartIndex, setShapeStartIndex] = useState(0);
@@ -100,6 +101,16 @@ const JewelryFilter = ({ Data }) => {
     }
   };
 
+  const handleAccentsSelect = (id) => {
+    if (id === selectedAccents) {
+      setSelectedAccents("");
+      updateQuery("accents", "");
+    } else {
+      setSelectedAccents(id);
+      updateQuery("accents", id);
+    }
+  };
+
   const handleGenderSelect = (id) => {
     if (id === selectedGender) {
       setSelectedGender("");
@@ -118,6 +129,7 @@ const JewelryFilter = ({ Data }) => {
     const profile = searchParams.get("profile")?.toLowerCase();
     const style = searchParams.get("style")?.toLowerCase();
     const band = searchParams.get("band")?.toLowerCase();
+    const accentsFilter = searchParams.get("accents")?.toLowerCase();
     const gender = searchParams.get("gender")?.toLowerCase();
 
     if (shape) setSelectedShape(shape);
@@ -125,6 +137,7 @@ const JewelryFilter = ({ Data }) => {
     if (profile) setSelectedProfile(profile);
     if (style) setSelectedSetting(style);
     if (band) setSelectedBand(band);
+    if (accentsFilter) setSelectedAccents(accentsFilter);
     if (gender) setSelectedGender(gender);
   }, [Data]);
 
@@ -158,7 +171,7 @@ const JewelryFilter = ({ Data }) => {
                       } rounded`}
                     >
                       <img
-                        src={profile.image}
+                        src={profile.image || null}
                         alt={profile.value}
                         className="w-12 h-8 object-contain brightness-0"
                         onError={(e) => {
@@ -206,7 +219,7 @@ const JewelryFilter = ({ Data }) => {
                     }`}
                   >
                     <img
-                      src={metal.image}
+                      src={metal.image || null}
                       className={`w-10 h-10 rounded-full mb-2 border-2 ${
                         selectedMetal === metal.value.toLowerCase()
                           ? "border-gray-400"
@@ -298,7 +311,7 @@ const JewelryFilter = ({ Data }) => {
                       }`}
                     >
                       <img
-                        src={shape.image}
+                        src={shape.image || null}
                         alt={shape.value}
                         className="w-8 h-8 brightness-0 object-contain"
                         onError={(e) => {
@@ -375,7 +388,7 @@ const JewelryFilter = ({ Data }) => {
                   }`}
                 >
                   <img
-                    src={metal.image}
+                    src={metal.image || null}
                     className={`w-10 h-10 rounded-full mb-2 border-2 ${
                       selectedMetal === metal.value.toLowerCase()
                         ? "border-gray-400"
@@ -419,7 +432,7 @@ const JewelryFilter = ({ Data }) => {
                     } rounded`}
                   >
                     <img
-                      src={profile.image}
+                      src={profile.image || null}
                       alt={profile.value}
                       className="w-12 h-8 object-contain brightness-0"
                       onError={(e) => {
@@ -463,7 +476,7 @@ const JewelryFilter = ({ Data }) => {
                     } rounded`}
                   >
                     <img
-                      src={band.image}
+                      src={band.image || null}
                       alt={band.value}
                       className="w-12 h-6 object-contain brightness-0"
                       onError={(e) => {
@@ -482,7 +495,7 @@ const JewelryFilter = ({ Data }) => {
           </div>
         )}
 
-        {/* Setting Profile - take 1.5 out of 6 columns */}
+        {/* Setting Profile - take 1 out of 6 columns */}
         {Data?.["SETTING"] && Data?.["SETTING"].length > 0 && (
           <div className="lg:col-span-1">
             <h3 className="text-[10px] font-medium text-gray-600 tracking-wide font-gintoNord mb-4">
@@ -509,7 +522,7 @@ const JewelryFilter = ({ Data }) => {
                     } rounded`}
                   >
                     <img
-                      src={profile.image}
+                      src={profile.image || null}
                       alt={profile.value}
                       className="w-12 h-8 object-contain brightness-0"
                       onError={(e) => {
@@ -521,6 +534,52 @@ const JewelryFilter = ({ Data }) => {
                   </div>
                   <span className="text-[10px] font-medium text-gray-700 text-center font-gintoNord whitespace-nowrap font-gintoNord">
                     {profile.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Accents - take 1 out of 6 columns */}
+        {Data?.["ACCENTS"] && Data?.["ACCENTS"].length > 0 && (
+          <div className="lg:col-span-1">
+            <h3 className="text-[10px] font-medium text-gray-600 tracking-wide font-gintoNord mb-4">
+              ACCENTS ?
+            </h3>
+            <div className="flex gap-4">
+              {Data?.["ACCENTS"]?.map((accent, index) => (
+                <div
+                  key={accent._id || accent.id || `accent-${index}`}
+                  onClick={() =>
+                    handleAccentsSelect(accent.value.toLowerCase())
+                  }
+                  className={`flex flex-col items-center cursor-pointer p-3 rounded-lg transition-all min-w-[100px] ${
+                    selectedAccents === accent.value.toLowerCase()
+                      ? "bg-gray-100"
+                      : "hover:bg-gray-50"
+                  }`}
+                >
+                  <div
+                    className={`w-16 h-12 flex items-center justify-center mb-2 border ${
+                      selectedAccents === accent.value.toLowerCase()
+                        ? "border-gray-400 bg-white"
+                        : "border-gray-200"
+                    } rounded`}
+                  >
+                    <img
+                      src={accent.image || null}
+                      alt={accent.value}
+                      className="w-12 h-8 object-contain brightness-0"
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                        e.target.nextSibling.style.display = "block";
+                      }}
+                    />
+                    <div className="w-12 h-6 bg-gray-300 rounded-sm hidden"></div>
+                  </div>
+                  <span className="text-[10px] font-medium text-gray-700 text-center font-gintoNord whitespace-nowrap font-gintoNord">
+                    {accent.value}
                   </span>
                 </div>
               ))}

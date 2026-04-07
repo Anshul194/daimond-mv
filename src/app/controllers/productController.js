@@ -342,6 +342,19 @@ export async function createProduct(formData, user = null) {
           // Use metal attribute value if found, otherwise use color field
           const metalType = metalAttr?.value || detail.color || null;
 
+          const settingStyleAttr = detailAttributes.find(attr =>
+            (attr.name || "").toLowerCase() === "setting style"
+          );
+          const settingProfileAttr = detailAttributes.find(attr =>
+            (attr.name || "").toLowerCase() === "setting profile"
+          );
+          const bandTypeAttr = detailAttributes.find(attr =>
+            (attr.name || "").toLowerCase() === "band type"
+          );
+          const accentsAttr = detailAttributes.find(attr =>
+            (attr.name || "").toLowerCase() === "accent"
+          );
+
           // Get shape image from pre-fetched shape terms map
           let shapeImage = null;
           if (shapeAttr?.value && shapeTermsMap.size > 0) {
@@ -369,6 +382,10 @@ export async function createProduct(formData, user = null) {
             shape_image: shapeImage,
             carat: caratAttr?.value || null,
             metal_type: metalType,
+            setting_style: settingStyleAttr?.value || null,
+            setting_profile: settingProfileAttr?.value || null,
+            band_type: bandTypeAttr?.value || null,
+            accents: accentsAttr?.value || null,
             additional_price: detail.additional_price,
             extra_cost: detail.add_cost || detail.extra_cost || 0,
             stock_count: detail.stock_count,
@@ -455,7 +472,7 @@ async function parseFormData(data) {
     lowStockThreshold: parseInt(data.get("lowStockThreshold")) || 5,
   };
 
-  const itemVariants = [];
+  let itemVariants = [];
 
   // Helper function to get values from form data with bracket notation (e.g., item_size[0], item_size[1])
   const getBracketNotationValues = (baseName) => {
@@ -486,7 +503,10 @@ async function parseFormData(data) {
   const itemColors = getBracketNotationValues("item_color");
   const itemShapes = getBracketNotationValues("item_shape");
   const itemCarats = getBracketNotationValues("item_carat");
-  // Read additional_price and extra_cost separately (they are different fields)
+  const itemSettingStyles = getBracketNotationValues("item_setting_style");
+  const itemSettingProfiles = getBracketNotationValues("item_setting_profile");
+  const itemBandTypes = getBracketNotationValues("item_band_type");
+  const itemAccents = getBracketNotationValues("item_accent");
   const itemAdditionalPrices = getBracketNotationValues("item_additional_price");
   const itemExtraCosts = getBracketNotationValues("item_extra_cost");
   const itemStockCounts = getBracketNotationValues("item_stock_count");
@@ -503,12 +523,15 @@ async function parseFormData(data) {
   //   itemImages: itemImages.length
   // });
 
-  // Calculate max length across all variant fields
   const maxLength = Math.max(
     itemSizes.length,
     itemColors.length,
     itemShapes.length,
     itemCarats.length,
+    itemSettingStyles.length,
+    itemSettingProfiles.length,
+    itemBandTypes.length,
+    itemAccents.length,
     itemAdditionalPrices.length,
     itemExtraCosts.length,
     itemStockCounts.length,
@@ -522,6 +545,10 @@ async function parseFormData(data) {
     const color = itemColors[itemIndex];
     const shapeValue = itemShapes[itemIndex];
     const caratValue = itemCarats[itemIndex];
+    const settingStyle = itemSettingStyles[itemIndex];
+    const settingProfile = itemSettingProfiles[itemIndex];
+    const bandType = itemBandTypes[itemIndex];
+    const accent = itemAccents[itemIndex];
 
     const additionalPrice = itemAdditionalPrices[itemIndex] && !isNaN(parseFloat(itemAdditionalPrices[itemIndex])) ? parseFloat(itemAdditionalPrices[itemIndex]) : 0;
     const extra_cost = itemExtraCosts[itemIndex] && !isNaN(parseFloat(itemExtraCosts[itemIndex])) ? parseFloat(itemExtraCosts[itemIndex]) : 0;
@@ -529,7 +556,7 @@ async function parseFormData(data) {
     const image = itemImages[itemIndex];
 
     // Skip if no meaningful variant fields are present
-    if (!size && !color && !shapeValue && !caratValue && !additionalPrice && !extra_cost && !stock_count && !image) {
+    if (!size && !color && !shapeValue && !caratValue && !settingStyle && !settingProfile && !bandType && !accent && !additionalPrice && !extra_cost && !stock_count && !image) {
       continue;
     }
 
@@ -564,6 +591,38 @@ async function parseFormData(data) {
       });
     }
 
+    // Add Setting Style attribute if present
+    if (settingStyle && typeof settingStyle === 'string' && settingStyle.trim() !== '') {
+      variant.attributes.push({
+        name: "Setting Style",
+        value: settingStyle.trim(),
+      });
+    }
+
+    // Add Setting Profile attribute if present
+    if (settingProfile && typeof settingProfile === 'string' && settingProfile.trim() !== '') {
+      variant.attributes.push({
+        name: "Setting Profile",
+        value: settingProfile.trim(),
+      });
+    }
+
+    // Add Band Type attribute if present
+    if (bandType && typeof bandType === 'string' && bandType.trim() !== '') {
+      variant.attributes.push({
+        name: "Band Type",
+        value: bandType.trim(),
+      });
+    }
+
+    // Add Accent attribute if present
+    if (accent && typeof accent === 'string' && accent.trim() !== '') {
+      variant.attributes.push({
+        name: "Accent",
+        value: accent.trim(),
+      });
+    }
+
     let attrIndex = 0;
 
     while (true) {
@@ -579,6 +638,60 @@ async function parseFormData(data) {
     }
     // console.log(`[DEBUG] Parsed attributes for item ${itemIndex}:`, variant.attributes);
     itemVariants.push(variant);
+  }
+
+  // Support product-level attributes passed from the admin form so they become
+  // available as filterable attributes. These can be provided as parallel arrays
+  // `product_attribute_name[0]`, `product_attribute_value[0]`, or as non-indexed
+  // inputs `product_attribute_name[]` / `product_attribute_value[]`.
+  try {
+    const productAttrNames = [];
+    const productAttrValues = [];
+
+    // Collect non-indexed arrays (product_attribute_name[0])
+    let idx = 0;
+    while (true) {
+      const name = data.get(`product_attribute_name[${idx}]`);
+      const value = data.get(`product_attribute_value[${idx}]`);
+      if (name === null || name === undefined) break;
+      if (name && value) {
+        productAttrNames.push(name);
+        productAttrValues.push(value);
+      }
+      idx++;
+    }
+
+    // Fallback: check for array-style getAll values
+    if (productAttrNames.length === 0 && data.getAll) {
+      const names = data.getAll('product_attribute_name') || [];
+      const values = data.getAll('product_attribute_value') || [];
+      if (names.length > 0) {
+        names.forEach((n, i) => {
+          if (n && values[i]) {
+            productAttrNames.push(n);
+            productAttrValues.push(values[i]);
+          }
+        });
+      }
+    }
+
+    // If product-level attributes found, append them to each variant so they are
+    // created as ProductInventoryDetailAttribute entries and collected as product-level
+    // available attributes later in the service layer.
+    if (productAttrNames.length > 0) {
+      itemVariants = itemVariants.map((variant) => {
+        productAttrNames.forEach((name, i) => {
+          const value = productAttrValues[i];
+          if (name && value) {
+            variant.attributes = variant.attributes || [];
+            variant.attributes.push({ name: name, value: value });
+          }
+        });
+        return variant;
+      });
+    }
+  } catch (e) {
+    // ignore parsing errors for optional product attributes
   }
 
   // console.log("Parsed product data:", itemVariants);
@@ -1064,6 +1177,19 @@ export async function updateProduct(id, formData) {
             // Use metal attribute value if found, otherwise use color field
             const metalType = metalAttr?.value || detail.color || null;
 
+            const settingStyleAttr = detailAttributes.find(attr =>
+              (attr.name || "").toLowerCase() === "setting style"
+            );
+            const settingProfileAttr = detailAttributes.find(attr =>
+              (attr.name || "").toLowerCase() === "setting profile"
+            );
+            const bandTypeAttr = detailAttributes.find(attr =>
+              (attr.name || "").toLowerCase() === "band type"
+            );
+            const accentsAttr = detailAttributes.find(attr =>
+              (attr.name || "").toLowerCase() === "accent"
+            );
+
             // Get shape image from pre-fetched shape terms map
             let shapeImage = null;
             if (shapeAttr?.value && shapeTermsMap.size > 0) {
@@ -1091,6 +1217,10 @@ export async function updateProduct(id, formData) {
               shape_image: shapeImage,
               carat: caratAttr?.value || null,
               metal_type: metalType,
+              setting_style: settingStyleAttr?.value || null,
+              setting_profile: settingProfileAttr?.value || null,
+              band_type: bandTypeAttr?.value || null,
+              accents: accentsAttr?.value || null,
               additional_price: detail.additional_price,
               extra_cost: detail.add_cost || detail.extra_cost || 0,
               stock_count: detail.stock_count,
@@ -1376,6 +1506,10 @@ async function parseUpdateFormData(data) {
   const itemColors = getBracketNotationValues("item_color");
   const itemShapes = getBracketNotationValues("item_shape");
   const itemCarats = getBracketNotationValues("item_carat");
+  const itemSettingStyles = getBracketNotationValues("item_setting_style");
+  const itemSettingProfiles = getBracketNotationValues("item_setting_profile");
+  const itemBandTypes = getBracketNotationValues("item_band_type");
+  const itemAccents = getBracketNotationValues("item_accent");
   // Read additional_price and extra_cost separately (they are different fields)
   const itemAdditionalPrices = getBracketNotationValues("item_additional_price");
   const itemExtraCosts = getBracketNotationValues("item_extra_cost");
@@ -1403,6 +1537,10 @@ async function parseUpdateFormData(data) {
     itemColors.length,
     itemShapes.length,
     itemCarats.length,
+    itemSettingStyles.length,
+    itemSettingProfiles.length,
+    itemBandTypes.length,
+    itemAccents.length,
     itemAdditionalPrices.length,
     itemExtraCosts.length,
     itemStockCounts.length,
@@ -1417,6 +1555,10 @@ async function parseUpdateFormData(data) {
     const color = itemColors[i];
     const shape = itemShapes[i];
     const carat = itemCarats[i];
+    const settingStyle = itemSettingStyles[i];
+    const settingProfile = itemSettingProfiles[i];
+    const bandType = itemBandTypes[i];
+    const accent = itemAccents[i];
     const inventoryDetailsId = inventoryDetailsIds[i];
 
     // Skip if no variant fields are present and no ID (should keep existing if ID?)
@@ -1429,7 +1571,7 @@ async function parseUpdateFormData(data) {
     const stock_count = itemStockCounts[i];
     const image = itemImages[i];
 
-    if (!size && !color && !shape && !carat && !inventoryDetailsId && !additionalPrice && !extra_cost && !stock_count && !image) {
+    if (!size && !color && !shape && !carat && !settingStyle && !settingProfile && !bandType && !accent && !inventoryDetailsId && !additionalPrice && !extra_cost && !stock_count && !image) {
       // console.log(`[DEBUG] Skipping empty variant at index ${i}`);
       continue;
     }
@@ -1464,6 +1606,38 @@ async function parseUpdateFormData(data) {
       variant.attributes.push({
         name: "Carat",
         value: carat.trim(),
+      });
+    }
+
+    // Add Setting Style attribute if present
+    if (settingStyle && typeof settingStyle === 'string' && settingStyle.trim() !== '') {
+      variant.attributes.push({
+        name: "Setting Style",
+        value: settingStyle.trim(),
+      });
+    }
+
+    // Add Setting Profile attribute if present
+    if (settingProfile && typeof settingProfile === 'string' && settingProfile.trim() !== '') {
+      variant.attributes.push({
+        name: "Setting Profile",
+        value: settingProfile.trim(),
+      });
+    }
+
+    // Add Band Type attribute if present
+    if (bandType && typeof bandType === 'string' && bandType.trim() !== '') {
+      variant.attributes.push({
+        name: "Band Type",
+        value: bandType.trim(),
+      });
+    }
+
+    // Add Accent attribute if present
+    if (accent && typeof accent === 'string' && accent.trim() !== '') {
+      variant.attributes.push({
+        name: "Accent",
+        value: accent.trim(),
       });
     }
 

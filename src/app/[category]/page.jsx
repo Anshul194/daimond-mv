@@ -34,6 +34,7 @@ const RingsBuild = ({ props }) => {
   const metal = searchParams.get("metal");
   const band = searchParams.get("band");
   const profile = searchParams.get("profile");
+  const accents = searchParams.get("accents");
   const gender = searchParams.get("gender");
 
   // Get the text after the first slash in the path
@@ -94,6 +95,7 @@ const RingsBuild = ({ props }) => {
       "BAND TYPE",
       "SETTING",
       "BAND",
+      "ACCENTS",
     ];
 
     // Use Promise.all to fetch all attributes in parallel. If categoryID is not available,
@@ -140,6 +142,9 @@ const RingsBuild = ({ props }) => {
     }
     if (profile && profile !== "") {
       attributeFilter.push(profile);
+    }
+    if (accents && accents !== "") {
+      attributeFilter.push(accents);
     }
 
     if (categoryID) {
@@ -193,6 +198,9 @@ const RingsBuild = ({ props }) => {
     if (profile && profile !== "") {
       attributeFilter.push(profile);
     }
+    if (accents && accents !== "") {
+      attributeFilter.push(accents);
+    }
 
     // if (categoryId) {
     //   setCategoryId(categoryId);
@@ -225,7 +233,7 @@ const RingsBuild = ({ props }) => {
         );
       }
     }
-  }, [shape, style, metal, band, profile, gender]);
+  }, [shape, style, metal, band, profile, accents, gender]);
   // Reset modal state on component mount
   useEffect(() => {
     getData();
