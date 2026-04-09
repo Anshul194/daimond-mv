@@ -257,6 +257,7 @@ const ProductOptions = ({
   selectedOptions,
   onOptionChange,
   availableOptions,
+  productData,
 }) => {
   const { sizes: globalSizes } = useSelector((state) => state.size);
   const dispatch = useDispatch();
@@ -285,8 +286,26 @@ const ProductOptions = ({
       // Fallback if size object isn't in global list yet (e.g. if it's populated as an object in inventory)
       const detailWithSize = availableOptions.find(d => (d.size?._id || d.size) === id);
       return detailWithSize.size;
-    }).filter(s => s && s.size_code);
+    }).filter(s => s && (s.size_code || s.name || s.value || typeof s === 'string'));
   }, [availableOptions, globalSizes]);
+
+  const dynamicAttributes = React.useMemo(() => {
+    if (!productData?.attributes) {
+      if (productData?.properties) {
+        return Object.entries(productData.properties).map(([key, value]) => ({ name: key, values: [value] }));
+      }
+      return [];
+    }
+
+    const skipNames = ['metal type', 'metal', 'metaltype', 'size', 'ring size'];
+    return Object.entries(productData.attributes)
+      .filter(([key]) => !skipNames.includes(key.toLowerCase()))
+      .map(([key, vals]) => {
+         // Get unique values to display
+         const values = [...new Set(vals.map(v => v.attribute_value).filter(Boolean))];
+         return { name: key, values: values };
+      }).filter(attr => attr.values.length > 0);
+  }, [productData]);
 
   return (
     <div className="max-w-md mx-auto space-y-6 bg-[#FEFAF5] p-6 ">
@@ -336,7 +355,7 @@ const ProductOptions = ({
                 key={index}
                 value={option.color?._id || option.color}
               >
-                {option.color?.value || "Default Color"}
+                {option.color?.value || option.color?.name || option.color}
               </option>
             ))}
         </select>
@@ -377,13 +396,40 @@ const ProductOptions = ({
             <option
               className="text-gray-700 font-gintoNormal text-[10px] font-medium"
               key={index}
-              value={size._id}
+              value={size._id || size}
             >
-              {size.size_code}
+              {size.size_code || size.name || size.value || size}
             </option>
           ))}
         </select>
       </div>
+
+      {/* Dynamic Attributes from metadata */}
+      {dynamicAttributes.map((attr, index) => (
+        <div key={index} className="space-y-2 grid grid-cols-3 gap-4">
+          <div className="flex text-gray-700 items-center gap-2 mb-2">
+            <span className="text-[10px] uppercase font-gintoNord font-semibold text-gray-700 mr-2 w-20">
+              {attr.name}
+            </span>
+            <button className="text-gray-400 hover:text-gray-600">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+          </div>
+          <select
+            className="w-full col-span-2 border border-gray-300 px-3 py-2 text-[10px] flex items-center justify-between hover:bg-gray-50 transition-colors text-left text-gray-700"
+            value={selectedOptions[attr.name] || ""}
+            onChange={(e) => onOptionChange(attr.name, e.target.value)}
+          >
+            {attr.values.map((val, idx) => (
+              <option className="text-gray-700 font-gintoNormal text-[10px] font-medium" key={idx} value={val}>
+                {val}
+              </option>
+            ))}
+          </select>
+        </div>
+      ))}
 
       <div className="flex items-center gap-2 mt-2">
         <input type="checkbox" id="help-select" className="rounded" />
@@ -515,12 +561,15 @@ const ProductDetails = ({
         selectedOptions={selectedOptions}
         onOptionChange={onOptionChange}
         availableOptions={availableOptions}
+        productData={productData}
       />
 
       {/* <StepOne /> */}
       <StepTwo
         handelSelectDiamond={handelSelectDiamond}
         selectedDiamond={selectedDiamond}
+        productData={productData}
+        selectedOptions={selectedOptions}
       />
       <StepThree
       />
@@ -750,6 +799,36 @@ const ProductModal = ({ onClose, loading }) => {
       // console.log("Product data fetched:", response.data.body.data.product);
 
       const product = response.data.body.data.product;
+      const productInventorySet = response.data.body.data.product_inventory_set || [];
+      const additionalInfoStore = response.data.body.data.additional_info_store || {};
+
+      product.inventory_set = productInventorySet;
+      product.additional_info = additionalInfoStore;
+
+      // Extract all available attribute options directly from the inventory set
+      if (productInventorySet && productInventorySet.length > 0) {
+        product.attributes = {};
+        productInventorySet.forEach(item => {
+          Object.entries(item).forEach(([key, value]) => {
+            if (key === 'Size' || key === 'Color' || !value) return; // Skip Size/Color as they are handled separately
+            if (!product.attributes[key]) {
+              product.attributes[key] = [];
+            }
+            if (!product.attributes[key].some(a => a.attribute_value === value)) {
+              product.attributes[key].push({ attribute_value: value });
+            }
+          });
+        });
+      } else {
+         const availableAttributes = response.data.body.data.available_attributes;
+         if (availableAttributes) {
+           product.attributes = {};
+           Object.entries(availableAttributes).forEach(([key, valuesObj]) => {
+             product.attributes[key] = Object.keys(valuesObj).map(val => ({ attribute_value: val }));
+           });
+         }
+      }
+
       setProductData(product);
       setProductPrice(product.price);
 
@@ -760,12 +839,26 @@ const ProductModal = ({ onClose, loading }) => {
         const metalTypeId = firstVariant?.color?._id || firstVariant?.color || null;
         const ringSizeId = firstVariant?.size?._id || firstVariant?.size || null;
 
-        setSelectedOptions({
+        const defaultOptions = {
           metalType: metalTypeId,
           ringSize: ringSizeId,
-        });
+        };
 
-        // console.log("Initial selected options set:", { metalType: metalTypeId, ringSize: ringSizeId });
+        if (product.attributes) {
+            const skipNames = ['metal type', 'metal', 'metaltype', 'size', 'ring size'];
+            Object.entries(product.attributes).forEach(([key, vals]) => {
+                if (!skipNames.includes(key.toLowerCase())) {
+                    const uniqueValues = [...new Set(vals.map(v => v.attribute_value).filter(Boolean))];
+                    if (uniqueValues.length > 0) {
+                        defaultOptions[key] = uniqueValues[0];
+                    }
+                }
+            });
+        }
+
+        setSelectedOptions(defaultOptions);
+
+        // console.log("Initial selected options set:", defaultOptions);
       } else {
         // console.warn("No inventory details found for product, selectedOptions will remain empty");
         // If no variants, set empty options - user will need to select manually
@@ -789,9 +882,24 @@ const ProductModal = ({ onClose, loading }) => {
   useEffect(() => {
     // console.log("Selected options changed:", selectedOptions);
     const filteredMetals = productData?.inventory?.inventory_details.filter(
-      (metal) =>
-        metal.color?._id === selectedOptions?.metalType &&
-        metal.size?._id === selectedOptions?.ringSize
+      (metal) => {
+        let isMatch = true;
+        if (selectedOptions?.metalType) isMatch = isMatch && (metal.color?._id === selectedOptions?.metalType || metal.color === selectedOptions?.metalType);
+        if (selectedOptions?.ringSize) isMatch = isMatch && (metal.size?._id === selectedOptions?.ringSize || metal.size === selectedOptions?.ringSize);
+        // We match extra attributes if they exist inside the metal inventory details
+        if (metal.attributes) {
+            const skipNames = ['metal type', 'metal', 'metaltype', 'size', 'ring size'];
+            Object.keys(selectedOptions || {}).forEach(optKey => {
+                if (!skipNames.includes(optKey.toLowerCase()) && optKey !== 'metalType' && optKey !== 'ringSize') {
+                    const attrNode = metal.attributes.find(a => a.name === optKey || a.attribute_name === optKey);
+                    if (attrNode) {
+                        isMatch = isMatch && ((attrNode.value || attrNode.attribute_value) === selectedOptions[optKey]);
+                    }
+                }
+            });
+        }
+        return isMatch;
+      }
     );
 
     if (filteredMetals?.length > 0) {

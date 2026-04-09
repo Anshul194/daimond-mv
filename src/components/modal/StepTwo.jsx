@@ -7,10 +7,9 @@ import axiosInstance from "@/axiosConfig/axiosInstance";
 
 const currencySymbol = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "₹";
 
-const StepTwo = ({ handelSelectDiamond, selectedDiamond }) => {
+const StepTwo = ({ handelSelectDiamond, selectedDiamond, productData, selectedOptions }) => {
   const [leftStoneOptions, setLeftStoneOptions] = useState({
     clarity: "",
-    // carat: "2.00-2.24ct",
     color: "",
   });
   const [diamondData, setDiamondData] = useState([]);
@@ -27,9 +26,9 @@ const StepTwo = ({ handelSelectDiamond, selectedDiamond }) => {
 
   const [openDropdown, setOpenDropdown] = useState(null);
 
-  const dropdownOptions = {
+  const [dropdownOptions, setDropdownOptions] = useState({
     stoneType: ["Lab Grown Diamond", "Natural Diamond", "Moissanite"],
-    clarity: ["FL", "IF", "VVS1", "VVS2", "VS1", "VS2", "SI1", "SI2"],
+    clarity: ["FL", "IF", "VVS1", "VVS2", "VS1", "VS2", "SI1", "SI2"], // fallback
     carat: [
       "1.00-1.24ct",
       "1.25-1.49ct",
@@ -38,9 +37,30 @@ const StepTwo = ({ handelSelectDiamond, selectedDiamond }) => {
       "2.00-2.24ct",
       "2.25-2.49ct",
     ],
-    color: ["D", "E", "F", "G", "H", "I", "J"],
+    color: ["D", "E", "F", "G", "H", "I", "J"], // fallback
     cut: ["Excellent", "Very Good", "Good", "Fair"],
-  };
+  });
+
+  // Fetch dynamic dropdown filters based on exactly what diamonds are actively in stock.
+  useEffect(() => {
+    const fetchFilters = async () => {
+      try {
+        const response = await axiosInstance.get('/api/diamond/filters');
+        if (response.data.success) {
+          const dynamicData = response.data.data;
+          setDropdownOptions((prev) => ({
+            ...prev,
+            clarity: dynamicData.clarity?.length > 0 ? dynamicData.clarity : prev.clarity,
+            color: dynamicData.color?.length > 0 ? dynamicData.color : prev.color,
+            cut: dynamicData.cut?.length > 0 ? dynamicData.cut : prev.cut,
+          }));
+        }
+      } catch (err) {
+        console.error("Failed to load diamond filters:", err);
+      }
+    };
+    fetchFilters();
+  }, []);
 
   // Check if all required fields are filled
   const areAllFieldsFilled = () => {
@@ -148,9 +168,19 @@ const StepTwo = ({ handelSelectDiamond, selectedDiamond }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        let currentSearchFields = { ...leftStoneOptions };
+        Object.keys(currentSearchFields).forEach(key => {
+            if (!currentSearchFields[key]) delete currentSearchFields[key];
+        });
+
+        const shape = selectedOptions?.Shape || productData?.properties?.Shape;
+        if (shape) {
+            currentSearchFields.shape = shape;
+        }
+
         const response = await axiosInstance.get(
           `api/diamond/import?searchFields=${JSON.stringify(
-            leftStoneOptions
+            currentSearchFields
           )}&limit=2`
         );
         console.log(
@@ -165,7 +195,7 @@ const StepTwo = ({ handelSelectDiamond, selectedDiamond }) => {
     };
 
     fetchData();
-  }, [leftStoneOptions]);
+  }, [leftStoneOptions, productData, selectedOptions]);
 
   const selectedDim = (data) => {
     handelSelectDiamond(data);
@@ -192,12 +222,20 @@ const StepTwo = ({ handelSelectDiamond, selectedDiamond }) => {
   }, [showDiamond]);
 
   console.log("slectedDiamond in StepTwo:", selectedDiamond);
+
+  // Compute full filters including base product restrictions
+  const fullFilters = { ...leftStoneOptions };
+  const shape = selectedOptions?.Shape || productData?.properties?.Shape;
+  if (shape) {
+      fullFilters.shape = shape;
+  }
+
   return (
     <>
       <ShowDiamond
         isVisible={showDiamond}
         onClose={() => setShowDiamond(false)}
-        filters={leftStoneOptions}
+        filters={fullFilters}
         handelSelectDiamond={selectedDim}
         ref={modalRef}
       />
@@ -261,64 +299,46 @@ const StepTwo = ({ handelSelectDiamond, selectedDiamond }) => {
               </div>
             </div>
           ) : (
-            <div className="flex gap-4 justify-center mb-4">
-              {" "}
-              {/* Stone 1 */}
-              <div
-                onClick={() => selectedDim(diamondData[0])}
-                className="relative bg-white  w-1/2"
-              >
-                <Heart className="absolute top-2 right-2 w-4 h-4 text-gray-300" />
-                <div className="bg-black/10 mb-3 aspect-square overflow-hidden w-full">
-                  <iframe
-                    src={diamondData[0]?.video}
-                    title={`Video for ${diamondData[0]?._id}`}
-                    className="w-full h-full aspect-square overflow-hidden"
-                    allowFullScreen
-                  ></iframe>
+            <div className="flex gap-4 justify-center mb-4 overflow-x-auto">
+              {diamondData && diamondData.length > 0 ? (
+                diamondData.slice(0, 2).map((diamond, index) => (
+                  <div
+                    key={index}
+                    onClick={() => selectedDim(diamond)}
+                    className="relative bg-white w-1/2 min-w-[140px] cursor-pointer hover:shadow-md transition-shadow"
+                  >
+                    <Heart className="absolute top-2 right-2 w-4 h-4 text-gray-300 z-10" />
+                    <div className="bg-black/10 mb-3 aspect-square overflow-hidden w-full relative">
+                      {diamond?.video ? (
+                        <iframe
+                          src={diamond.video}
+                          title={`Video for ${diamond?._id}`}
+                          className="w-full h-full aspect-square overflow-hidden pointer-events-none"
+                          allowFullScreen
+                        ></iframe>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-[10px]">No Video</div>
+                      )}
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-medium text-gray-800">
+                        {diamond?.weight?.toFixed(2)}ct - {diamond?.color} - {diamond?.clarity}
+                      </div>
+                      <div className="text-[10px] text-gray-500 mb-2 truncate px-1">
+                        {diamond?.measurements || "N/A"}
+                      </div>
+                      <div className="text-sm w-full font-semibold text-gray-800">
+                        {currencySymbol}
+                        {diamond?.net?.toLocaleString() || "Request Price"}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-gray-500 text-sm py-6">
+                  No recommended stones match your criteria. Please try adjusting your filters.
                 </div>
-                <div className="text-center">
-                  <div className="text-lg  font-medium text-gray-800 ">
-                    {diamondData[0]?.weight.toFixed(2)}w -{" "}
-                    {diamondData[0]?.color} - {diamondData[0]?.clarity}
-                  </div>
-                  <div className="text-[10px] text-gray-500 mb-2">
-                    {diamondData[0]?.measurements}
-                  </div>
-                  <div className="text-sm w-full font-semibold text-gray-800">
-                    {currencySymbol}
-                    {diamondData[0]?.net}
-                  </div>
-                </div>
-              </div>
-              {/* Stone 2 */}
-              <div
-                onClick={() => selectedDim(diamondData[0])}
-                className="relative bg-white  w-1/2"
-              >
-                <Heart className="absolute top-2 right-2 w-4 h-4 text-gray-300" />
-                <div className="bg-black/10 mb-3 aspect-square overflow-hidden w-full">
-                  <iframe
-                    src={diamondData[1]?.video}
-                    title={`Video for ${diamondData[1]?._id}`}
-                    className="w-full h-full aspect-square overflow-hidden"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-                <div className="text-center">
-                  <div className="text-lg  font-medium text-gray-800 ">
-                    {diamondData[1]?.weight.toFixed(2)}w -{" "}
-                    {diamondData[1]?.color} - {diamondData[1]?.clarity}
-                  </div>
-                  <div className="text-[10px] text-gray-500 mb-2">
-                    {diamondData[1]?.measurements}
-                  </div>
-                  <div className="text-sm w-full font-semibold text-gray-800">
-                    {currencySymbol}
-                    {diamondData[1]?.net}
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           )}
 
