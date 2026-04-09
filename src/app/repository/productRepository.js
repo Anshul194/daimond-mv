@@ -178,7 +178,11 @@ class ProductRepository extends CrudRepository {
 
   async createInventoryDetailsAttributes(data) {
     try {
-      console.log("Data for createInventoryDetailsAttributes:", data);
+      try {
+        console.log("Data for createInventoryDetailsAttributes:", JSON.stringify(data));
+      } catch (e) {
+        console.log("Data for createInventoryDetailsAttributes (non-serializable):", data);
+      }
       if (Array.isArray(data)) {
         return await ProductInventoryDetailAttribute.insertMany(data);
       }

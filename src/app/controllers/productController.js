@@ -355,6 +355,14 @@ export async function createProduct(formData, user = null) {
             (attr.name || "").toLowerCase() === "accent"
           );
 
+          const stoneAttr = detailAttributes.find(attr =>
+            (attr.name || "").toLowerCase() === "stone"
+          );
+          const stoneColorAttr = detailAttributes.find(attr => {
+            const n = (attr.name || "").toLowerCase();
+            return n === "stone color" || n === "stone_color" || n === "stonecolor";
+          });
+
           // Get shape image from pre-fetched shape terms map
           let shapeImage = null;
           if (shapeAttr?.value && shapeTermsMap.size > 0) {
@@ -386,6 +394,8 @@ export async function createProduct(formData, user = null) {
             setting_profile: settingProfileAttr?.value || null,
             band_type: bandTypeAttr?.value || null,
             accents: accentsAttr?.value || null,
+            stone: stoneAttr?.value || null,
+            stone_color: stoneColorAttr?.value || null,
             additional_price: detail.additional_price,
             extra_cost: detail.add_cost || detail.extra_cost || 0,
             stock_count: detail.stock_count,
@@ -502,6 +512,8 @@ async function parseFormData(data) {
   const itemSizes = getBracketNotationValues("item_size");
   const itemColors = getBracketNotationValues("item_color");
   const itemShapes = getBracketNotationValues("item_shape");
+  const itemStones = getBracketNotationValues("item_stone");
+  const itemStoneColors = getBracketNotationValues("item_stone_color");
   const itemCarats = getBracketNotationValues("item_carat");
   const itemSettingStyles = getBracketNotationValues("item_setting_style");
   const itemSettingProfiles = getBracketNotationValues("item_setting_profile");
@@ -527,6 +539,8 @@ async function parseFormData(data) {
     itemSizes.length,
     itemColors.length,
     itemShapes.length,
+    itemStones.length,
+    itemStoneColors.length,
     itemCarats.length,
     itemSettingStyles.length,
     itemSettingProfiles.length,
@@ -543,6 +557,8 @@ async function parseFormData(data) {
   for (let itemIndex = 0; itemIndex < maxLength; itemIndex++) {
     const size = itemSizes[itemIndex];
     const color = itemColors[itemIndex];
+    const stone = itemStones[itemIndex];
+    const stoneColor = itemStoneColors[itemIndex];
     const shapeValue = itemShapes[itemIndex];
     const caratValue = itemCarats[itemIndex];
     const settingStyle = itemSettingStyles[itemIndex];
@@ -556,7 +572,7 @@ async function parseFormData(data) {
     const image = itemImages[itemIndex];
 
     // Skip if no meaningful variant fields are present
-    if (!size && !color && !shapeValue && !caratValue && !settingStyle && !settingProfile && !bandType && !accent && !additionalPrice && !extra_cost && !stock_count && !image) {
+    if (!size && !color && !stone && !stoneColor && !shapeValue && !caratValue && !settingStyle && !settingProfile && !bandType && !accent && !additionalPrice && !extra_cost && !stock_count && !image) {
       continue;
     }
 
@@ -565,6 +581,8 @@ async function parseFormData(data) {
 
     const variant = {
       size: size || undefined,
+      stone: stone || undefined,
+      stone_color: stoneColor || undefined,
       color: color || undefined,
       sku: sku,
       additional_price: additionalPrice,
@@ -581,6 +599,16 @@ async function parseFormData(data) {
         name: "Shape",
         value: shapeValue.trim(),
       });
+    }
+
+    // Add Stone attribute if present
+    if (stone && typeof stone === 'string' && stone.trim() !== '') {
+      variant.attributes.push({ name: "Stone", value: stone.trim() });
+    }
+
+    // Add Stone Color attribute if present
+    if (stoneColor && typeof stoneColor === 'string' && stoneColor.trim() !== '') {
+      variant.attributes.push({ name: "Stone Color", value: stoneColor.trim() });
     }
 
     // Add Carat attribute if present (ensure it's a valid string, not an array)
@@ -720,6 +748,7 @@ async function createInventoryDetailsInBatch(
 ) {
   const inventoryDetails = [];
   const allAttributes = [];
+  let updatedAttributes = [];
 
   itemVariants.forEach((variant, idx) => {
     const detail = {
@@ -754,7 +783,7 @@ async function createInventoryDetailsInBatch(
     createdResources.push({ type: "inventory_detail", id: detail._id });
   });
 
-  let createdAttributes = [];
+  let createdAttrs = [];
   if (allAttributes.length > 0) {
     allAttributes.forEach((attr) => {
       attr.inventory_details_id =
@@ -765,9 +794,9 @@ async function createInventoryDetailsInBatch(
     //   `Batch creating ${allAttributes.length} attributes for inventory details...`
     // );
 
-    createdAttributes =
+    createdAttrs =
       await productService.batchCreateInventoryDetailsAttributes(allAttributes);
-    createdAttributes.forEach((attr) => {
+    createdAttrs.forEach((attr) => {
       createdResources.push({ type: "attribute", id: attr._id });
     });
   }
@@ -775,7 +804,7 @@ async function createInventoryDetailsInBatch(
   // console.log(
   //   `Batch created ${inventoryDetails.length} inventory details and ${allAttributes.length} attributes`
   // );
-  return { inventoryDetails: createdDetails, attributes: createdAttributes };
+  return { inventoryDetails: createdDetails, attributes: createdAttrs };
 }
 
 async function updateProductCaches(product, productName) {
@@ -1505,6 +1534,8 @@ async function parseUpdateFormData(data) {
   const itemSizes = getBracketNotationValues("item_size");
   const itemColors = getBracketNotationValues("item_color");
   const itemShapes = getBracketNotationValues("item_shape");
+  const itemStones = getBracketNotationValues("item_stone");
+  const itemStoneColors = getBracketNotationValues("item_stone_color");
   const itemCarats = getBracketNotationValues("item_carat");
   const itemSettingStyles = getBracketNotationValues("item_setting_style");
   const itemSettingProfiles = getBracketNotationValues("item_setting_profile");
@@ -1536,6 +1567,8 @@ async function parseUpdateFormData(data) {
     itemSizes.length,
     itemColors.length,
     itemShapes.length,
+    itemStones.length,
+    itemStoneColors.length,
     itemCarats.length,
     itemSettingStyles.length,
     itemSettingProfiles.length,
@@ -1553,6 +1586,8 @@ async function parseUpdateFormData(data) {
   for (let i = 0; i < maxLength; i++) {
     const size = itemSizes[i];
     const color = itemColors[i];
+    const stone = itemStones[i];
+    const stoneColor = itemStoneColors[i];
     const shape = itemShapes[i];
     const carat = itemCarats[i];
     const settingStyle = itemSettingStyles[i];
@@ -1583,6 +1618,8 @@ async function parseUpdateFormData(data) {
     const variant = {
       inventoryDetailsId: inventoryDetailsId || undefined,
       size: size || undefined,
+      stone: stone || undefined,
+      stone_color: stoneColor || undefined,
       color: color || undefined,
       sku: sku || "",
       additional_price: additionalPrice !== undefined && !isNaN(parseFloat(additionalPrice)) ? parseFloat(additionalPrice) : 0,
@@ -1599,6 +1636,16 @@ async function parseUpdateFormData(data) {
         name: "Shape",
         value: shape.trim(),
       });
+    }
+
+    // Add Stone attribute if present
+    if (stone && typeof stone === 'string' && stone.trim() !== '') {
+      variant.attributes.push({ name: "Stone", value: stone.trim() });
+    }
+
+    // Add Stone Color attribute if present
+    if (stoneColor && typeof stoneColor === 'string' && stoneColor.trim() !== '') {
+      variant.attributes.push({ name: "Stone Color", value: stoneColor.trim() });
     }
 
     // Add Carat attribute if present
@@ -1666,6 +1713,7 @@ async function updateInventoryDetailsInBatch(
 ) {
   const inventoryDetails = [];
   const allAttributes = [];
+  let updatedAttributes = [];
 
   // Get all existing inventory details for this product
   const existingDetails = await ProductInventoryDetails.find({
@@ -1783,55 +1831,107 @@ async function updateInventoryDetailsInBatch(
       });
 
       if (attributes && attributes.length > 0) {
-        // [FIX] Delete existing attributes for this specific variant to ensure clean update
-        // This prevents duplicates and ensures the latest values are what the GET request finds first
-        if (inventoryDetailsId) {
-          // console.log(`[DEBUG] Clearing old attributes for variant ${inventoryDetailsId} before update`);
-          await ProductInventoryDetailAttribute.deleteMany({
-            inventory_details_id: inventoryDetailsId,
-            deletedAt: null
-          });
+        // Merge incoming attributes with existing ones for this variant instead of deleting all.
+        // This preserves attributes that are not part of the request (e.g., Stone/Stone Color when omitted).
+        const targetDetailId = createdDetail._id;
+        // Fetch existing attributes for this detail
+        const existingAttrs = await ProductInventoryDetailAttribute.find({
+          inventory_details_id: targetDetailId,
+          deletedAt: null,
+        }).lean();
+
+        const existingMap = new Map();
+        existingAttrs.forEach((a) => {
+          const key = (a.attribute_name || a.name || "").toLowerCase().trim();
+          if (key) existingMap.set(key, a);
+        });
+
+        for (const attr of attributes) {
+          const name = (attr.name || attr.attribute_name || "").trim();
+          const value = (attr.value || attr.attribute_value || "").trim();
+          if (!name) continue;
+          const key = name.toLowerCase();
+
+          if (existingMap.has(key)) {
+            // Update the existing attribute
+            const existing = existingMap.get(key);
+            try {
+              const updatedAttr = await productService.updateInventoryDetailsAttributes(existing._id, {
+                attribute_name: name,
+                attribute_value: value,
+              });
+              if (updatedAttr) {
+                updatedAttributes.push(updatedAttr);
+                updatedResources.push({ type: "attribute", id: updatedAttr._id });
+              }
+            } catch (e) {
+              // If update fails, fall back to creating a new attribute record
+              try {
+                const newAttr = await productService.createInventoryDetailsAttributes({
+                  attribute_name: name,
+                  attribute_value: value,
+                  inventory_details_id: targetDetailId,
+                  product_id: productId,
+                });
+                if (newAttr) {
+                  updatedAttributes.push(newAttr);
+                  updatedResources.push({ type: "attribute", id: newAttr._id });
+                }
+              } catch (createErr) {
+                try {
+                  console.error("Failed to create attribute on fallback:", {
+                    name,
+                    value,
+                    targetDetailId: String(targetDetailId),
+                    productId,
+                    err: createErr && (createErr.message || JSON.stringify(createErr)),
+                  });
+                } catch (logErr) {
+                  console.error("Failed to create attribute on fallback, logging error failed:", logErr);
+                }
+              }
+            }
+          } else {
+            // Create new attribute
+            try {
+              const newAttr = await productService.createInventoryDetailsAttributes({
+                attribute_name: name,
+                attribute_value: value,
+                inventory_details_id: targetDetailId,
+                product_id: productId,
+              });
+              if (newAttr) {
+                updatedAttributes.push(newAttr);
+                updatedResources.push({ type: "attribute", id: newAttr._id });
+              }
+            } catch (createErr) {
+              try {
+                console.error("Failed to create attribute:", {
+                  name,
+                  value,
+                  targetDetailId: String(targetDetailId),
+                  productId,
+                  err: createErr && (createErr.message || JSON.stringify(createErr)),
+                });
+              } catch (logErr) {
+                console.error("Failed to create attribute, logging error failed:", logErr);
+              }
+            }
+          }
         }
-
-        const detailAttributes = attributes.map((attr) => ({
-          attribute_name: (attr.name || attr.attribute_name || "").trim(),
-          attribute_value: (attr.value || attr.attribute_value || "").trim(),
-          inventory_details_id: createdDetail._id,
-          product_id: productId,
-        }));
-        // console.log(`[DEBUG] Adding ${detailAttributes.length} attributes to allAttributes for variant ${createdDetail._id}`);
-        allAttributes.push(...detailAttributes);
       }
 
     }
   }
 
-  let createdAttributes = [];
-  if (allAttributes.length > 0) {
-    // console.log(`[DEBUG] Total attributes to process: ${allAttributes.length}`);
-    const variantIds = inventoryDetails.map((d) => d._id);
-    const existingAttributes = await ProductInventoryDetailAttribute.find({
-      inventory_details_id: { $in: variantIds },
-    });
-    // console.log(`[DEBUG] Found ${existingAttributes.length} existing attributes in DB for these variants`);
-
-    // [FIX] Since we already deleted existing attributes for updated variants above,
-    // we should just create all of them to avoid duplicate checks and logic issues.
-    for (const attr of allAttributes) {
-      // console.log(`[DEBUG] Creating attribute: "${attr.attribute_name}" with value: "${attr.attribute_value}" for variant: ${attr.inventory_details_id}`);
-      const createdAttr = await productService.createInventoryDetailsAttributes(attr);
-      if (createdAttr) {
-
-        createdAttributes.push(createdAttr);
-        updatedResources.push({ type: "attribute", id: createdAttr._id });
-      }
-    }
-  }
+  // If any attributes were created/updated while processing variants, updatedAttributes
+  // already contains them. The previous flow used `allAttributes` and batch-create;
+  // with the merge behavior above we no longer rely on that.
 
   // console.log(
-  //   `[DEBUG] updateInventoryDetailsInBatch completed. Updated/Created ${inventoryDetails.length} details and ${createdAttributes.length} attributes`
+  //   `[DEBUG] updateInventoryDetailsInBatch completed. Updated/Created ${inventoryDetails.length} details and ${updatedAttributes.length} attributes`
   // );
-  return { inventoryDetails, attributes: createdAttributes };
+  return { inventoryDetails, attributes: updatedAttributes };
 }
 
 export async function getProductsByAttribute(query) {
