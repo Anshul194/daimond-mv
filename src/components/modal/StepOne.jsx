@@ -69,7 +69,9 @@ const MetalSelector = ({ selectedOptions, onOptionChange }) => {
           className="w-3/4 max-w-[290px] border border-gray-600  px-4 py-2 flex items-center justify-between hover:bg-[#004643]/10 transition-colors"
         >
           <span className="text-gray-700 font-gintoNormal text-[10px] font-medium">
-            {selectedOptions.metalType}
+            {typeof selectedOptions?.metalType === 'object'
+              ? (selectedOptions.metalType?.value || selectedOptions.metalType?.name || JSON.stringify(selectedOptions.metalType))
+              : selectedOptions?.metalType}
           </span>
           <ChevronDown
             className={`w-5 h-5 text-gray-400 transition-transform ${

@@ -17,6 +17,25 @@ const Cart = () => {
   const dispatch = useDispatch();
   const { data } = useSelector((state) => state.cart);
 
+  const renderOptionValue = (opt) => {
+    if (opt === null || opt === undefined) return "";
+    if (typeof opt === "object") {
+      // Common shapes: { color: { value }, size: { size_code }, value, name }
+      if (opt.color && (opt.color.value || opt.color.name)) return opt.color.value || opt.color.name;
+      if (opt.size && (opt.size.size_code || opt.size.name)) return opt.size.size_code || opt.size.name;
+      if (opt.size_code) return opt.size_code;
+      if (opt.value) return opt.value;
+      if (opt.name) return opt.name;
+      if (opt._id) return String(opt._id);
+      try {
+        return JSON.stringify(opt);
+      } catch (e) {
+        return String(opt);
+      }
+    }
+    return String(opt);
+  };
+
   useEffect(() => {
     dispatch(fetchCart());
   }, []);
@@ -98,8 +117,7 @@ const Cart = () => {
                             metal type:
                           </span>
                           <span className="ml-1 text-gray-800 text-[10px]">
-                            {item?.selectedOptions?.metalType?.color?.value ||
-                              item.selectedOptions.metalType}
+                            {item?.selectedOptions?.metalType?.color?.value || renderOptionValue(item.selectedOptions.metalType)}
                           </span>
                         </div>
                       )}
@@ -109,8 +127,7 @@ const Cart = () => {
                             Size
                           </span>
                           <span className="ml-1 text-gray-800 text-[10px]">
-                            {item?.selectedOptions?.ringSize?.size_code ||
-                              item.selectedOptions.ringSize}
+                            {item?.selectedOptions?.ringSize?.size_code || renderOptionValue(item.selectedOptions.ringSize)}
                           </span>
                         </div>
                       )}
@@ -197,8 +214,7 @@ const Cart = () => {
                                     metal type:
                                   </span>
                                   <span className="ml-1 text-gray-800 text-[10px]">
-                                    {item?.selectedOptions?.metalType?.color
-                                      ?.value || item.selectedOptions.metalType}
+                                    {item?.selectedOptions?.metalType?.color?.value || renderOptionValue(item.selectedOptions.metalType)}
                                   </span>
                                 </div>
                               )}
@@ -208,9 +224,7 @@ const Cart = () => {
                                     Size
                                   </span>
                                   <span className="ml-1 text-gray-800 text-[10px]">
-                                    {item?.selectedOptions?.ringSize
-                                      ?.size_code ||
-                                      item.selectedOptions.ringSize}
+                                    {item?.selectedOptions?.ringSize?.size_code || renderOptionValue(item.selectedOptions.ringSize)}
                                   </span>
                                 </div>
                               )}

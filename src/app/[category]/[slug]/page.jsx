@@ -353,9 +353,9 @@ const ProductOptions = ({
               <option
                 className="text-gray-700 font-gintoNormal text-[10px] font-medium"
                 key={index}
-                value={option.color?._id || option.color}
+                value={option.color?._id || (typeof option.color === 'string' ? option.color : (option.color?._id || ''))}
               >
-                {option.color?.value || option.color?.name || option.color}
+                {option.color?.value || option.color?.name || (typeof option.color === 'string' ? option.color : JSON.stringify(option.color))}
               </option>
             ))}
         </select>
@@ -396,9 +396,9 @@ const ProductOptions = ({
             <option
               className="text-gray-700 font-gintoNormal text-[10px] font-medium"
               key={index}
-              value={size._id || size}
+              value={size?._id || (typeof size === 'string' ? size : (size?._id || ''))}
             >
-              {size.size_code || size.name || size.value || size}
+              {size?.size_code || size?.name || size?.value || (typeof size === 'string' ? size : JSON.stringify(size))}
             </option>
           ))}
         </select>
@@ -565,16 +565,16 @@ const ProductDetails = ({
       />
 
       {/* <StepOne /> */}
-      <StepTwo
+      {/* <StepTwo
         handelSelectDiamond={handelSelectDiamond}
         selectedDiamond={selectedDiamond}
         productData={productData}
         selectedOptions={selectedOptions}
-      />
-      <StepThree
+      /> */}
+      {/* <StepThree
       />
       <StepFour
-      />
+      /> */}
 
       <div className="grid grid-cols-2 gap-6 mb-6 mt-6">
         {/* Lifetime Warranty */}
@@ -946,7 +946,11 @@ const ProductModal = ({ onClose, loading }) => {
       (size) => size._id === selectedOptions.ringSize
     )[0];
     const metalTypeData = productData.inventory.inventory_details.filter(
-      (metal) => metal.color._id === selectedOptions.metalType
+      (metal) => {
+        const color = metal.color;
+        const colorId = color ? (typeof color === 'object' ? (color._id || color) : color) : null;
+        return colorId === selectedOptions.metalType;
+      }
     )[0];
 
     try {
@@ -957,8 +961,8 @@ const ProductModal = ({ onClose, loading }) => {
         pid_image: productData.image[0] || "",
         pid_price: productPrice || productData.price,
         selectedOptions: {
-          ringSize: sizeData,
-          metalType: metalTypeData,
+          ringSize: sizeData?._id || sizeData,
+          metalType: metalTypeData?.color?._id || metalTypeData?.color || metalTypeData?._id || metalTypeData,
         },
         selectedDiamond: selectedDiamond,
       };
