@@ -212,6 +212,10 @@ class ProductService {
       if (data.is_diamond !== undefined)
         updatedData.is_diamond = data.is_diamond;
 
+      // Allow updating approval and status flags when provided
+      if (data.is_approved !== undefined) updatedData.is_approved = data.is_approved;
+      if (data.status !== undefined) updatedData.status = data.status;
+
       // Ensure 'featured' flag from update payload is applied
       if (data.featured !== undefined) updatedData.featured = data.featured;
 
@@ -648,12 +652,19 @@ class ProductService {
         filterConditions.vendor = mongoose.Types.ObjectId.isValid(vendorId)
           ? new mongoose.Types.ObjectId(vendorId)
           : vendorId;
-      } else if (user && user.role === 'admin') {
-        // Admin sees all, no vendor filter
+      } else if (user && (user.role === 'admin' || user.role === 'superadmin')) {
+        // Admin/superadmin sees all, no vendor filter
       } else if (user && user.role === 'user') {
         // User: only active products, not deleted, and not vendor-specific (global/admin products)
         filterConditions.status = 'active';
         filterConditions.vendor = null;
+        // Only approved products are visible to general users
+        filterConditions.is_approved = true;
+      }
+      else {
+        // Public (no user): only active and approved global products
+        filterConditions.status = 'active';
+        filterConditions.is_approved = true;
       }
       // Merge in any additional filters
       Object.assign(filterConditions, parsedFilters);

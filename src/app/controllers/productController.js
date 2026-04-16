@@ -145,6 +145,14 @@ export async function createProduct(formData, user = null) {
     // Set vendor if user is a vendor
     if (user && user.role === 'vendor') {
       value.vendor = user._id;
+      // Vendor-created products require admin approval
+      value.is_approved = false;
+      // Keep product inactive until approved
+      if (!value.status) value.status = 'inactive';
+    }
+    else {
+      // Admin-created products are approved by default
+      if (!value.is_approved) value.is_approved = true;
     }
 
     // Step 5: Create product
@@ -266,6 +274,7 @@ export async function createProduct(formData, user = null) {
     // Step 9: Construct response data
     const responseData = {
       name: product.name,
+      is_approved: (product.is_approved === undefined ? true : product.is_approved),
       slug: product.slug,
       summary: product.summary,
       category_id: product.category_id,
@@ -465,6 +474,14 @@ async function parseFormData(data) {
     isTaxable: data.get("isTaxable"),
     taxClass: data.get("taxClass"),
   };
+
+  // Allow explicit is_approved to be passed via form data (string 'true'/'false')
+  try {
+    const raw = data.get && data.get("is_approved");
+    if (raw !== null && raw !== undefined) {
+      productData.is_approved = raw === "true" || raw === true;
+    }
+  } catch (e) {}
 
   // Parse `featured` flag from form data if provided
   try {
@@ -1126,6 +1143,7 @@ export async function updateProduct(id, formData) {
     // Added is_diamond to response data
     const responseData = {
       name: updatedProduct.name,
+      is_approved: (updatedProduct.is_approved === undefined ? true : updatedProduct.is_approved),
       slug: updatedProduct.slug,
       summary: updatedProduct.summary,
       category_id: updatedProduct.category_id,
@@ -1420,6 +1438,9 @@ async function parseUpdateFormData(data) {
     featured: data.get("featured")
       ? data.get("featured") === "true"
       : undefined,
+    // Allow status and is_approved to be explicitly set during update
+    status: data.get("status") || undefined,
+    is_approved: data.get("is_approved") ? data.get("is_approved") === "true" : undefined,
   };
 
   // Helper function to normalize stock_status values
@@ -1955,6 +1976,10 @@ export async function getProducts(query, user = null) {
   try {
     console.log('GET /api/products - query:', query);
     const result = await productService.getAllProducts(query, user);
+    // Ensure each product has `is_approved` field in response
+    if (result && Array.isArray(result.docs)) {
+      result.docs = result.docs.map(p => ({ ...(p || {}), is_approved: (p && p.is_approved) === undefined ? true : p.is_approved }));
+    }
     return {
       status: 200,
       body: { success: true, message: 'Products fetched successfully', data: result }
@@ -1986,9 +2011,12 @@ export async function getProductById(id, slug) {
         body: errorResponse("Product not found", 404),
       };
     }
+    // Ensure is_approved present
+    const normalized = { ...(product || {}) };
+    if (normalized.is_approved === undefined) normalized.is_approved = true;
     return {
       status: 200,
-      body: successResponse(product, "Product fetched"),
+      body: successResponse(normalized, "Product fetched"),
     };
   } catch (err) {
     // console.error("Get Product by ID error:", err.message);

@@ -192,6 +192,25 @@ export async function verifyUserAccess(request) {
 }
 
 /**
+ * Superadmin-only middleware
+ * Verifies admin token and ensures role is `superadmin`
+ */
+export async function verifySuperadminAccess(request) {
+  const adminResult = await verifyAdminAccess(request);
+  if (adminResult.error) return adminResult;
+  const admin = adminResult.user;
+  if (!admin || admin.role !== 'superadmin') {
+    return {
+      error: NextResponse.json(
+        { success: false, message: 'Superadmin access required' },
+        { status: 403 }
+      )
+    };
+  }
+  return { user: admin };
+}
+
+/**
  * Flexible middleware that checks both tables
  * Returns user info with userType indication
  */

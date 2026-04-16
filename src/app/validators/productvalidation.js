@@ -170,6 +170,9 @@ const baseProductSchema = {
    is_diamond: Joi.boolean().default(false).messages({
     "boolean.base": "Is diamond must be a boolean.",
   }),
+  is_approved: Joi.boolean().default(true).messages({
+    "boolean.base": "Is approved must be a boolean.",
+  }),
   featured: Joi.boolean().default(false).messages({
     "boolean.base": "Featured must be a boolean.",
   }),
@@ -203,6 +206,7 @@ export const productCreateValidator = Joi.object({
   taxClass: baseProductSchema.taxClass,
   gender: baseProductSchema.gender,
   is_diamond: baseProductSchema.is_diamond,
+  is_approved: baseProductSchema.is_approved,
   featured: baseProductSchema.featured,
 });
 
@@ -234,5 +238,6 @@ export const productUpdateValidator = Joi.object({
   taxClass: baseProductSchema.taxClass.optional(),
   gender: baseProductSchema.gender,
   is_diamond: baseProductSchema.is_diamond.optional(),
+  is_approved: baseProductSchema.is_approved.optional(),
   featured: baseProductSchema.featured.optional(),
 });

@@ -15,35 +15,47 @@ export async function createProductAttribute(form, admin = null) {
     const title = form.get("title");
     const category_id = form.get("category_id"); // <-- 👈 Add this line
 
-    const terms = [];
+    let terms = [];
 
-    // Parse terms from form data
-    let i = 0;
-    while (form.has(`terms[${i}][value]`)) {
-      const value = form.get(`terms[${i}][value]`)?.trim() || "";
-      // Optionally handle images if you expect them: terms[${i}][image]
-      const image = form.get(`terms[${i}][image]`);
-      if (image && typeof image === 'object' && image instanceof File) {
-        try {
-          validateImageFile(image);
-          const imageUrl = await saveFile(image, "attribute-images");
-          terms.push({ value, image: imageUrl }); // full path with folder prefix
-        } catch (fileError) {
-          return {
-            status: 400,
-            body: errorResponse(
-              `Error uploading image for term #${i}`,
-              400,
-              fileError.message
-            ),
-          };
+    // Support two shapes:
+    // 1) FormData with keys like terms[0][value], terms[0][image]
+    // 2) JSON payload where `terms` is an array of { value, image }
+    const rawTerms = form.get && form.get('terms');
+    if (Array.isArray(rawTerms)) {
+      // JSON array case
+      terms = rawTerms.map((t) => ({
+        value: (t.value || '').toString().trim(),
+        image: (t.image || '').toString(),
+      }));
+    } else {
+      // Parse terms from FormData-like entries
+      let i = 0;
+      while (form.has && form.has(`terms[${i}][value]`)) {
+        const value = (form.get(`terms[${i}][value]`) || "").toString().trim();
+        // Optionally handle images if you expect them: terms[${i}][image]
+        const image = form.get(`terms[${i}][image]`);
+        if (image && typeof image === 'object' && typeof File !== 'undefined' && image instanceof File) {
+          try {
+            validateImageFile(image);
+            const imageUrl = await saveFile(image, "attribute-images");
+            terms.push({ value, image: imageUrl }); // full path with folder prefix
+          } catch (fileError) {
+            return {
+              status: 400,
+              body: errorResponse(
+                `Error uploading image for term #${i}`,
+                400,
+                fileError.message
+              ),
+            };
+          }
+        } else {
+          // Carry over old image string or set to empty
+          const imageValue = (typeof image === 'string') ? image : "";
+          terms.push({ value, image: imageValue });
         }
-      } else {
-        // Carry over old image string or set to empty
-        const imageValue = (typeof image === 'string') ? image : "";
-        terms.push({ value, image: imageValue });
+        i++;
       }
-      i++;
     }
 
     // console.log(
@@ -55,15 +67,17 @@ export async function createProductAttribute(form, admin = null) {
 
     // (existing code...)
 
-    // Always set vendor field from admin if vendor, or allow superadmin to set or leave null
-    let vendorId = null;
-
-    if (admin && admin.role == 'vendor') {
-      vendorId = admin._id.toString();
-    } else if (admin && admin.role == 'superadmin') {
-      // Allow superadmin to set vendor or leave null
-      vendorId = form.get('vendor') || null;
+    // Only superadmin can create product attributes for the system.
+    // Vendors are not allowed to create attributes.
+    if (!admin || admin.role !== 'superadmin') {
+      return {
+        status: 403,
+        body: errorResponse('Only superadmin can create product attributes', 403)
+      };
     }
+
+    // When created by superadmin, attributes are global (available to all vendors)
+    const vendorId = null;
 
     // Validate final data
     const { error, value } = productAttributeCreateValidator.validate({

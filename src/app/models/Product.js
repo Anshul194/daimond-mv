@@ -129,6 +129,12 @@ const productSchema = new Schema(
       default: false,
       index: true,
     },
+    // Approval flag: products created by vendors must be approved by admin
+    is_approved: {
+      type: Boolean,
+      default: true,
+      index: true,
+    },
     deletedAt: {
       type: Date,
       default: null,

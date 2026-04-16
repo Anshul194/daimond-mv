@@ -7,7 +7,7 @@ import {
   deleteProductAttribute
 } from '../../controllers/productAttributeController.js';
 import { NextResponse } from 'next/server';
-import { verifyAdminAccess ,verifyTokenAndUser} from '../../middlewares/commonAuth.js';
+import { verifyAdminAccess, verifyTokenAndUser, verifySuperadminAccess } from '../../middlewares/commonAuth.js';
 // import  verifyAdminAccess  from '../../middlewares/commonAuth.js';
 import {parseNestedFormData} from '../../utils/parseNestedFormData.js';
 
@@ -97,16 +97,67 @@ export async function POST(request) {
   try {
     await dbConnect();
 
-    const authResult = await verifyAdminAccess(request);
+    const authResult = await verifySuperadminAccess(request);
     if (authResult.error) return authResult.error;
+    // Accept both JSON and multipart/form-data for creating attributes
+    const contentType = request.headers.get('content-type') || '';
+    let payload;
 
-    const form = await request.formData();
-    const result = await createProductAttribute(form, authResult.user);
+    if (contentType.includes('application/json')) {
+      payload = await request.json();
+      // Convert plain object to a FormData-like map expected by controller
+      // The controller expects a FormData instance; create a minimal shim
+      const form = new Map();
+      for (const key of Object.keys(payload || {})) {
+        form.set(key, payload[key]);
+      }
+      const result = await createProductAttribute(form, authResult.user);
+      return NextResponse.json(result.body, { status: result.status });
+    } else if (contentType.includes('multipart/form-data')) {
+      let form;
+      try {
+        form = await request.formData();
+      } catch (parseErr) {
+        // Common cause: missing boundary in Content-Type header (client set Content-Type manually)
+        // Fallbacks: try JSON body, then try urlencoded/text parsing before failing.
+        try {
+          const jsonPayload = await request.json();
+          const shim = new Map();
+          for (const key of Object.keys(jsonPayload || {})) {
+            shim.set(key, jsonPayload[key]);
+          }
+          const result = await createProductAttribute(shim, authResult.user);
+          return NextResponse.json(result.body, { status: result.status });
+        } catch (jsonErr) {
+          try {
+            const text = await request.text();
+            const params = new URLSearchParams(text);
+            if ([...params.keys()].length > 0) {
+              const shim2 = new Map();
+              for (const [k, v] of params.entries()) {
+                shim2.set(k, v);
+              }
+              const result = await createProductAttribute(shim2, authResult.user);
+              return NextResponse.json(result.body, { status: result.status });
+            }
+          } catch (textErr) {
+            // ignore and fall through to error response
+          }
+        }
 
-    return NextResponse.json(result.body, { status: result.status });
+        const msg = 'Failed to parse body as FormData. Ensure the request uses multipart/form-data with a proper boundary (let the client library set Content-Type when using multipart/form-data).';
+        return NextResponse.json({ success: false, message: msg, error: parseErr?.message }, { status: 400 });
+      }
+
+      const result = await createProductAttribute(form, authResult.user);
+      return NextResponse.json(result.body, { status: result.status });
+    } else {
+      return NextResponse.json({ success: false, message: 'Unsupported content type. Use application/json or multipart/form-data' }, { status: 415 });
+    }
   } catch (err) {
-    // console.error('POST /subcategory error:', err);
-    return NextResponse.json({ success: false, message: 'Invalid request' }, { status: 400 });
+    // console.error('POST /productattribute error:', err);
+    const message = err?.message || 'Invalid request';
+    return NextResponse.json({ success: false, message }, { status: 400 });
   }
 }
 
@@ -116,7 +167,7 @@ export async function POST(request) {
 export async function PUT(request) {
   try {
     await dbConnect();
-     const authResult = await verifyAdminAccess(request);
+    const authResult = await verifySuperadminAccess(request);
     if (authResult.error) return authResult.error;
     // console.log('Admin access verified', authResult);
 
@@ -184,6 +235,9 @@ export async function DELETE(request) {
         { status: 400 }
       );
     }
+
+    const authResult = await verifySuperadminAccess(request);
+    if (authResult.error) return authResult.error;
 
     const result = await deleteProductAttribute(id);
     return NextResponse.json(result.body, { status: result.status });
