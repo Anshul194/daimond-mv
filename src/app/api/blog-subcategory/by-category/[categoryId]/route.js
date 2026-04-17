@@ -11,6 +11,7 @@ export async function GET(request, { params }) {
     // console.log('🔧 Params received:', resolvedParams);
 
     const { categoryId } = resolvedParams || {};
+    console.log('GET /blog-subcategory/by-category - received categoryId:', categoryId);
     
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
@@ -27,6 +28,12 @@ export async function GET(request, { params }) {
 
     // console.log('GET /blog-subcategory/by-category - categoryId:', categoryId);
     const result = await getSubCategoriesByCategoryId(categoryId);
+    try {
+      const dataCount = result && result.body && result.body.data ? (Array.isArray(result.body.data) ? result.body.data.length : (result.body.data.docs ? result.body.data.docs.length : 0)) : 'unknown';
+      console.log('GET /blog-subcategory/by-category - service returned status:', result.status, 'dataCount:', dataCount);
+    } catch (e) {
+      console.log('GET /blog-subcategory/by-category - result logging error:', e.message);
+    }
 
     return NextResponse.json(result.body, { status: result.status, headers: corsHeaders });
   } catch (err) {

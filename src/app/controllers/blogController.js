@@ -1,4 +1,6 @@
 import BlogService from '../services/blogService.js';
+import BlogCategory from '../models/BlogCategory.js';
+import mongoose from 'mongoose';
 import { successResponse, errorResponse } from '../utils/response.js';
 import { saveFile, validateImageFile } from '../lib/fileUpload.js';
 import initRedis from '../config/redis.js';
@@ -203,6 +205,40 @@ export async function getBlogsByCategoryId(categoryId) {
     return {
       status: 500,
       body: errorResponse('Failed to fetch blogs by category', 500),
+    };
+  }
+}
+
+// Accept either a category ObjectId or a category name/slug prefix like 'education'
+export async function getBlogsByCategoryByIdentifier(identifier) {
+  try {
+    // If identifier is a valid ObjectId, reuse the existing method
+    if (mongoose.Types.ObjectId.isValid(identifier)) {
+      return await getBlogsByCategoryId(identifier);
+    }
+
+    // Try to find category by slug starting with identifier OR exact name (case-insensitive)
+    const regexStart = new RegExp(`^${identifier}`, 'i');
+    const regexExact = new RegExp(`^${identifier}$`, 'i');
+
+    const category = await BlogCategory.findOne({
+      deletedAt: null,
+      $or: [{ slug: regexStart }, { name: regexExact }]
+    }).lean();
+
+    if (!category) {
+      return {
+        status: 404,
+        body: errorResponse('Category not found', 404)
+      };
+    }
+
+    return await getBlogsByCategoryId(category._id);
+  } catch (err) {
+    console.error('getBlogsByCategoryByIdentifier controller error:', err);
+    return {
+      status: 500,
+      body: errorResponse('Failed to fetch blogs by category identifier', 500, err.message)
     };
   }
 }

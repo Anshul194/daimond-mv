@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  fetchBlogCategories,
-  fetchSubCategoriesByCategoryId,
-} from "@/store/slices/blogCategory";
+import axiosInstance from '@/axiosConfig/axiosInstance';
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -50,7 +47,15 @@ const Education = () => {
     return () => window.removeEventListener("resize", updateItemsPerView);
   }, []);
 
-  const maxSlides = Math.max(0, data.length - itemsPerView);
+  // Flatten subcategories -> blogs so each blog is a slide
+  const slides = (data || []).flatMap((item) => {
+    const sub = item.subCategory || item.subCategory || {};
+    return Array.isArray(item.blogs)
+      ? item.blogs.map((blog) => ({ blog, subCategory: sub }))
+      : [];
+  });
+
+  const maxSlides = Math.max(0, slides.length - itemsPerView);
 
   const nextSlide = () => {
     if (currentSlide < maxSlides) {
@@ -115,29 +120,11 @@ const Education = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const resultAction = await dispatch(
-          fetchSubCategoriesByCategoryId("6878cbb596dfc8337a3359b4")
-        );
-
-        if (fetchSubCategoriesByCategoryId.fulfilled.match(resultAction)) {
-          const payload = resultAction.payload;
-          if (Array.isArray(payload)) {
-            setData([...payload].reverse());
-          } else if (payload && Array.isArray(payload.data)) {
-            setData([...payload.data].reverse());
-          } else {
-            console.warn("Unexpected data structure from Education API:", payload);
-            setData([]);
-          }
-        } else {
-          console.warn(
-            "Failed to fetch Education subcategories:",
-            resultAction.payload
-          );
-          setData([]);
-        }
+        const res = await axiosInstance.get('/api/blog/category/education/blogs');
+        const payload = res.data?.body?.data || [];
+        setData(Array.isArray(payload) ? [...payload].reverse() : []);
       } catch (error) {
-        console.error("Error executing fetch in Education:", error);
+        console.error('Error fetching education blogs:', error);
         setData([]);
       }
     };
@@ -177,57 +164,47 @@ const Education = () => {
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          {data.map((style, index) => (
-            <Link
-              href={`/blogs/${style.BlogCategory?._id || style.BlogCategory || '6878cbb596dfc8337a3359b4'}/${style._id}`}
-              key={style._id}
-              className="flex-shrink-0 px-2"
-              style={{ width: `${slideWidth}%` }}
-            >
-              <div className="group cursor-pointer">
-                {/* Ring Image Container */}
-                <div className="aspect-[4/5] bg-gray-50 overflow-hidden mb-6 relative transition-transform duration-300 ease-in-out hover:scale-[1.03]">
-                  <div
-                    className="w-full h-full bg-cover bg-center"
-                    style={{
-                      backgroundImage: `url(${style.image})`,
-                      backgroundPosition: "center center",
-                    }}
-                  />
-                </div>
+          {slides.map((item, index) => {
+            const { blog, subCategory: sub } = item;
+            const linkHref = blog ? `/blogs/education/${sub._id}/${blog._id}` : `/blogs/education/${sub._id}`;
+            const imageUrl = blog?.coverImage || blog?.thumbnailImage || sub.image || '/images/default-education.svg';
+            const title = blog?.title || sub.name || 'Education';
+            const desc = blog?.description || (blog?.content ? blog.content.replace(/<[^>]*>/g, '') : '');
 
-                {/* Style Name */}
-                <div className="flex items-center justify-start gap-4">
-                  <h3 className="text-[10px] font-semibold font-gintoNord text-gray-900 tracking-wide uppercase">
-                    {style.name}
-                  </h3>
-                  <svg
-                    className="w-5 h-4 text-gray-600 group-hover:translate-x-1 transition-transform duration-300"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    {/* Arrow with tail */}
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
+            return (
+              <Link
+                href={linkHref}
+                key={blog?._id || sub._id || index}
+                className="flex-shrink-0 px-2"
+                style={{ width: `${slideWidth}%` }}
+              >
+                <div className="group cursor-pointer">
+                  {/* Image Container */}
+                  <div className="aspect-[4/5] bg-gray-50 overflow-hidden mb-6 relative transition-transform duration-300 ease-in-out hover:scale-[1.03]">
+                    <div
+                      className="w-full h-full bg-cover bg-center"
+                      style={{
+                        backgroundImage: `url(${imageUrl})`,
+                        backgroundPosition: "center center",
+                      }}
                     />
-                    <line
-                      x1="0"
-                      y1="12"
-                      x2="15"
-                      y2="12"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                    />
-                  </svg>
+                  </div>
+
+                  {/* Title and snippet */}
+                  <div className="flex flex-col items-start gap-2">
+                    <h3 className="text-sm font-semibold font-gintoNord text-gray-900 tracking-wide">
+                      {title}
+                    </h3>
+                    {desc && (
+                      <p className="text-[12px] text-gray-600 line-clamp-3">
+                        {desc.length > 140 ? desc.slice(0, 140) + '...' : desc}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </div>

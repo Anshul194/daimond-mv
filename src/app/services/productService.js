@@ -693,45 +693,53 @@ class ProductService {
         // Convert to ObjectIds - handle both ObjectId strings and numeric IDs
         const validCategoryIds = [];
         const numericIds = [];
+        const nameOrSlugKeys = [];
 
         for (const id of categoryIds) {
+          if (!id || id.trim() === '') continue;
           // Check if it's a valid ObjectId (24 chars)
           if (mongoose.Types.ObjectId.isValid(id) && id.length === 24) {
-            const objectId = new mongoose.Types.ObjectId(id);
-            validCategoryIds.push(objectId);
-            // console.log(`✅ Valid ObjectId category ID: ${id} -> ${objectId}`);
-          } else if (!isNaN(id) && id.trim() !== '') {
-            // It's a numeric ID - we'll need to look it up
+            validCategoryIds.push(new mongoose.Types.ObjectId(id));
+          } else if (!isNaN(id)) {
+            // It's a numeric ID - map later
             numericIds.push(parseInt(id));
-            // console.log(`⚠️ Numeric category ID found (will try to map): ${id}`);
           } else {
-            // console.log(`❌ Category ID "${id}" is not a valid ObjectId or numeric ID, skipping`);
+            // Treat as a name/slug key
+            nameOrSlugKeys.push(id);
           }
         }
 
-        // If we have numeric IDs, try to map them to ObjectIds by querying categories
+        // Map numeric IDs to ObjectIds if any
         if (numericIds.length > 0) {
           try {
-            // Fetch all categories and try to match by some numeric field or index
-            // Since we don't have a numeric ID field, we'll fetch all and use array index
             const allCategories = await Category.find({ deletedAt: null }).sort({ createdAt: 1 }).lean();
-            // console.log(`Found ${allCategories.length} categories for numeric ID mapping`);
-
-            // Map numeric IDs (assuming they're 1-based indices or some other mapping)
-            // If numeric IDs represent array positions, use them as indices
             for (const numericId of numericIds) {
-              // Try as 1-based index (subtract 1 for 0-based array)
               const categoryIndex = numericId - 1;
               if (categoryIndex >= 0 && categoryIndex < allCategories.length) {
                 const category = allCategories[categoryIndex];
-                if (category && category._id) {
-                  validCategoryIds.push(new mongoose.Types.ObjectId(category._id));
-                  // console.log(`Mapped numeric ID ${numericId} to ObjectId ${category._id}`);
-                }
+                if (category && category._id) validCategoryIds.push(new mongoose.Types.ObjectId(category._id));
               }
             }
           } catch (mapError) {
-            // console.error('Error mapping numeric category IDs:', mapError.message);
+            // ignore mapping errors
+          }
+        }
+
+        // Resolve name/slug keys to ObjectIds in one query
+        if (nameOrSlugKeys.length > 0) {
+          try {
+            const orQueries = [];
+            for (const key of nameOrSlugKeys) {
+              const regexStart = new RegExp(`^${key}`, 'i');
+              const regexExact = new RegExp(`^${key}$`, 'i');
+              orQueries.push({ slug: regexStart }, { name: regexExact });
+            }
+            const matchingCategories = await Category.find({ deletedAt: null, $or: orQueries }).lean();
+            if (matchingCategories && matchingCategories.length > 0) {
+              for (const c of matchingCategories) validCategoryIds.push(new mongoose.Types.ObjectId(c._id));
+            }
+          } catch (nameMapError) {
+            // ignore
           }
         }
 

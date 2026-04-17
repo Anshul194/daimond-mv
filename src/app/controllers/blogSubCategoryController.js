@@ -4,6 +4,7 @@ import initRedis from '../config/redis.js';
 import { blogSubCategoryCreateValidator, blogSubCategoryUpdateValidator } from '../validators/blogSubCategoryValidator.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 import BlogCategory from '../models/BlogCategory.js';
+import mongoose from 'mongoose';
 
 const blogSubCategoryService = new BlogSubCategoryService();
 const redis = initRedis(); 
@@ -203,7 +204,23 @@ export async function deleteBlogSubCategory(id) {
 
 export async function getSubCategoriesByCategoryId(categoryId) {
   try {
-    const subCategories = await blogSubCategoryService.getSubCategoriesByCategoryId(categoryId);
+    // Accept either ObjectId or category name/slug
+    let resolvedCategoryId = categoryId;
+    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+      // Try to find category by slug starting with identifier OR exact name (case-insensitive)
+      const regexStart = new RegExp(`^${categoryId}`, 'i');
+      const regexExact = new RegExp(`^${categoryId}$`, 'i');
+      const category = await BlogCategory.findOne({ deletedAt: null, $or: [{ slug: regexStart }, { name: regexExact }] }).lean();
+      if (!category) {
+        return {
+          status: 404,
+          body: { success: false, message: 'Category not found' }
+        };
+      }
+      resolvedCategoryId = category._id;
+    }
+
+    const subCategories = await blogSubCategoryService.getSubCategoriesByCategoryId(resolvedCategoryId);
 
     if (!subCategories || subCategories.length === 0) {
       return {

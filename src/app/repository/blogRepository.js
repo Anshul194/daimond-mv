@@ -99,8 +99,7 @@ class BlogRepository extends CrudRepository {
       BlogCategory: categoryId,
       deletedAt: null,
     })
-      .select('_id title BlogSubCategory') // only select needed fields
-      .populate('BlogSubCategory', '_id name') // only select subcategory id and title
+      .populate('BlogSubCategory', '_id name')
       .lean();
 
     const grouped = {};
@@ -115,11 +114,8 @@ class BlogRepository extends CrudRepository {
         };
       }
 
-      // Push only _id and title for blog
-      grouped[subcatId].blogs.push({
-        _id: blog._id,
-        title: blog.title,
-      });
+      // Push the full blog object
+      grouped[subcatId].blogs.push(blog);
     }
 
     return Object.values(grouped);

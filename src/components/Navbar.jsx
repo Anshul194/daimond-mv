@@ -139,6 +139,7 @@ const Navbar = () => {
 
   const navItems = [
     { name: "NEW ARRIVALS", href: "/new-arrivals" },
+    { name: "SHOP BY CATEGORY", href: "/shop-by-category", hasDropdown: false },
     ...(categories && categories.length > 0
       ? [...categories].reverse().map((category) => ({
         name: category.name.toUpperCase(),
@@ -148,7 +149,7 @@ const Navbar = () => {
       : []),
   ];
 
-  const visiblePriority = ["WEDDING RINGS", "ENGAGEMENT RINGS", "FINE JEWELLERY"];
+  const visiblePriority = ["WEDDING RINGS", "SHOP BY CATEGORY", "ENGAGEMENT RINGS", "FINE JEWELLERY"];
 
   const visibleLeftNavItems = navItems
     .filter((item) => visiblePriority.includes(item.name))
@@ -179,7 +180,7 @@ const Navbar = () => {
       setFineJewellerSubCategories(res.data?.data || []);
 
       const educationData = await axiosInstance.get(
-        "/api/blog/category/6878cbb596dfc8337a3359b4/blogs"
+        "/api/blog/category/education/blogs"
       );
 
       console.log("Education Data:", educationData.data.body.data);
@@ -1293,26 +1294,14 @@ const Navbar = () => {
             <div className="grid grid-cols-4 space-x-10 space-y-4">
               {educationCategories?.map((category, index) => (
                 <div className="" key={index}>
-                  <Link
-                    href={
-                      "/blogs/" +
-                      "6878cbb596dfc8337a3359b4/" +
-                      category.subCategory._id
-                    }
-                  >
+                  <Link href={"/blogs/education/" + category.subCategory._id}>
                     <h2 className="block w-full text-black hover:bg-[#00736C]/5 py-2 px-2 text-lg font-medium font-gintoNormal transition-colors duration-200">
                       {category.subCategory.name}
                     </h2>
                   </Link>
                   {category.blogs.slice(0, 2).map((blog) => (
                     <Link
-                      href={
-                        "/blogs/" +
-                        "6878cbb596dfc8337a3359b4/" +
-                        category.subCategory._id +
-                        "/" +
-                        blog._id
-                      }
+                      href={"/blogs/education/" + category.subCategory._id + "/" + blog._id}
                       key={blog._id}
                     >
                       <h2 className="block w-full text-black/60 hover:bg-[#00736C]/5 py-2 ml-4 px-2 text-sm font-medium font-gintoNormal transition-colors duration-200">
@@ -1514,7 +1503,7 @@ const Navbar = () => {
                             {educationCategories?.map((category, idx) => (
                               <div key={idx} className="space-y-3">
                                 <Link
-                                  href={`/blogs/6878cbb596dfc8337a3359b4/${category.subCategory._id}`}
+                                  href={`/blogs/education/${category.subCategory._id}`}
                                   className="text-[#00736C] text-[10px] font-bold tracking-[0.2em] uppercase block"
                                   onClick={() => setIsMobileMenuOpen(false)}
                                 >
@@ -1522,7 +1511,7 @@ const Navbar = () => {
                                 </Link>
                                 <div className="ml-2 space-y-2 flex flex-col">
                                   {category.blogs?.slice(0, 3).map((blog) => (
-                                    <Link key={blog._id} href={`/blogs/6878cbb596dfc8337a3359b4/${category.subCategory._id}/${blog._id}`} className="text-black/60 hover:text-black text-[13px] font-light" onClick={() => setIsMobileMenuOpen(false)}>
+                                    <Link key={blog._id} href={`/blogs/education/${category.subCategory._id}/${blog._id}`} className="text-black/60 hover:text-black text-[13px] font-light" onClick={() => setIsMobileMenuOpen(false)}>
                                       {blog.title}
                                     </Link>
                                   ))}

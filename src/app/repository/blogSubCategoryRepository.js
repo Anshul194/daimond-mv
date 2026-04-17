@@ -89,8 +89,22 @@ async getByCategoryId(categoryId) {
   try {
     console.log('🔍 getByCategoryId called with:', categoryId);
 
+    // Always treat the incoming identifier as a name/slug regex
+    const regex = { $regex: categoryId, $options: 'i' };
+    const matchingCategories = await BlogCategory.find({
+      $or: [{ name: regex }, { slug: regex }],
+      deletedAt: null,
+    }).lean();
+
+    if (!matchingCategories || matchingCategories.length === 0) {
+      console.log('📦 No matching categories for regex (always-regex):', categoryId);
+      return [];
+    }
+
+    const categoryQuery = { $in: matchingCategories.map((c) => c._id) };
+
     const result = await BlogSubCategory.find({
-      BlogCategory: categoryId,
+      BlogCategory: categoryQuery,
       deletedAt: null,
     }).sort({ createdAt: -1 });
 
