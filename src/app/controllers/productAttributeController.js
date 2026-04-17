@@ -141,14 +141,12 @@ function normalizeTerms(terms) {
 
 export async function getProductAttributes(query, admin = null) {
   try {
-    // Enforce vendor filter for vendors
-    if (admin && admin.role === 'vendor') {
-      query.vendor = (admin._id || admin.id).toString();
-    } else if (admin && admin.role === 'superadmin') {
-      // Superadmins can filter by vendor if desired
-      if (query.vendor) {
-        query.vendor = query.vendor;
-      }
+    // Allow vendors to fetch all attributes (no vendor filter)
+    // Only superadmins can filter by vendor if desired
+    if (admin && admin.role === 'superadmin' && query.vendor) {
+      query.vendor = query.vendor;
+    } else {
+      delete query.vendor;
     }
     // console.log("Get Product Attributes query:", query);
     const result = await productAttributeService.getAllProductAttributes(query);
