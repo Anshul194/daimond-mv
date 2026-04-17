@@ -68,16 +68,7 @@ export async function verifyTokenAndUser(request, userType = 'admin') {
       };
     }
 
-    // if (!userId) {
-    //   return {
-    //     error: NextResponse.json(
-    //       { success: false, message: 'User ID not found in token' },
-    //       { status: 401 }
-    //     )
-    //   };
-    // }
     if (!userId) {
-      // console.log('[Auth] User ID not found in token');
       return { error: NextResponse.json({ success: false, message: 'User ID not found in token' }, { status: 401 }) };
     }
 
@@ -92,160 +83,63 @@ export async function verifyTokenAndUser(request, userType = 'admin') {
       user = await User.findById(userId).select('-password');
       userModel = 'User';
     } else {
-      // console.log('[Auth] Invalid user type specified:', userType);
-      try {
-        // Connect to database
-        await dbConnect();
-
-        // Extract access token from Authorization header
-        const accessToken = request.headers.get('authorization')?.replace('Bearer ', '');
-        console.log('[Auth Debug] Access token:', accessToken);
-
-        if (!accessToken) {
-          console.log('[Auth Debug] No access token provided');
-          return {
-            error: NextResponse.json(
-              { success: false, message: 'Access token is required' },
-              { status: 401 }
-            )
-          };
-        }
-
-        // Verify token is valid in Redis
-        const redis = initRedis();
-        const tokenStatus = await redis.get(`accessToken:${accessToken}`);
-        console.log('[Auth Debug] Token status from Redis:', tokenStatus);
-
-        if (!tokenStatus || tokenStatus !== 'valid') {
-          console.log('[Auth Debug] Invalid or expired token in Redis');
-          return {
-            error: NextResponse.json(
-              { success: false, message: 'Invalid or expired token' },
-              { status: 401 }
-            )
-          };
-        }
-
-        // Decode JWT token to get user information
-        let decoded;
-        try {
-          decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
-          console.log('[Auth Debug] Decoded JWT:', decoded);
-        } catch (jwtError) {
-          console.log('[Auth Debug] JWT Verification Error:', jwtError);
-          return {
-            error: NextResponse.json(
-              { success: false, message: 'Invalid token format' },
-              { status: 401 }
-            )
-          };
-        }
-
-        // Extract user ID from token
-        const userId = decoded.id || decoded.userId || decoded.sub;
-        console.log('[Auth Debug] Extracted userId:', userId);
-
-        if (!userId) {
-          console.log('[Auth Debug] User ID missing in token payload:', decoded);
-          return {
-            error: NextResponse.json(
-              { success: false, message: 'User ID not found in token' },
-              { status: 401 }
-            )
-          };
-        }
-
-        let user;
-        let userModel;
-
-        // Check user existence based on userType
-        if (userType === 'admin') {
-          user = await Admin.findById(userId).select('-password');
-          userModel = 'Admin';
-        } else if (userType === 'user') {
-          user = await User.findById(userId).select('-password');
-          userModel = 'User';
-        } else {
-          console.log('[Auth Debug] Invalid user type specified:', userType);
-          return {
-            error: NextResponse.json(
-              { success: false, message: 'Invalid user type specified' },
-              { status: 500 }
-            )
-          };
-        }
-
-        console.log(`[Auth Debug] Found user in ${userModel} collection:`, user);
-        if (!user) {
-          console.log(`[Auth Debug] Access denied. ${userModel} not found.`);
-          return {
-            error: NextResponse.json(
-              {
-                success: false,
-                message: `Access denied. ${userModel} account not found.`
-              },
-              { status: 403 }
-            )
-          };
-        }
-
-        // Optional: Check if account is active
-        if (user.status && user.status !== 'active') {
-          console.log(`[Auth Debug] ${userModel} account is inactive`);
-          return {
-            error: NextResponse.json(
-              { success: false, message: `${userModel} account is inactive` },
-              { status: 403 }
-            )
-          };
-        }
-
-        // Optional: Check if account is deleted (soft delete)
-        if (user.isDeleted) {
-          console.log(`[Auth Debug] ${userModel} account has been deactivated`);
-          return {
-            error: NextResponse.json(
-              { success: false, message: `${userModel} account has been deactivated` },
-              { status: 403 }
-            )
-          };
-        }
-
-        // Return full admin document for admin users
-        if (userType === 'admin') {
-          console.log('final [Auth Debug] Authentication success for admin:', user);
-          return { user: user.toObject ? user.toObject() : user };
-        } else {
-          // For userType === 'user', keep previous structure
-          console.log('final [Auth Debug] Authentication success for user:', user);
-          return {
-            user: {
-              id: user._id,
-              email: user.email,
-              name: user.name,
-              userType: userType,
-              createdAt: user.createdAt,
-              lastLogin: user.lastLogin,
-              status: user.status
-            }
-          };
-        }
-
-      } catch (error) {
-        console.log('[Auth Debug] Authentication error:', error);
-        return {
-          error: NextResponse.json(
-            { success: false, message: 'Server error during authentication' },
-            { status: 500 }
-          )
-        };
-      }
-        }
+      return {
+        error: NextResponse.json(
+          { success: false, message: 'Invalid user type specified' },
+          { status: 500 }
+        )
       };
     }
 
-    // If both failed, return the admin error (more restrictive)
-    return adminResult;
+    if (!user) {
+      return {
+        error: NextResponse.json(
+          {
+            success: false,
+            message: `Access denied. ${userModel} account not found.`
+          },
+          { status: 403 }
+        )
+      };
+    }
+
+    // Optional: Check if account is active
+    if (user.status && user.status !== 'active') {
+      return {
+        error: NextResponse.json(
+          { success: false, message: `${userModel} account is inactive` },
+          { status: 403 }
+        )
+      };
+    }
+
+    // Optional: Check if account is deleted (soft delete)
+    if (user.isDeleted) {
+      return {
+        error: NextResponse.json(
+          { success: false, message: `${userModel} account has been deactivated` },
+          { status: 403 }
+        )
+      };
+    }
+
+    // Return full admin document for admin users
+    if (userType === 'admin') {
+      return { user: user.toObject ? user.toObject() : user };
+    } else {
+      // For userType === 'user', keep previous structure
+      return {
+        user: {
+          id: user._id,
+          email: user.email,
+          name: user.name,
+          userType: userType,
+          createdAt: user.createdAt,
+          lastLogin: user.lastLogin,
+          status: user.status
+        }
+      };
+    }
 
   } catch (error) {
     // console.error('Flexible authentication error:', error);
