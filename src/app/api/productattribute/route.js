@@ -27,17 +27,8 @@ export async function GET(request) {
       }, { status: 503 }); // 503 Service Unavailable for connection issues
     }
 
+    // Public endpoint: do not check for token or admin
     let admin = null;
-    let authResult = null;
-    // Try to get token, but don't require it
-     try {
-         authResult = await verifyTokenAndUser(request, 'admin');
-         if (!authResult.error) admin = authResult.user;
-       } catch (e) {
-        // console?.log('No admin authentication, proceeding as public',e?.message);
-         // Ignore auth errors for public access
-         admin = null;
-       }
 
     // Extract query params from NextRequest
     const { searchParams } = new URL(request.url);
