@@ -1,3 +1,78 @@
+/**
+ * Admin-only middleware
+ * Specifically checks Admin table
+ */
+export async function verifyAdminAccess(request) {
+  return await verifyTokenAndUser(request, 'admin');
+}
+
+/**
+ * User-only middleware
+ * Specifically checks User table
+ */
+export async function verifyUserAccess(request) {
+  return await verifyTokenAndUser(request, 'user');
+}
+
+/**
+ * Superadmin-only middleware
+ * Verifies admin token and ensures role is `superadmin`
+ */
+export async function verifySuperadminAccess(request) {
+  const adminResult = await verifyAdminAccess(request);
+  if (adminResult.error) return adminResult;
+  const admin = adminResult.user;
+  if (!admin || admin.role !== 'superadmin') {
+    return {
+      error: NextResponse.json(
+        { success: false, message: 'Superadmin access required' },
+        { status: 403 }
+      )
+    };
+  }
+  return { user: admin };
+}
+
+/**
+ * Flexible middleware that checks both tables
+ * Returns user info with userType indication
+ */
+export async function verifyAnyUserAccess(request) {
+  try {
+    // First try admin table
+    const adminResult = await verifyTokenAndUser(request, 'admin');
+    if (!adminResult.error) {
+      return {
+        user: {
+          ...adminResult.user,
+          userType: 'admin'
+        }
+      };
+    }
+
+    // If admin check failed, try user table
+    const userResult = await verifyTokenAndUser(request, 'user');
+    if (!userResult.error) {
+      return {
+        user: {
+          ...userResult.user,
+          userType: 'user'
+        }
+      };
+    }
+
+    // If both failed, return the admin error (more restrictive)
+    return adminResult;
+
+  } catch (error) {
+    return {
+      error: NextResponse.json(
+        { success: false, message: 'Server error during authentication' },
+        { status: 500 }
+      )
+    };
+  }
+}
 import jwt from 'jsonwebtoken';
 import Admin from '../models/admin.js';
 import User from '../models/User.js';
