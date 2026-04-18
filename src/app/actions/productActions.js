@@ -1,8 +1,8 @@
 "use server";
 
-import dbConnect from "../../lib/mongodb.js";
-import { createProduct } from "../../controllers/productController.js";
-import { withUserAction } from "../../middleware/withUserAction.js";
+import dbConnect from "../lib/mongodb.js";
+import { createProduct } from "../controllers/productController.js";
+import { withUserAction } from "../middleware/withUserAction.js";
 
 /**
  * Server Action to create a product with support for large file uploads (>10MB).

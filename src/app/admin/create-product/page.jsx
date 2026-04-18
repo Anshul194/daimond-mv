@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { createProductAction } from "../../../actions/productActions";
+import { createProductAction } from "../../actions/productActions";
 
 export default function CreateProductPage() {
   const [title, setTitle] = useState("");
