@@ -10,6 +10,18 @@ const nextConfig = {
   turbopack: {},
   transpilePackages: ["gsap"],
   serverExternalPackages: ["nodemailer"],
+  middlewareClientMaxBodySize: '100mb',
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '100mb',
+    },
+  },
+  // Although technically for Pages router, some Next.js environments use this for shared limits
+  api: {
+    bodyParser: {
+      sizeLimit: '100mb',
+    },
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },

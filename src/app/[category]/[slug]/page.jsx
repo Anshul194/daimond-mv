@@ -136,13 +136,32 @@ const ImageSlider = ({ images, currentIndex, onIndexChange }) => {
               zIndex: 10,
             }}
           >
-            <div className="w-full h-full overflow-hidden shadow-2xl bg-white">
-              <img
-                src={getImageUrl(images[currentIndex]) || undefined}
-                alt="current product image"
-                className="w-full h-full object-cover"
-                draggable={false}
-              />
+            <div className="w-full h-full overflow-hidden shadow-2xl bg-white border border-gray-100">
+              {(() => {
+                const mediaUrl = images[currentIndex];
+                const isVideo = mediaUrl?.toLowerCase()?.match(/\.(mp4|webm|ogg|mov)$/);
+                
+                if (isVideo) {
+                  return (
+                    <video
+                      src={getImageUrl(mediaUrl)}
+                      className="w-full h-full object-cover"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                    />
+                  );
+                }
+                return (
+                  <img
+                    src={getImageUrl(mediaUrl) || undefined}
+                    alt="current product image"
+                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+                    draggable={false}
+                  />
+                );
+              })()}
             </div>
           </div>
 
@@ -236,16 +255,32 @@ const ThumbnailNavigation = ({ images, currentIndex, onIndexChange }) => {
         <button
           key={index}
           onClick={() => onIndexChange(index)}
-          className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${index === currentIndex
+          className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all relative ${index === currentIndex
             ? "border-green-500 scale-110"
             : "border-gray-200 hover:border-gray-400"
             }`}
         >
-          <img
-            src={(typeof image === 'string' ? image : (image?.url || '')) || undefined}
-            alt={typeof image === 'string' ? `thumbnail-${index}` : (image?.alt || `thumbnail-${index}`)}
-            className="w-full h-full object-cover"
-          />
+          {(() => {
+            const url = (typeof image === 'string' ? image : (image?.url || ''));
+            const isVideo = url?.toLowerCase()?.match(/\.(mp4|webm|ogg|mov)$/);
+            
+            if (isVideo) {
+              return (
+                <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M6.3 2.841A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                  </svg>
+                </div>
+              );
+            }
+            return (
+              <img
+                src={getImageUrl(url) || undefined}
+                alt={typeof image === 'string' ? `thumbnail-${index}` : (image?.alt || `thumbnail-${index}`)}
+                className="w-full h-full object-cover"
+              />
+            );
+          })()}
         </button>
       ))}
     </div>
@@ -272,39 +307,48 @@ const ProductOptions = ({
   const availableSizes = React.useMemo(() => {
     if (!availableOptions || !Array.isArray(availableOptions)) return [];
 
-    // Extract unique size IDs from inventory details
-    const sizeIds = [...new Set(availableOptions
-      .map(detail => detail.size?._id || detail.size)
-      .filter(id => id)
-    )];
+    // Extract sizes from all variants
+    const sizesFound = availableOptions.map(variant => {
+      const sizeObj = variant.size;
+      return {
+        id: sizeObj?._id || sizeObj,
+        label: sizeObj?.size_code || sizeObj?.name || sizeObj?.value || (typeof sizeObj === 'string' ? sizeObj : null)
+      };
+    }).filter(s => s.id && s.label);
 
-    // Map size IDs back to global size objects to get labels/codes
-    return sizeIds.map(id => {
-      const sizeObj = globalSizes.find(s => s._id === id);
-      if (sizeObj) return sizeObj;
+    // Filter out duplicates and show original label
+    const uniqueSizes = [];
+    const seenIds = new Set();
 
-      // Fallback if size object isn't in global list yet (e.g. if it's populated as an object in inventory)
-      const detailWithSize = availableOptions.find(d => (d.size?._id || d.size) === id);
-      return detailWithSize.size;
-    }).filter(s => s && (s.size_code || s.name || s.value || typeof s === 'string'));
-  }, [availableOptions, globalSizes]);
+    sizesFound.forEach(s => {
+      if (!seenIds.has(s.id)) {
+        seenIds.add(s.id);
+        uniqueSizes.push({ id: s.id, label: s.label });
+      }
+    });
+
+    return uniqueSizes;
+  }, [availableOptions]);
 
   const dynamicAttributes = React.useMemo(() => {
-    if (!productData?.attributes) {
-      if (productData?.properties) {
-        return Object.entries(productData.properties).map(([key, value]) => ({ name: key, values: [value] }));
-      }
-      return [];
-    }
+    if (!productData?.inventory_set) return [];
 
-    const skipNames = ['metal type', 'metal', 'metaltype', 'size', 'ring size'];
-    return Object.entries(productData.attributes)
-      .filter(([key]) => !skipNames.includes(key.toLowerCase()))
-      .map(([key, vals]) => {
-         // Get unique values to display
-         const values = [...new Set(vals.map(v => v.attribute_value).filter(Boolean))];
-         return { name: key, values: values };
-      }).filter(attr => attr.values.length > 0);
+    const attributesMap = {};
+    const skipNames = ['size', 'color', 'metal type', 'metal', 'metaltype'];
+
+    // Collect all unique attribute keys and values from the valid inventory set
+    productData.inventory_set.forEach(combo => {
+      Object.entries(combo).forEach(([key, value]) => {
+        if (skipNames.includes(key.toLowerCase()) || !value) return;
+        if (!attributesMap[key]) attributesMap[key] = new Set();
+        attributesMap[key].add(value);
+      });
+    });
+
+    return Object.entries(attributesMap).map(([name, valuesSet]) => ({
+      name,
+      values: Array.from(valuesSet)
+    }));
   }, [productData]);
 
   return (
@@ -347,6 +391,7 @@ const ProductOptions = ({
           value={selectedOptions.metalType}
           onChange={(e) => onOptionChange("metalType", e.target.value)}
         >
+          <option value="">Select Metal Type</option>
           {availableOptions &&
             availableOptions.length > 0 &&
             availableOptions?.map((option, index) => (
@@ -391,14 +436,13 @@ const ProductOptions = ({
           onChange={(e) => onOptionChange("ringSize", e.target.value)}
         >
           <option value="">Select Ring Size</option>
-
           {availableSizes.map((size, index) => (
             <option
               className="text-gray-700 font-gintoNormal text-[10px] font-medium"
               key={index}
-              value={size?._id || (typeof size === 'string' ? size : (size?._id || ''))}
+              value={size.id}
             >
-              {size?.size_code || size?.name || size?.value || (typeof size === 'string' ? size : JSON.stringify(size))}
+              {size.label}
             </option>
           ))}
         </select>
@@ -422,6 +466,7 @@ const ProductOptions = ({
             value={selectedOptions[attr.name] || ""}
             onChange={(e) => onOptionChange(attr.name, e.target.value)}
           >
+            <option value="">Select {attr.name}</option>
             {attr.values.map((val, idx) => (
               <option className="text-gray-700 font-gintoNormal text-[10px] font-medium" key={idx} value={val}>
                 {val}
@@ -494,6 +539,7 @@ const ProductDetails = ({
   handelSelectDiamond,
   productPrice,
   selectedDiamond,
+  variantId,
 }) => {
   const dispatch = useDispatch();
   useEffect(() => {
@@ -547,9 +593,15 @@ const ProductDetails = ({
         {productData?.name}
       </h1>
 
-      <div className="text-xl font-medium text-gray-800 mb-4">
-        {currencySymbol}
-        {(productPrice || productData?.price || 0).toFixed(2)}
+      <div className="text-xl font-medium text-gray-800 mb-4 h-8">
+        {productPrice ? (
+          <>
+            {currencySymbol}
+            {productPrice.toFixed(2)}
+          </>
+        ) : (
+          <span className="text-red-500 text-sm italic font-normal">Selection Unavailable</span>
+        )}
       </div>
 
       <p className="text-gray-600 font-gintoNormal leading-5 mb-8">
@@ -748,26 +800,31 @@ const ProductDetails = ({
       </div>
 
       <div className="mb-4 max-w-md mx-auto">
-        {/* <Link href={`/cart`} className="w-full"> */}
-        {isOnCart ? (
-          <button
-            onClick={handelAddToCart}
-            className={`w-full cursor-pointer  mt-4 py-4 px-4 text-sm font-medium uppercase tracking-wider transition-colors  btn text-white hover:bg-green-700`}
-          >
-            ALREADY ADDED ON CART
-          </button>
+        {!variantId && Object.values(selectedOptions).every(v => v !== "") ? (
+           <div className="bg-red-50 border border-red-200 p-4 text-center rounded-lg mt-4">
+              <p className="text-red-600 text-xs font-semibold uppercase tracking-widest">Combination Out of Stock</p>
+              <p className="text-gray-500 text-[10px] lowercase mt-1">This specific metal and shape combination is currently unavailable.</p>
+           </div>
         ) : (
-          <button
-            onClick={handelAddToCart}
-            className={`w-full cursor-pointer  mt-4 py-4 px-4 text-sm font-medium uppercase tracking-wider transition-colors  btn text-white hover:bg-green-700`}
-          >
-            ADD TO CART | {currencySymbol}
-            {selectedDiamond
-              ? (Number(selectedDiamond.net || 0) + Number(productPrice || 0)).toFixed(2)
-              : (productPrice || 0).toFixed(2)}
-          </button>
+          <>
+            {isOnCart ? (
+              <button
+                onClick={handelAddToCart}
+                className={`w-full cursor-pointer  mt-4 py-4 px-4 text-sm font-medium uppercase tracking-wider transition-colors  btn text-white hover:bg-green-700`}
+              >
+                ALREADY ADDED ON CART
+              </button>
+            ) : (
+              <button
+                onClick={handelAddToCart}
+                disabled={!variantId}
+                className={`w-full cursor-pointer  mt-4 py-4 px-4 text-sm font-medium uppercase tracking-wider transition-colors  btn text-white ${!variantId ? "bg-gray-400 cursor-not-allowed" : "hover:bg-green-700 font-semibold"}`}
+              >
+                {!variantId ? (Object.values(selectedOptions).every(v => v !== "") ? "Product Not Available" : "Select Options") : `ADD TO CART | ${currencySymbol}${selectedDiamond ? (Number(selectedDiamond.net || 0) + Number(productPrice || 0)).toFixed(2) : productPrice?.toFixed(2)}`}
+              </button>
+            )}
+          </>
         )}
-        {/* </Link> */}
       </div>
     </div>
   );
@@ -831,42 +888,24 @@ const ProductModal = ({ onClose, loading }) => {
 
       setProductData(product);
       setProductPrice(product.price);
+      
+      // Initialize with empty options to force user to select
+      const initialOptions = {
+        metalType: "",
+        ringSize: "",
+      };
 
-      const firstVariant = product?.inventory?.inventory_details?.[0];
-
-      // Set default selected options from first variant if available
-      if (firstVariant) {
-        const metalTypeId = firstVariant?.color?._id || firstVariant?.color || null;
-        const ringSizeId = firstVariant?.size?._id || firstVariant?.size || null;
-
-        const defaultOptions = {
-          metalType: metalTypeId,
-          ringSize: ringSizeId,
-        };
-
-        if (product.attributes) {
-            const skipNames = ['metal type', 'metal', 'metaltype', 'size', 'ring size'];
-            Object.entries(product.attributes).forEach(([key, vals]) => {
-                if (!skipNames.includes(key.toLowerCase())) {
-                    const uniqueValues = [...new Set(vals.map(v => v.attribute_value).filter(Boolean))];
-                    if (uniqueValues.length > 0) {
-                        defaultOptions[key] = uniqueValues[0];
-                    }
-                }
-            });
-        }
-
-        setSelectedOptions(defaultOptions);
-
-        // console.log("Initial selected options set:", defaultOptions);
-      } else {
-        // console.warn("No inventory details found for product, selectedOptions will remain empty");
-        // If no variants, set empty options - user will need to select manually
-        setSelectedOptions({
-          metalType: "",
-          ringSize: "",
+      // Add other dynamic attributes as empty
+      if (product.attributes) {
+        const skipNames = ['metal type', 'metal', 'metaltype', 'size', 'ring size'];
+        Object.keys(product.attributes).forEach(key => {
+          if (!skipNames.includes(key.toLowerCase())) {
+            initialOptions[key] = "";
+          }
         });
       }
+
+      setSelectedOptions(initialOptions);
     } catch (error) {
       // console.error("Failed to fetch product data:", error);
       toast.error("Failed to load product data");
@@ -880,39 +919,46 @@ const ProductModal = ({ onClose, loading }) => {
   }, []);
 
   useEffect(() => {
-    // console.log("Selected options changed:", selectedOptions);
-    const filteredMetals = productData?.inventory?.inventory_details.filter(
-      (metal) => {
-        let isMatch = true;
-        if (selectedOptions?.metalType) isMatch = isMatch && (metal.color?._id === selectedOptions?.metalType || metal.color === selectedOptions?.metalType);
-        if (selectedOptions?.ringSize) isMatch = isMatch && (metal.size?._id === selectedOptions?.ringSize || metal.size === selectedOptions?.ringSize);
-        // We match extra attributes if they exist inside the metal inventory details
-        if (metal.attributes) {
-            const skipNames = ['metal type', 'metal', 'metaltype', 'size', 'ring size'];
-            Object.keys(selectedOptions || {}).forEach(optKey => {
-                if (!skipNames.includes(optKey.toLowerCase()) && optKey !== 'metalType' && optKey !== 'ringSize') {
-                    const attrNode = metal.attributes.find(a => a.name === optKey || a.attribute_name === optKey);
-                    if (attrNode) {
-                        isMatch = isMatch && ((attrNode.value || attrNode.attribute_value) === selectedOptions[optKey]);
-                    }
-                }
-            });
-        }
-        return isMatch;
-      }
-    );
+    if (!productData) return;
 
-    if (filteredMetals?.length > 0) {
-      const selectedMetal = filteredMetals[0];
-      const basePrice = Number(productData?.price || 0);
-      const additionalPrice = Number(selectedMetal.additional_price || 0);
+    // 1. Find the basic variant matching color and size
+    const matchedVariant = productData?.inventory?.inventory_details?.find((v) => {
+      const isColorMatch = (v.color?._id || v.color) === selectedOptions.metalType;
+      const isSizeMatch = (v.size?._id || v.size) === selectedOptions.ringSize;
+      return isColorMatch && isSizeMatch;
+    });
+
+    // 2. Validate the full combination against the product_inventory_set
+    const isValidCombination = productData.inventory_set?.some(combo => {
+      // Check if this combo matches our selected options
+      return Object.keys(selectedOptions).every(key => {
+        const val = selectedOptions[key];
+        if (val === "" || val === null) return false;
+
+        if (key === 'metalType') return true; // Color is handled by the inventory_details match
+
+        if (key === 'ringSize') {
+          // Compare size name instead of ID
+          const sizeName = matchedVariant?.size?.name || matchedVariant?.size;
+          return combo.Size === sizeName;
+        }
+
+        // Check other attributes (Shape, Stone, etc.)
+        const comboKey = Object.keys(combo).find(k => k.toLowerCase() === key.toLowerCase());
+        return comboKey && combo[comboKey] === val;
+      });
+    });
+
+    if (matchedVariant && isValidCombination) {
+      const basePrice = Number(productData.price || 0);
+      const additionalPrice = Number(matchedVariant.additional_price || 0);
       setProductPrice(basePrice + additionalPrice);
-      setVariantId(selectedMetal._id);
+      setVariantId(matchedVariant._id);
     } else {
-      setProductPrice(productData?.price || 0);
+      setProductPrice(null); 
       setVariantId("");
     }
-  }, [selectedOptions]);
+  }, [selectedOptions, productData]);
   // Handle escape key and body overflow
 
   const handelAddToCart = async () => {
@@ -997,6 +1043,8 @@ const ProductModal = ({ onClose, loading }) => {
       ...prev,
       [option]: value,
     }));
+    // Reset gallery to first item when variant changes
+    setCurrentImageIndex(0);
   };
 
   const handleOverlayClick = (e) => {
@@ -1029,25 +1077,70 @@ const ProductModal = ({ onClose, loading }) => {
         />
 
         {/* <div className="w-2/3 max-sm:w-full max-sm:-bottom-32 -bottom-28 pt-6 flex flex-wrap justify-center mx-auto  gap-2  p-2 rounded-lg"> */}
-        <div className="md:block relative w-full px-16 xl:px-40 max-sm:px-4 max-sm:pb-10 pb-40 md:px-20 h-fit  md:mx-auto bg-[#FEFAF5] shadow-xl overflow-scroll">
+        <div className="md:block relative w-full px-16 xl:px-40 max-sm:px-4 max-sm:pb-10 pb-40 md:px-20 h-fit md:mx-auto bg-[#FEFAF5] shadow-xl">
           <ModalHeader onClose={onClose} />
 
           <div
             className="flex flex-col md:flex-row overflow-hidden h-fit"
             style={{ height: "calc(100% - 64px)" }}
           >
-            <div className="w-full mt-2 md:w-1/2 h-full max-sm:mb-40 relative">
-              <ImageSlider
-                images={productData?.image || []}
-                currentIndex={currentImageIndex}
-                onIndexChange={setCurrentImageIndex}
-              />
+            <div className="w-full mt-2 md:w-1/2 h-full max-sm:mb-40 relative md:sticky md:top-0 md:h-[calc(100vh-100px)] flex flex-col items-center justify-center">
+              {(() => {
+                // Find a variant that matches ALL currently selected options
+                const selectedVariant = productData?.inventory?.inventory_details?.find(v => {
+                  let match = true;
+                  // Check color/metalType
+                  if (selectedOptions?.metalType) {
+                    match = match && ((v.color?._id || v.color) === selectedOptions.metalType);
+                  } else {
+                    return false; // must have at least metalType selected to show variant images
+                  }
 
-              <ThumbnailNavigation
-                images={productData?.image || []}
-                currentIndex={currentImageIndex}
-                onIndexChange={setCurrentImageIndex}
-              />
+                  // Check other attributes if the variant object has them
+                  if (v.attributes) {
+                    const skipNames = ['metal type', 'metal', 'metaltype', 'size', 'ring size'];
+                    Object.keys(selectedOptions).forEach(key => {
+                      if (!skipNames.includes(key.toLowerCase()) && selectedOptions[key]) {
+                         const attr = v.attributes.find(a => (a.name || a.attribute_name) === key);
+                         if (attr) {
+                           match = match && ((attr.value || attr.attribute_value) === selectedOptions[key]);
+                         }
+                      }
+                    });
+                  }
+                  return match;
+                });
+
+                let mediaList = [];
+                if (selectedVariant) {
+                  // If a matching variant is completely selected, show its specific media
+                  if (selectedVariant.ringImages?.length > 0) mediaList.push(...selectedVariant.ringImages);
+                  if (selectedVariant.ringVideo360) mediaList.push(selectedVariant.ringVideo360);
+                  if (selectedVariant.modelImage) mediaList.push(selectedVariant.modelImage);
+                  if (selectedVariant.modelVideo) mediaList.push(selectedVariant.modelVideo);
+                }
+
+                // Fallback to default product images if no variant matched or nothing selected
+                if (mediaList.length === 0) {
+                  mediaList = productData?.image || [];
+                }
+
+                return (
+                  <>
+                    <ImageSlider
+                      images={mediaList}
+                      currentIndex={currentImageIndex}
+                      onIndexChange={setCurrentImageIndex}
+                    />
+
+                    <ThumbnailNavigation
+                      images={mediaList}
+                      currentIndex={currentImageIndex}
+                      onIndexChange={setCurrentImageIndex}
+                    />
+                  </>
+                );
+              })()}
             </div>
 
             <ProductDetails
@@ -1059,6 +1152,7 @@ const ProductModal = ({ onClose, loading }) => {
               handelAddToCart={handelAddToCart}
               handelSelectDiamond={handelSelectDiamond}
               selectedDiamond={selectedDiamond}
+              variantId={variantId}
             />
           </div>
           <Difference />
@@ -1164,10 +1258,10 @@ const ProductModal = ({ onClose, loading }) => {
               ) : (
                 <button
                   onClick={handelAddToCart}
-                  disabled={isLoadingProduct || !productData || !selectedOptions.ringSize || !selectedOptions.metalType}
+                   disabled={isLoadingProduct || !productData || !variantId}
                   className="bg-green-100 hover:bg-green-200 font-gintoNord text-[10px] w-full md:max-w-[300px] text-gray-800 font-medium px-10 py-2 rounded border border-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoadingProduct ? "Loading..." : `ADD TO CART | ${currencySymbol}${selectedDiamond ? (selectedDiamond.net + productPrice).toFixed(2) : productPrice?.toFixed(2) || "00.00"}`}
+                  {isLoadingProduct ? "Loading..." : (!variantId ? "PRODUCT NOT AVAILABLE" : `ADD TO CART | ${currencySymbol}${selectedDiamond ? (selectedDiamond.net + productPrice).toFixed(2) : productPrice?.toFixed(2)}`)}
                 </button>
               )}
               {/* </Link> */}

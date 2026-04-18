@@ -118,18 +118,63 @@ export async function createProduct(formData, user = null) {
       }
     });
 
-    const itemImagePromises = itemVariants.map((variant, index) => {
+    const itemImagePromises = itemVariants.map(async (variant, index) => {
+      const promises = [];
       if (variant.image && variant.image instanceof File) {
-        return processImageUpload(
-          variant.image,
-          "products",
-          `item_${index}`
-        ).then((url) => {
-          variant.processedImageUrl = url;
-          return url;
+        promises.push(
+          processImageUpload(
+            variant.image,
+            "products",
+            `item_${index}`
+          ).then((url) => {
+            variant.processedImageUrl = url;
+            return url;
+          })
+        );
+      }
+      
+      if (variant.ringImages && variant.ringImages.length > 0) {
+        variant.processedRingImages = [];
+        variant.ringImages.forEach((ri, riIdx) => {
+          if (ri && ri instanceof File) {
+            promises.push(
+              processImageUpload(ri, "products", `item_${index}_ring_${riIdx}`).then(url => {
+                variant.processedRingImages.push(url);
+                return url;
+              })
+            );
+          }
         });
       }
-      return Promise.resolve(null);
+
+      if (variant.ringVideo360 && variant.ringVideo360 instanceof File) {
+        promises.push(
+          processImageUpload(variant.ringVideo360, "products", `item_${index}_video_360`).then(url => {
+            variant.processedRingVideo360 = url;
+            return url;
+          })
+        );
+      }
+
+      if (variant.modelImage && variant.modelImage instanceof File) {
+        promises.push(
+          processImageUpload(variant.modelImage, "products", `item_${index}_model_image`).then(url => {
+            variant.processedModelImage = url;
+            return url;
+          })
+        );
+      }
+
+      if (variant.modelVideo && variant.modelVideo instanceof File) {
+        promises.push(
+          processImageUpload(variant.modelVideo, "products", `item_${index}_model_video`).then(url => {
+            variant.processedModelVideo = url;
+            return url;
+          })
+        );
+      }
+      
+      return Promise.all(promises);
     });
 
     fileUploadPromises.push(...itemImagePromises);
@@ -409,6 +454,10 @@ export async function createProduct(formData, user = null) {
             extra_cost: detail.add_cost || detail.extra_cost || 0,
             stock_count: detail.stock_count,
             image: detail.image,
+            ringImages: detail.ringImages || [],
+            ringVideo360: detail.ringVideo360 || null,
+            modelImage: detail.modelImage || null,
+            modelVideo: detail.modelVideo || null,
             created_at: detail.created_at,
             updated_at: detail.updated_at,
             __v: detail.__v,
@@ -588,8 +637,21 @@ async function parseFormData(data) {
     const stock_count = itemStockCounts[itemIndex] && !isNaN(parseInt(itemStockCounts[itemIndex])) ? parseInt(itemStockCounts[itemIndex]) : 0;
     const image = itemImages[itemIndex];
 
+    const ringImages = [];
+    for(let r = 0; r < 4; r++) {
+       let ri = data.get(`item_ring_images[${itemIndex}][${r}]`);
+       if(!ri && data.getAll) {
+          const allRi = data.getAll(`item_ring_images[${itemIndex}][]`);
+          if(allRi && allRi[r]) ri = allRi[r];
+       }
+       if (ri) ringImages.push(ri);
+    }
+    const ringVideo360 = data.get(`item_ring_video_360[${itemIndex}]`);
+    const modelImage = data.get(`item_model_image[${itemIndex}]`);
+    const modelVideo = data.get(`item_model_video[${itemIndex}]`);
+
     // Skip if no meaningful variant fields are present
-    if (!size && !color && !stone && !stoneColor && !shapeValue && !caratValue && !settingStyle && !settingProfile && !bandType && !accent && !additionalPrice && !extra_cost && !stock_count && !image) {
+    if (!size && !color && !stone && !stoneColor && !shapeValue && !caratValue && !settingStyle && !settingProfile && !bandType && !accent && !additionalPrice && !extra_cost && !stock_count && !image && ringImages.length === 0 && !ringVideo360 && !modelImage && !modelVideo) {
       continue;
     }
 
@@ -606,6 +668,10 @@ async function parseFormData(data) {
       extra_cost: extra_cost,
       stock_count: stock_count,
       image: image || undefined,
+      ringImages,
+      ringVideo360: ringVideo360 || undefined,
+      modelImage: modelImage || undefined,
+      modelVideo: modelVideo || undefined,
       attributes: [],
     };
 
@@ -778,6 +844,10 @@ async function createInventoryDetailsInBatch(
       stock_count: variant.stock_count,
       sku: variant.sku || "",
       image: variant.processedImageUrl ? [variant.processedImageUrl] : [],
+      ringImages: variant.processedRingImages || [],
+      ringVideo360: variant.processedRingVideo360 || null,
+      modelImage: variant.processedModelImage || null,
+      modelVideo: variant.processedModelVideo || null,
     };
     inventoryDetails.push(detail);
 
@@ -1272,6 +1342,10 @@ export async function updateProduct(id, formData) {
               extra_cost: detail.add_cost || detail.extra_cost || 0,
               stock_count: detail.stock_count,
               image: detail.image,
+              ringImages: detail.ringImages || [],
+              ringVideo360: detail.ringVideo360 || null,
+              modelImage: detail.modelImage || null,
+              modelVideo: detail.modelVideo || null,
               created_at: detail.created_at,
               updated_at: detail.updated_at,
               __v: detail.__v,
@@ -1627,7 +1701,20 @@ async function parseUpdateFormData(data) {
     const stock_count = itemStockCounts[i];
     const image = itemImages[i];
 
-    if (!size && !color && !shape && !carat && !settingStyle && !settingProfile && !bandType && !accent && !inventoryDetailsId && !additionalPrice && !extra_cost && !stock_count && !image) {
+    const ringImages = [];
+    for(let r = 0; r < 4; r++) {
+       let ri = data.get(`item_ring_images[${i}][${r}]`);
+       if(!ri && data.getAll) {
+          const allRi = data.getAll(`item_ring_images[${i}][]`);
+          if(allRi && allRi[r]) ri = allRi[r];
+       }
+       if (ri) ringImages.push(ri);
+    }
+    const ringVideo360 = data.get(`item_ring_video_360[${i}]`);
+    const modelImage = data.get(`item_model_image[${i}]`);
+    const modelVideo = data.get(`item_model_video[${i}]`);
+
+    if (!size && !color && !shape && !carat && !settingStyle && !settingProfile && !bandType && !accent && !inventoryDetailsId && !additionalPrice && !extra_cost && !stock_count && !image && ringImages.length === 0 && !ringVideo360 && !modelImage && !modelVideo) {
       // console.log(`[DEBUG] Skipping empty variant at index ${i}`);
       continue;
     }
@@ -1647,6 +1734,10 @@ async function parseUpdateFormData(data) {
       extra_cost: extra_cost !== undefined && !isNaN(parseFloat(extra_cost)) ? parseFloat(extra_cost) : 0,
       stock_count: stock_count !== undefined && !isNaN(parseInt(stock_count)) ? parseInt(stock_count) : 0,
       image: image || undefined,
+      ringImages,
+      ringVideo360: ringVideo360 || undefined,
+      modelImage: modelImage || undefined,
+      modelVideo: modelVideo || undefined,
       attributes: [],
     };
 
@@ -1774,7 +1865,6 @@ async function updateInventoryDetailsInBatch(
     // console.log(`[DEBUG] Processing variant ${i}:`, JSON.stringify(variant));
     const { inventoryDetailsId, image, attributes, ...variantData } = variant;
 
-    // image is either a File object (new) or a string/array (existing)
     let imageUrls = [];
     if (image && image instanceof File) {
       const url = await processImageUpload(
@@ -1787,6 +1877,40 @@ async function updateInventoryDetailsInBatch(
       imageUrls = [image];
     } else if (Array.isArray(image)) {
       imageUrls = image;
+    }
+
+    let ringImageUrls = [];
+    if (variantData.ringImages && variantData.ringImages.length > 0) {
+      for (let riIdx = 0; riIdx < variantData.ringImages.length; riIdx++) {
+        const ri = variantData.ringImages[riIdx];
+        if (ri && ri instanceof File) {
+          const url = await processImageUpload(ri, "products", `item_${productId}_ring_${inventoryDetailsId || Date.now()}_${riIdx}`);
+          ringImageUrls.push(url);
+        } else if (typeof ri === 'string') {
+          ringImageUrls.push(ri);
+        }
+      }
+    }
+
+    let ringVideo360Url = null;
+    if (variantData.ringVideo360 && variantData.ringVideo360 instanceof File) {
+      ringVideo360Url = await processImageUpload(variantData.ringVideo360, "products", `item_${productId}_video_360_${inventoryDetailsId || Date.now()}`);
+    } else if (typeof variantData.ringVideo360 === 'string') {
+      ringVideo360Url = variantData.ringVideo360;
+    }
+
+    let modelImageUrl = null;
+    if (variantData.modelImage && variantData.modelImage instanceof File) {
+      modelImageUrl = await processImageUpload(variantData.modelImage, "products", `item_${productId}_model_image_${inventoryDetailsId || Date.now()}`);
+    } else if (typeof variantData.modelImage === 'string') {
+      modelImageUrl = variantData.modelImage;
+    }
+
+    let modelVideoUrl = null;
+    if (variantData.modelVideo && variantData.modelVideo instanceof File) {
+      modelVideoUrl = await processImageUpload(variantData.modelVideo, "products", `item_${productId}_model_video_${inventoryDetailsId || Date.now()}`);
+    } else if (typeof variantData.modelVideo === 'string') {
+      modelVideoUrl = variantData.modelVideo;
     }
 
     // Ensure stock_count is a valid number, default to 0 if not
@@ -1821,6 +1945,10 @@ async function updateInventoryDetailsInBatch(
       stock_count, // always a valid number
       sku: variantData.sku || "",
       image: imageUrls,
+      ringImages: ringImageUrls,
+      ringVideo360: ringVideo360Url,
+      modelImage: modelImageUrl,
+      modelVideo: modelVideoUrl,
     };
 
     // console.log(`[DEBUG] Variant ${i} detailData:`, JSON.stringify(detailData));

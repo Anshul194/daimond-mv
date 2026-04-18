@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { createProductAction } from "../../../actions/productActions";
 
 export default function CreateProductPage() {
   const [title, setTitle] = useState("");
@@ -30,12 +31,8 @@ export default function CreateProductPage() {
         }
       }
 
-      const res = await fetch('/api/product', {
-        method: 'POST',
-        body: fd,
-      });
-      const data = await res.json();
-      setResult({ ok: res.ok, data });
+      const result = await createProductAction(fd);
+      setResult({ ok: result.success, data: result.body || result });
     } catch (err) {
       setResult({ ok: false, error: err.message });
     } finally {

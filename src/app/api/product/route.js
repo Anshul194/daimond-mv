@@ -12,12 +12,27 @@ export async function POST(request) {
     await dbConnect();
     const { user, error } = await withUser(request, 'admin');
     if (error) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
-    const form = await request.formData();
+    
+    // Check Content-Length to provide better error for large files
+    const contentLength = request.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > 10 * 1024 * 1024) {
+       console.warn(`[WARNING] Large payload detected (${(contentLength / 1024 / 1024).toFixed(1)}MB). Next.js Route Handlers have a 10MB limit.`);
+    }
+
+    // Use arrayBuffer and manual conversion to bypass the 10MB smart-parser limit
+    const buffer = await request.arrayBuffer();
+    const contentType = request.headers.get('content-type');
+    
+    // Reconstruct as a Blob then get FormData
+    const blob = new Blob([buffer], { type: contentType });
+    // Use the native Response's formData parser on the blob instead of the request
+    const form = await new Response(blob, { headers: { 'content-type': contentType } }).formData();
+    
     const result = await createProduct(form, user);
     return NextResponse.json({ body: result.body }, { status: result.status });
   } catch (err) {
-    // console.error('POST /product error:', err);
-    return NextResponse.json({ success: false, message: 'Invalid request' }, { status: 400 });
+    console.error('POST /product error:', err);
+    return NextResponse.json({ success: false, message: 'Invalid request', error: err ? (err.message || err.toString()) : 'Unknown error' }, { status: 400 });
   }
 }
 

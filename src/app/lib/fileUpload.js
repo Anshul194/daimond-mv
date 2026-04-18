@@ -52,8 +52,12 @@ export function validateImageFile(file) {
     "image/webp",
     "image/avif",
     "image/svg+xml",
+    "video/mp4",
+    "video/webm",
+    "video/ogg",
+    "video/quicktime",
   ];
-  const maxSize = 10 * 1024 * 1024; // 5MB
+  const maxSize = 50 * 1024 * 1024; // 50MB for video/image mixed uploads
 
   console.log("Validating file:", typeof file, file.name, file.size, file.type);
   // If file is a string (e.g., from a URL or path), try to convert it to a File-like object
@@ -65,12 +69,12 @@ export function validateImageFile(file) {
 
   if (!allowedTypes.includes(file.type)) {
     throw new Error(
-      "Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed."
+      "Invalid file type. Only JPEG, PNG, GIF, WebP, SVG, MP4, WebM, OGG, and QuickTime files are allowed."
     );
   }
 
   if (file.size > maxSize) {
-    throw new Error("File size too large. Maximum size is 5MB.");
+    throw new Error("File size too large. Maximum size is 50MB.");
   }
 
   return true;

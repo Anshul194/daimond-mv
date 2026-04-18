@@ -40,6 +40,22 @@ const productInventoryDetailSchema = new Schema({
         type: [String], // Changed to array of strings to support multiple images
         default: [],
     },
+    ringImages: {
+        type: [String],
+        default: [],
+    },
+    ringVideo360: {
+        type: String,
+        default: null,
+    },
+    modelImage: {
+        type: String,
+        default: null,
+    },
+    modelVideo: {
+        type: String,
+        default: null,
+    },
     sku: {
         type: String,
         trim: true,
