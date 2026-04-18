@@ -71,7 +71,7 @@ const productSchema = new Schema(
     status: {
       type: String,
       enum: ["active", "inactive"],
-      default: "active",
+      default: "inactive",
       maxlength: 50,
     },
 
