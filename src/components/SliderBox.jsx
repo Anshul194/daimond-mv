@@ -46,13 +46,13 @@ const SliderBox = ({
   useEffect(() => {
     if (!loading && items.length > 0) {
       const ctx = gsap.context(() => {
-        gsap.fromTo(".slider-item", 
+        gsap.fromTo(".slider-item",
           { y: 50, opacity: 0 },
-          { 
-            y: 0, 
-            opacity: 1, 
-            stagger: 0.1, 
-            duration: 0.8, 
+          {
+            y: 0,
+            opacity: 1,
+            stagger: 0.1,
+            duration: 0.8,
             ease: "back.out(1.7)",
             scrollTrigger: {
               trigger: sliderRef.current,
@@ -196,11 +196,15 @@ const SliderBox = ({
           originalPrice: item.originalPrice || null,
         };
       } else {
+        // For styles, if valid products exist, we can use their images or the term image
+        const firstProductImage = item.products?.[0]?.image?.[0] || item.products?.[0]?.image;
+
         return {
           id: item._id || item.value,
           name: item.value || item.name || "Unnamed Style",
-          image: imageSrc,
+          image: imageSrc || firstProductImage,
           backgroundPosition: item.backgroundPosition || "center center",
+          productCount: item.products?.length || 0
         };
       }
     },
@@ -272,7 +276,7 @@ const SliderBox = ({
                   href={
                     type === "products"
                       ? `/${item.category_id?.slug}/${item.slug}`
-                      : `/engagement-230?style=${itemData.name.toLowerCase()}`
+                      : `/engagement-407?style=${itemData.name.toLowerCase()}`
                   }
                   className="slider-item flex-shrink-0 px-4 opacity-0"
                   style={{ width: `${slideWidth}%` }}
@@ -294,6 +298,13 @@ const SliderBox = ({
                           layout="fill"
                           objectFit="cover"
                         />
+                      )}
+
+                      {/* Show product count for styles if requested */}
+                      {type === "styles" && itemData.productCount > 0 && (
+                        <div className="absolute top-2 right-2 bg-black/60 text-white backdrop-blur-sm px-2 py-1 rounded text-[8px] font-bold uppercase tracking-tighter">
+                          {itemData.productCount} Items
+                        </div>
                       )}
 
                       {/* Show price for products */}

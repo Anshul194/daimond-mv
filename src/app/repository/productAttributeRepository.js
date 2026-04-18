@@ -121,6 +121,62 @@ class ProductAttributeRepository {
     }
   }
 
+  async getAttributesWithProducts(filterConditions, sortConditions, page, limit) {
+    try {
+      const skip = (page - 1) * limit;
+      // 1. Fetch the attributes first
+      const attributes = await ProductAttribute.find(filterConditions)
+        .populate("category_id")
+        .sort(sortConditions)
+        .skip(skip)
+        .limit(limit)
+        .lean();
+
+      const total = await ProductAttribute.countDocuments(filterConditions);
+
+      // 2. For each attribute and each term, find associated products
+      const Product = mongoose.models.Product;
+      const ProductInventoryDetailAttribute = mongoose.models.ProductInventoryDetailAttribute;
+
+      for (let attr of attributes) {
+        if (attr.terms && Array.isArray(attr.terms)) {
+          for (let term of attr.terms) {
+            // Find unique product IDs that have this attribute name and value
+            const mappings = await ProductInventoryDetailAttribute.find({
+              attribute_name: attr.title, // e.g. "Home page Styles"
+              attribute_value: term.value, // e.g. "Vintage"
+              deletedAt: null
+            }).select('product_id').lean();
+
+            const productIds = [...new Set(mappings.map(m => m.product_id.toString()))];
+
+            if (productIds.length > 0) {
+              // Fetch basic product info to show on homepage
+              term.products = await Product.find({
+                _id: { $in: productIds },
+                deletedAt: null,
+                status: 'active'
+              }).select('name slug image price saleprice').limit(12).lean();
+            } else {
+              term.products = [];
+            }
+          }
+        }
+      }
+
+      return {
+        data: attributes,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      };
+    } catch (error) {
+      console.error("Repo getAttributesWithProducts error:", error);
+      throw error;
+    }
+  }
+
   async softDelete(id) {
     try {
       return await ProductAttribute.findByIdAndUpdate(

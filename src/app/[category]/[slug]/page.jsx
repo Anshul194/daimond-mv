@@ -334,7 +334,7 @@ const ProductOptions = ({
     if (!productData?.inventory_set) return [];
 
     const attributesMap = {};
-    const skipNames = ['size', 'color', 'metal type', 'metal', 'metaltype'];
+    const skipNames = ['size', 'color', 'metal type', 'metal', 'metaltype', 'home page styles'];
 
     // Collect all unique attribute keys and values from the valid inventory set
     productData.inventory_set.forEach(combo => {
@@ -895,12 +895,19 @@ const ProductModal = ({ onClose, loading }) => {
         ringSize: "",
       };
 
-      // Add other dynamic attributes as empty
+      // Add other dynamic attributes - auto-select if they are "hidden" ones
       if (product.attributes) {
-        const skipNames = ['metal type', 'metal', 'metaltype', 'size', 'ring size'];
+        const skipNames = ['metal type', 'metal', 'metaltype', 'size', 'ring size', 'home page styles'];
         Object.keys(product.attributes).forEach(key => {
-          if (!skipNames.includes(key.toLowerCase())) {
+          const lowerKey = key.toLowerCase();
+          if (!skipNames.includes(lowerKey)) {
             initialOptions[key] = "";
+          } else if (lowerKey === 'home-page-styles' || lowerKey === 'home page styles' || lowerKey === 'style') {
+            // Auto-select the first value for hidden styles so the logic isn't blocked
+            const values = product.attributes[key];
+            if (values && values.length > 0) {
+              initialOptions[key] = values[0].attribute_value;
+            }
           }
         });
       }

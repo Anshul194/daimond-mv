@@ -725,14 +725,18 @@ class ProductService {
           }
         }
 
-        // Resolve name/slug keys to ObjectIds in one query
+        // Resolve name/slug keys to ObjectIds with partial match for flexibility
         if (nameOrSlugKeys.length > 0) {
           try {
             const orQueries = [];
             for (const key of nameOrSlugKeys) {
-              const regexStart = new RegExp(`^${key}`, 'i');
-              const regexExact = new RegExp(`^${key}$`, 'i');
-              orQueries.push({ slug: regexStart }, { name: regexExact });
+              // Try exact match first for performance, then partial match for robust category finding
+              const cleanKey = key.split('-')[0]; // Get 'engagement' from 'engagement-230'
+              orQueries.push(
+                { slug: new RegExp(`^${key}$`, 'i') },
+                { slug: new RegExp(`^${cleanKey}`, 'i') }, 
+                { name: new RegExp(`^${cleanKey}`, 'i') }
+              );
             }
             const matchingCategories = await Category.find({ deletedAt: null, $or: orQueries }).lean();
             if (matchingCategories && matchingCategories.length > 0) {
@@ -943,7 +947,14 @@ class ProductService {
         // });
 
         // 1. Fetch all matching attribute records
-        const attrRegexList = parsedAttributeFilters.map(v => new RegExp(`^${v}$`, "i"));
+        // Use a more lenient regex that allows for spaces or partial matches if needed
+        // but primarily handles the case where the value might have leading/trailing spaces in DB
+        const attrRegexList = parsedAttributeFilters.map(v => {
+          const trimmed = v.trim();
+          // Match the exact word but allow whitespace around it, or partial match for robustness
+          return new RegExp(`${trimmed}`, "i"); 
+        });
+
         const matches = await ProductInventoryDetailAttribute.find({
           $or: [
             { attribute_value: { $in: attrRegexList } },
@@ -969,12 +980,27 @@ class ProductService {
           if (!variantMatches[vid]) variantMatches[vid] = new Set();
           vidToPid[vid] = pid;
 
-          // Check direct attribute match
-          if (parsedAttributeFilters.some(pf => pf.toLowerCase() === val)) {
-            variantMatches[vid].add(name);
-            requiredAttrCategories.add(name);
-            matchedFilterValues.add(val);
-          }
+          // Check direct attribute match - use trimmed comparison for robustness
+          const lowerVal = val.trim().toLowerCase();
+          const lowerName = name.trim().toLowerCase();
+          
+          parsedAttributeFilters.forEach(f => {
+            const lowFilter = f.trim().toLowerCase();
+            if (lowerVal.includes(lowFilter)) {
+              // Special Logic: If the filter came from a "style" parameter,
+              // we ensure we track it under a consistent category name if it matches "home page styles"
+              let categoryToTrack = lowerName;
+              
+              // If filtering by "solitaire" (style), we know it belongs to the style family
+              if (lowerName.includes("style") || lowerName.includes("setting")) {
+                categoryToTrack = "style_family_filter";
+              }
+
+              variantMatches[vid].add(categoryToTrack);
+              requiredAttrCategories.add(categoryToTrack);
+              matchedFilterValues.add(lowFilter);
+            }
+          });
 
           // Check carat match
           if (name.includes("carat")) {
@@ -989,7 +1015,7 @@ class ProductService {
         });
 
         // 3. Verify all provided filters matched at least something
-        const unmatchedFilters = parsedAttributeFilters.filter(f => !matchedFilterValues.has(f.toLowerCase()));
+        const unmatchedFilters = parsedAttributeFilters.filter(f => !matchedFilterValues.has(f.trim().toLowerCase()));
         if (unmatchedFilters.length > 0) {
           // console.log("Some filters had no matches in database:", unmatchedFilters);
           // If some attribute filters exist that literally don't exist in DB, no product can match them

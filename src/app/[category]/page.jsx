@@ -128,24 +128,14 @@ const RingsBuild = ({ props }) => {
     // Combine the results into an object
 
     const attributeFilter = [];
-    if (shape && shape !== "") {
-      attributeFilter.push(shape);
-    }
-    if (style && style !== "") {
-      attributeFilter.push(style);
-    }
-    if (metal && metal !== "") {
-      attributeFilter.push(metal);
-    }
-    if (band && band !== "") {
-      attributeFilter.push(band);
-    }
-    if (profile && profile !== "") {
-      attributeFilter.push(profile);
-    }
-    if (accents && accents !== "") {
-      attributeFilter.push(accents);
-    }
+    if (shape && shape !== "") attributeFilter.push(shape);
+    if (style && style !== "") attributeFilter.push(style);
+    if (metal && metal !== "") attributeFilter.push(metal);
+    if (band && band !== "") attributeFilter.push(band);
+    if (profile && profile !== "") attributeFilter.push(profile);
+    if (accents && accents !== "") attributeFilter.push(accents);
+    
+    console.log("Applying filters to API call:", { categoryID, attributeFilter });
 
     if (categoryID) {
       setCategoryId(categoryID);

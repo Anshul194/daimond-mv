@@ -102,13 +102,24 @@ class ProductAttributeService {
       }
 
       // Execute query with dynamic filters, sorting, and pagination
-      // // // console.log("[DEBUG] Final filterConditions for Attributes:", JSON.stringify(filterConditions, null, 2));
-      const productAttributes = await this.productAttributeRepo.getAll(
-        filterConditions,
-        sortConditions,
-        pageNum,
-        limitNum
-      );
+      const populateProducts = queryObj.populateProducts === 'true' || parsedFilters.title === 'Home page Styles';
+      
+      let productAttributes;
+      if (populateProducts) {
+        productAttributes = await this.productAttributeRepo.getAttributesWithProducts(
+          filterConditions,
+          sortConditions,
+          pageNum,
+          limitNum
+        );
+      } else {
+        productAttributes = await this.productAttributeRepo.getAll(
+          filterConditions,
+          sortConditions,
+          pageNum,
+          limitNum
+        );
+      }
 
       // // // console.log(`[DEBUG] Found ${productAttributes.data?.length || 0} attributes. Total: ${productAttributes.total}`);
       if (productAttributes.data?.length > 0) {
