@@ -16,27 +16,28 @@ export async function saveFile(file, uploadDir = "uploads") {
   // Generate unique filename
   const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
   const fileExtension = path.extname(file.name);
-  const filename = `profile-${uniqueSuffix}${fileExtension}`;
+  const filename = `${uniqueSuffix}${fileExtension}`; // Removed 'profile-' prefix for general usage
   const filepath = path.join(uploadPath, filename);
 
   // Save file
   await writeFile(filepath, buffer);
 
-  // Return the public URL path
-  return `/${uploadDir}/${filename}`;
+  // Return the dynamic public URL path to bypass static caching
+  return `/api/media/${uploadDir}/${filename}`;
 }
 
 export async function deleteFile(fileUrl) {
   try {
     if (!fileUrl) return;
 
-    // Extract filename from URL
-    const filename = path.basename(fileUrl);
-    const filepath = path.join(process.cwd(), "public", fileUrl);
+    // Extract filename and the actual relative path in public folder
+    // If URL is /api/media/products/file.jpg, we need products/file.jpg
+    const relativePath = fileUrl.replace(/^\/api\/media\//, "").replace(/^\//, "");
+    const filepath = path.join(process.cwd(), "public", relativePath);
 
     // Delete file
     await unlink(filepath);
-    console.log("Deleted old file:", filename);
+    console.log("Deleted old file:", relativePath);
   } catch (error) {
     console.error("Error deleting file:", error.message);
     // Don't throw error - just log it
