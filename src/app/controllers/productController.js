@@ -331,7 +331,7 @@ export async function createProduct(formData, user = null) {
       cost: product.cost,
       badge_id: product.badge_id,
       brand_id: product.brand_id,
-      status: product.status || "active",
+      status: product.status || "inactive",
       product_type: product.product_type,
       sold_count: product.sold_count || 0,
       min_purchase: product.min_purchase,
@@ -522,6 +522,7 @@ async function parseFormData(data) {
     vendor_id: null,
     isTaxable: data.get("isTaxable"),
     taxClass: data.get("taxClass"),
+    status: data.get("status") || undefined,
   };
 
   // Allow explicit is_approved to be passed via form data (string 'true'/'false')

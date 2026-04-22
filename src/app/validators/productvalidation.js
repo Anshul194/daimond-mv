@@ -83,7 +83,7 @@ const baseProductSchema = {
     "number.positive": "Brand ID must be positive.",
   }),
 
-  status: Joi.string().valid("active", "inactive").default("active").messages({
+  status: Joi.string().valid("active", "inactive").default("inactive").messages({
     "any.only": "Status must be either active or inactive.",
   }),
 
