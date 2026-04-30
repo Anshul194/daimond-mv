@@ -8,8 +8,9 @@ const orderService = new OrderService(); // create instance
 export async function PUT(request, context) {
   await dbConnect();
 
-  const { params } = await context; // ✅ await context
-  const { id } = params;
+  const { params } = context;
+  const awaitedParams = await params;
+  const { id } = awaitedParams;
 
   const authResult = await verifyAdminAccess(request);
   if (authResult.error) return authResult.error;
