@@ -228,8 +228,9 @@ class ProductService {
         }
       }
 
-      // Set image if updated
-      if (data.image) {
+      // Set image if provided in the update payload.
+      // Use strict undefined check so an explicit empty array `[]` clears images.
+      if (data.image !== undefined) {
         updatedData.image = data.image;
       }
 

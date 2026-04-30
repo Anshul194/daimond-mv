@@ -994,6 +994,23 @@ export async function updateProduct(id, formData) {
     }
 
     // Step 4: Process file uploads
+    // Debug: log received FormData keys and value types to diagnose missing files
+    try {
+      console.log('FormData keys:', Array.from(formData.keys()));
+      for (const key of formData.keys()) {
+        const vals = formData.getAll(key);
+        try {
+          console.log(
+            `FormData[${key}] count=${vals.length}:`,
+            vals.map(v => (v && typeof v === 'object' && v.constructor && v.constructor.name === 'File') ? `File(name=${v.name}, size=${v.size})` : String(v).slice(0,200))
+          );
+        } catch (e) {
+          console.log(`FormData[${key}] values: (unable to stringify)`, e && e.message);
+        }
+      }
+    } catch (e) {
+      console.log('Error logging formData keys:', e && e.message);
+    }
     const fileUploadPromises = [];
     let mainImageUrls = [];
 
@@ -1015,6 +1032,7 @@ export async function updateProduct(id, formData) {
     }
 
     const uniqueMainImages = Array.from(new Set(mainImages));
+    console.log('Detected main images count:', uniqueMainImages.length);
     uniqueMainImages.forEach((mainImage, idx) => {
       if (mainImage && mainImage instanceof File) {
         fileUploadPromises.push(
@@ -1043,18 +1061,42 @@ export async function updateProduct(id, formData) {
 
     fileUploadPromises.push(...itemImagePromises);
     await Promise.all(fileUploadPromises);
+    console.log('Processed mainImageUrls:', mainImageUrls);
+    // Log processed variant images if any
+    try {
+      console.log('Item variants processed image URLs:', itemVariants.map((v, i) => v.processedImageUrl ? `idx${i}=${v.processedImageUrl}` : `idx${i}=<none>`));
+    } catch (e) {}
 
     // Parse existing images that were kept by the user
     const existingImagesList = [];
     const existingImagesFromForm = formData.getAll("existingImages");
+    // Normalize and ignore empty-string artifacts created when JSON arrays
+    // are converted to FormData (String([]) -> ''). Only treat explicit
+    // '[]' string as a clear signal. Otherwise ignore blank entries.
     if (existingImagesFromForm.length === 1 && existingImagesFromForm[0] === '[]') {
-      // all existing images were deleted by user
+      // client explicitly removed all existing images
     } else if (existingImagesFromForm.length > 0) {
-      existingImagesFromForm.forEach(img => existingImagesList.push(img));
+      existingImagesFromForm.forEach((img) => {
+        if (img === null || img === undefined) return;
+        const s = String(img).trim();
+        if (s === '') return; // ignore empty strings from JSON->FormData
+        if (s.toLowerCase() === 'null' || s.toLowerCase() === 'undefined') return;
+        existingImagesList.push(s);
+      });
     }
 
-    // Merge new images with retained existing ones
-    value.image = [...existingImagesList, ...mainImageUrls];
+    // Merge new images with retained existing ones.
+    // Files included in the request should take precedence over an
+    // explicit '[]' marker in `existingImages` (which often means "clear").
+    // If files are uploaded, use them (plus any retained existingImages).
+    if (uniqueMainImages.length > 0) {
+      value.image = [...existingImagesList, ...mainImageUrls];
+    } else if (existingImagesFromForm.length === 1 && existingImagesFromForm[0] === '[]') {
+      // client explicitly removed all existing images (and no new files were uploaded)
+      value.image = [];
+    } else if (existingImagesFromForm.length > 0) {
+      value.image = [...existingImagesList];
+    }
 
     // Step 5: Update product
     const updatedProduct = await productService.updateProduct(id, value, {
