@@ -4,6 +4,12 @@ import axios from "axios";
 
 // Add this declaration to extend ImportMeta for Vite env support
 
+
+
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000/";
+
 const parseStoredUser = () => {
   try {
     const storedUser = localStorage.getItem("user");

@@ -15,6 +15,7 @@ export default function ElegantLogin() {
   const [otp, setOtp] = useState("");
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const otpInputRef = useRef(null);
 
   const containerRef = useRef(null);
   const leftSideRef = useRef(null);
@@ -24,6 +25,7 @@ export default function ElegantLogin() {
   const buttonRef = useRef(null);
   const diamondRef = useRef(null);
   const [sparkles, setSparkles] = useState([]);
+  const [mounted, setMounted] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -56,6 +58,7 @@ export default function ElegantLogin() {
 
   // Generate sparkle positions on client only to avoid SSR/CSR mismatch
   useEffect(() => {
+    setMounted(true);
     const arr = Array.from({ length: 6 }).map(() => ({
       top: `${Math.random() * 100}%`,
       left: `${Math.random() * 100}%`,
@@ -65,10 +68,29 @@ export default function ElegantLogin() {
 
   useEffect(() => {
     if (isOtpSent) {
+      try {
+        const el = formCardRef.current?.querySelector('.otp-state');
+        if (el) {
+          el.style.transform = 'none';
+          el.style.opacity = '1';
+          el.style.pointerEvents = 'auto';
+        }
+      } catch (e) {
+        console.log('login: failed to force-show otp-state', e && e.message);
+      }
+
       gsap.fromTo(".otp-state",
         { x: 30, opacity: 0 },
         { x: 0, opacity: 1, duration: 0.6, ease: "power3.out", delay: 0.1 }
       );
+      console.log('login useEffect: isOtpSent =', isOtpSent);
+      try {
+        // focus the hidden input so user can type immediately
+        if (otpInputRef.current) {
+          otpInputRef.current.focus();
+          otpInputRef.current.selectionStart = otpInputRef.current.value.length;
+        }
+      } catch (e) {}
     }
   }, [isOtpSent]);
 
@@ -83,6 +105,9 @@ export default function ElegantLogin() {
       const result = await dispatch(sendOtp(email));
 
       if (result.payload?.success) {
+        // Ensure OTP UI is shown immediately even if animation fails
+        setIsOtpSent(true);
+        console.log('login: OTP sent, isOtpSent set to true');
         // Transition animation to OTP state
         const tl = gsap.timeline();
         tl.to(".login-initial-state", { x: -30, opacity: 0, duration: 0.4, ease: "power2.in", onComplete: () => setIsOtpSent(true) });
@@ -128,7 +153,7 @@ export default function ElegantLogin() {
     <div ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#FEFAF5]">
       {/* Decorative Background Elements (positions generated on client) */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
-        {sparkles.length > 0 && sparkles.map((s, i) => (
+        {mounted && sparkles.map((s, i) => (
           <div
             key={i}
             className="bg-sparkle absolute w-2 h-2 rounded-full bg-[#00736C]/10"
@@ -188,8 +213,7 @@ export default function ElegantLogin() {
             {/* Glossy Overlay Effect */}
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
-            {!isOtpSent ? (
-              <div className="login-initial-state space-y-8 relative">
+            <div className={`login-initial-state space-y-8 relative ${isOtpSent ? 'hidden' : 'block'}`}>
                 <div className="lg:hidden flex justify-center mb-6">
                   <Image
                     src={ArdorLogo}
@@ -250,8 +274,8 @@ export default function ElegantLogin() {
                   </div>
                 </div>
               </div>
-            ) : (
-              <div className="otp-state space-y-8 relative shadow-none opacity-0">
+
+              <div className={`otp-state space-y-8 relative shadow-none ${isOtpSent ? 'block' : 'hidden'}`}>
                 <div className="flex items-center justify-between mb-4">
                   <button onClick={handleBack} className="text-gray-400 hover:text-gray-900 transition-colors flex items-center text-[10px] font-gintoNord tracking-wider">
                     <ChevronLeft className="w-4 h-4 mr-1" /> BACK
@@ -267,7 +291,7 @@ export default function ElegantLogin() {
                 </div>
 
                 <div className="space-y-6">
-                  <div className="flex justify-between items-center space-x-2">
+                  <div className="flex justify-between items-center space-x-2 relative">
                     {[0, 1, 2, 3, 4, 5].map((i) => (
                       <div key={i} className="otp-field flex-1 h-14 bg-gray-50 text-2xl font-light text-center flex items-center justify-center border-b-2 border-gray-100 focus-within:border-[#00736C] focus-within:bg-white transition-all duration-300">
                         {otp[i] || ""}
@@ -275,12 +299,15 @@ export default function ElegantLogin() {
                     ))}
                     {/* Hidden input for better accessibility/handling */}
                     <input
+                      ref={otpInputRef}
                       type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       value={otp}
                       onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                      className="absolute inset-0 opacity-0 cursor-default w-full"
+                      className="absolute inset-0 opacity-0 w-full"
                       maxLength="6"
-                      autoFocus
+                      aria-label="OTP input"
                     />
                   </div>
 
@@ -303,7 +330,6 @@ export default function ElegantLogin() {
                   </div>
                 </div>
               </div>
-            )}
           </div>
 
           <p className="mt-8 text-[10px] text-center text-gray-400 font-gintoNord tracking-[0.2em] uppercase opacity-50">

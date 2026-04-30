@@ -19,6 +19,7 @@ export default function Signup() {
   const [otp, setOtp] = useState("");
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const otpInputRef = useRef(null);
   
   const containerRef = useRef(null);
   const leftSideRef = useRef(null);
@@ -28,6 +29,9 @@ export default function Signup() {
   const logoRef = useRef(null);
 
   const dispatch = useDispatch();
+
+  const [sparkles, setSparkles] = useState([]);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -69,6 +73,9 @@ export default function Signup() {
     try {
       const result = await dispatch(sendOtp(formData.email));
       if (result.payload?.success) {
+        // Ensure OTP state is shown even if GSAP animation fails
+        setIsOtpSent(true);
+        console.log('signup: OTP sent, isOtpSent set to true');
         gsap.to(".signup-initial-state", { x: -30, opacity: 0, duration: 0.4, ease: "power2.in" })
           .eventCallback("onComplete", () => setIsOtpSent(true));
         toast.success("Verification code sent!");
@@ -81,6 +88,39 @@ export default function Signup() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    console.log('signup component isOtpSent changed:', isOtpSent);
+    if (isOtpSent) {
+      try {
+        const el = formCardRef.current?.querySelector('.otp-state');
+        if (el) {
+          el.style.transform = 'none';
+          el.style.opacity = '1';
+          el.style.pointerEvents = 'auto';
+        }
+      } catch (e) {
+        console.log('signup: failed to force-show otp-state', e && e.message);
+      }
+      try {
+        if (otpInputRef.current) {
+          otpInputRef.current.focus();
+          otpInputRef.current.selectionStart = otpInputRef.current.value.length;
+        }
+      } catch (e) {}
+    }
+  }, [isOtpSent]);
+
+  useEffect(() => {
+    // Generate sparkle positions only on client after mount to avoid
+    // hydration mismatch caused by Math.random during SSR.
+    setMounted(true);
+    const arr = Array.from({ length: 6 }).map(() => ({
+      top: `${Math.random() * 100}%`,
+      left: `${Math.random() * 100}%`,
+    }));
+    setSparkles(arr);
+  }, []);
 
   const handleVerifyAndSignup = async () => {
     if (otp.length !== 6) {
@@ -119,14 +159,14 @@ export default function Signup() {
   return (
     <div ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#FEFAF5]">
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
-        {[...Array(6)].map((_, i) => (
-          <div 
+        {mounted && sparkles.map((s, i) => (
+          <div
             key={i}
             className="bg-sparkle absolute w-2 h-2 rounded-full bg-[#00736C]/10"
             style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              filter: "blur(1px)"
+              top: s.top,
+              left: s.left,
+              filter: "blur(1px)",
             }}
           />
         ))}
@@ -161,8 +201,7 @@ export default function Signup() {
           <div className="bg-white/70 backdrop-blur-xl p-10 lg:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-white/50 relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
-            {!isOtpSent ? (
-              <div className="signup-initial-state space-y-8 relative">
+            <div className={`signup-initial-state space-y-8 relative ${isOtpSent ? 'hidden' : 'block'}`}>
                 <div ref={titleRef} className="space-y-3">
                   <div className="lg:hidden flex justify-center mb-6">
                     <Image src={ArdorLogo} alt="Ardor Diamonds" width={140} height={50} className="object-contain" />
@@ -243,8 +282,8 @@ export default function Signup() {
                   </p>
                 </div>
               </div>
-            ) : (
-              <div className="otp-state space-y-8 relative">
+            
+              <div className={`otp-state space-y-8 relative ${isOtpSent ? 'block' : 'hidden'}`}>
                 <div className="flex items-center justify-between mb-4">
                   <button onClick={handleBack} className="text-gray-400 hover:text-gray-900 transition-colors flex items-center text-[10px] font-gintoNord tracking-wider">
                     <ChevronLeft className="w-4 h-4 mr-1" /> BACK
@@ -260,19 +299,22 @@ export default function Signup() {
                 </div>
 
                 <div className="space-y-6">
-                  <div className="flex justify-between items-center space-x-2">
+                  <div className="flex justify-between items-center space-x-2 relative">
                     {[0, 1, 2, 3, 4, 5].map((i) => (
                       <div key={i} className="otp-field flex-1 h-14 bg-gray-50 text-2xl font-light text-center flex items-center justify-center border-b-2 border-gray-100 focus-within:border-[#00736C] focus-within:bg-white transition-all duration-300">
                         {otp[i] || ""}
                       </div>
                     ))}
                     <input
+                      ref={otpInputRef}
                       type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       value={otp}
                       onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                      className="absolute inset-0 opacity-0 cursor-default w-full"
+                      className="absolute inset-0 opacity-0 w-full"
                       maxLength="6"
-                      autoFocus
+                      aria-label="OTP input"
                     />
                   </div>
 
@@ -289,7 +331,6 @@ export default function Signup() {
                   </button>
                 </div>
               </div>
-            )}
           </div>
         </div>
       </div>
