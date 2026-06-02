@@ -34,7 +34,7 @@ export async function createProductAttribute(form, admin = null) {
         const value = (form.get(`terms[${i}][value]`) || "").toString().trim();
         // Optionally handle images if you expect them: terms[${i}][image]
         const image = form.get(`terms[${i}][image]`);
-        if (image && typeof image === 'object' && typeof File !== 'undefined' && image instanceof File) {
+        if (image && typeof image === 'object' && image.name) {
           try {
             validateImageFile(image);
             const imageUrl = await saveFile(image, "attribute-images");
@@ -274,7 +274,7 @@ export async function updateProductAttribute(id, data) {
         if (
           term.image &&
           typeof term.image === "object" &&
-          term.image instanceof File
+          term.image.name
         ) {
           try {
             validateImageFile(term.image);

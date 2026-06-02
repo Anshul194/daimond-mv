@@ -448,8 +448,8 @@ const Navbar = () => {
     <>
       <div
         className={`fixed inset-0 w-full h-screen bg-black/20 z-[9999] transition-all duration-300 ${showSearch
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
+          ? "opacity-100 pointer-events-auto"
+          : "opacity-0 pointer-events-none"
           }`}
       >
         <div
@@ -601,8 +601,8 @@ const Navbar = () => {
 
                   <div
                     className={`absolute top-full left-0 w-48 bg-white shadow-md border border-gray-100 py-2 z-50 flex flex-col transition-all duration-300 ease-in-out ${showMoreDropdown
-                        ? "opacity-100 translate-y-0 pointer-events-auto"
-                        : "opacity-0 -translate-y-2 pointer-events-none"
+                      ? "opacity-100 translate-y-0 pointer-events-auto"
+                      : "opacity-0 -translate-y-2 pointer-events-none"
                       }`}
                   >
                     <div className="w-full h-full absolute top-[-40px] left-0 bg-transparent"></div>
@@ -748,8 +748,8 @@ const Navbar = () => {
         {/* Fine Jewellery Dropdown Menu */}
         <div
           className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${showJewelleryDropdown
-              ? "opacity-100 translate-y-0 pointer-events-auto"
-              : "opacity-0 -translate-y-2 pointer-events-none"
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 -translate-y-2 pointer-events-none"
             }`}
           onMouseEnter={() => setShowJewelleryDropdown(true)}
           onMouseLeave={() => setShowJewelleryDropdown(false)}
@@ -915,8 +915,8 @@ const Navbar = () => {
       {/* Engagement Rings Dropdown Menu */}
       <div
         className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${showEngagementDropdown
-            ? "opacity-100 translate-y-0 pointer-events-auto"
-            : "opacity-0 -translate-y-2 pointer-events-none"
+          ? "opacity-100 translate-y-0 pointer-events-auto"
+          : "opacity-0 -translate-y-2 pointer-events-none"
           }`}
         onMouseEnter={() => setShowEngagementDropdown(true)}
         onMouseLeave={() => setShowEngagementDropdown(false)}
@@ -1063,8 +1063,8 @@ const Navbar = () => {
         {/* Wedding Rings Dropdown Menu */}
         <div
           className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${showWeddingDropdown
-              ? "opacity-100 translate-y-0 pointer-events-auto"
-              : "opacity-0 -translate-y-2 pointer-events-none"
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 -translate-y-2 pointer-events-none"
             }`}
           onMouseEnter={() => setShowWeddingDropdown(true)}
           onMouseLeave={() => setShowWeddingDropdown(false)}
@@ -1195,8 +1195,8 @@ const Navbar = () => {
       {/* Contact Dropdown Menu */}
       <div
         className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${showContactDropdown
-            ? "opacity-100 translate-y-0 pointer-events-auto"
-            : "opacity-0 -translate-y-2 pointer-events-none"
+          ? "opacity-100 translate-y-0 pointer-events-auto"
+          : "opacity-0 -translate-y-2 pointer-events-none"
           }`}
         onMouseEnter={() => setShowContactDropdown(true)}
         onMouseLeave={() => setShowContactDropdown(false)}
@@ -1282,8 +1282,8 @@ const Navbar = () => {
       {/* Education Dropdown Menu */}
       <div
         className={`fixed top-16 lg:top-20 left-0 w-full border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${showEducationDropdown
-            ? "opacity-100 translate-y-0 pointer-events-auto"
-            : "opacity-0 -translate-y-2 pointer-events-none"
+          ? "opacity-100 translate-y-0 pointer-events-auto"
+          : "opacity-0 -translate-y-2 pointer-events-none"
           }`}
         onMouseEnter={() => setShowEducationDropdown(true)}
         onMouseLeave={() => setShowEducationDropdown(false)}

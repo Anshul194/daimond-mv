@@ -22,17 +22,20 @@ export async function saveFile(file, uploadDir = "uploads") {
   // Save file
   await writeFile(filepath, buffer);
 
-  // Return the dynamic public URL path to bypass static caching
-  return `/api/media/${uploadDir}/${filename}`;
+  // Return the direct public path so the file can be served statically.
+  // This avoids relying on the dynamic media route for newly uploaded files.
+  return `/${uploadDir}/${filename}`;
 }
 
 export async function deleteFile(fileUrl) {
   try {
     if (!fileUrl) return;
 
-    // Extract filename and the actual relative path in public folder
-    // If URL is /api/media/products/file.jpg, we need products/file.jpg
-    const relativePath = fileUrl.replace(/^\/api\/media\//, "").replace(/^\//, "");
+    // Support both old `/api/media/...` URLs and direct public paths.
+    const relativePath = fileUrl
+      .replace(/^https?:\/\/[^/]+\//, "")
+      .replace(/^\/api\/media\//, "")
+      .replace(/^\//, "");
     const filepath = path.join(process.cwd(), "public", relativePath);
 
     // Delete file

@@ -22,9 +22,13 @@ export function getImageUrl(path) {
     if (!path) return undefined;
     // Already an absolute URL (http/https/data) — return as-is
     if (/^(https?:\/\/|data:)/.test(path)) return path;
+    // Normalize legacy `/uploads/...` paths to the public root if the files
+    // are actually stored directly under `public/<folder>`.
+    const normalizedPath = path.replace(/^\/uploads\//, "/");
+
     // Relative path — prefix with backend base URL
     const base = BASE_URL.replace(/\/$/, ""); // remove trailing slash
-    return `${base}${path.startsWith("/") ? "" : "/"}${path}`;
+    return `${base}${normalizedPath.startsWith("/") ? "" : "/"}${normalizedPath}`;
 }
 
 /**

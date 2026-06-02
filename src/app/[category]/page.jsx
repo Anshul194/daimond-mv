@@ -92,7 +92,7 @@ const RingsBuild = ({ props }) => {
       "Shape",
       "METAL TYPE",
       "BAND TYPE",
-      "SETTING",
+      "SETTING STYLE",
       "SETTING PROFILE",
       "BAND",
       "ACCENTS",
@@ -102,23 +102,28 @@ const RingsBuild = ({ props }) => {
     // fetch attribute terms globally (without category filter) so the Filter can still render.
     const responses = await Promise.all(
       attributes.map((attribute) => {
-        const filterObj = categoryID
-          ? { category_id: categoryID, title: attribute }
-          : { title: attribute };
-        const filterStr = JSON.stringify(filterObj).replace(/"/g, '\"');
-        return axiosInstance.get(
-          `/api/productattribute?filters={"title":"${attribute}"}${categoryID ? `&categoryId=${categoryID}` : ''}`
-        ).catch((err) => {
-          // If the endpoint doesn't support the above query, try a fallback without category filter
-          return axiosInstance.get(`/api/productattribute?filters={"title":"${attribute}"}`);
+        // URL-encode the filters so multi-word names (e.g. "SETTING STYLE") are not malformed in the request
+        const filterParam = encodeURIComponent(JSON.stringify({ title: attribute }));
+        const url = `/api/productattribute?filters=${filterParam}${categoryID ? `&categoryId=${categoryID}` : ''}`;
+        return axiosInstance.get(url).catch(() => {
+          // Fallback without category filter
+          return axiosInstance.get(`/api/productattribute?filters=${filterParam}`);
         });
       })
     );
 
-    // Push data in attributeData with key
+    // Pick the term list that exactly matches the attribute title (case-insensitive).
+    // This prevents partial-regex matches from returning the wrong attribute (e.g. "Setting Profile" for "SETTING").
     const attributeData = {};
     responses.forEach((response, idx) => {
-      attributeData[attributes[idx]] = response.data.data.data[0]?.terms;
+      const targetTitle = attributes[idx].toLowerCase();
+      const allResults = response?.data?.data?.data || [];
+      const exactMatch = allResults.find(
+        (a) => (a.title || "").toLowerCase() === targetTitle
+      );
+      // Fall back to first result only if there is exactly one (no ambiguity)
+      const best = exactMatch || (allResults.length === 1 ? allResults[0] : null);
+      attributeData[attributes[idx]] = best?.terms || [];
     });
 
     // console.log("attributeData", attributeData);
@@ -134,7 +139,7 @@ const RingsBuild = ({ props }) => {
     if (band && band !== "") attributeFilter.push(band);
     if (profile && profile !== "") attributeFilter.push(profile);
     if (accents && accents !== "") attributeFilter.push(accents);
-    
+
     console.log("Applying filters to API call:", { categoryID, attributeFilter });
 
     if (categoryID) {

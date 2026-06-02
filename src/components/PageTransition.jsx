@@ -9,11 +9,23 @@ export default function PageTransition() {
   const diamondRef = useRef(null);
   const pathname = usePathname();
   const prevPathRef = useRef(pathname);
+  const firstMountRef = useRef(true);
+  const diamondTweenRef = useRef(null);
+  const revealTlRef = useRef(null);
   const isAnimating = useRef(false);
 
   useEffect(() => {
     if (prevPathRef.current === pathname) return;
     prevPathRef.current = pathname;
+
+    // On the very first mount, just ensure curtain is hidden and skip
+    // the reveal logic — this avoids running the animation twice on load.
+    if (firstMountRef.current) {
+      firstMountRef.current = false;
+      gsap.set(curtainRef.current, { yPercent: -100 });
+      gsap.set(diamondRef.current, { opacity: 0, scale: 1, rotation: 0 });
+      return;
+    }
 
     // Reset visibility if path changes but we weren't animating
     if (!isAnimating.current) {
@@ -54,19 +66,31 @@ export default function PageTransition() {
 
     window.addEventListener("__page-data-ready", handleDataReady);
     
-    // Add a pulsing scale to the diamond while waiting
-    gsap.to(diamondRef.current, {
-      scale: 1.2,
-      opacity: 1,
-      duration: 0.8,
-      repeat: -1,
-      yoyo: true,
-      ease: "sine.inOut"
-    });
+    // Add a pulsing scale to the diamond while waiting (store ref so we can kill it)
+    if (diamondRef.current) {
+      diamondTweenRef.current = gsap.to(diamondRef.current, {
+        scale: 1.2,
+        opacity: 1,
+        duration: 0.8,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      });
+    }
     
     return () => {
       window.removeEventListener("__page-data-ready", handleDataReady);
       clearTimeout(timeoutId);
+      // Clean up any diamond tween created while waiting
+      if (diamondTweenRef.current) {
+        diamondTweenRef.current.kill();
+        diamondTweenRef.current = null;
+      }
+      // Kill any reveal timeline lingering
+      if (revealTlRef.current) {
+        revealTlRef.current.kill();
+        revealTlRef.current = null;
+      }
     };
   }, [pathname]);
 
@@ -76,6 +100,16 @@ export default function PageTransition() {
   useEffect(() => {
     const handleStart = () => {
       if (isAnimating.current) return;
+      // Kill any existing tweens/timelines to avoid duplicates
+      if (diamondTweenRef.current) {
+        diamondTweenRef.current.kill();
+        diamondTweenRef.current = null;
+      }
+      if (revealTlRef.current) {
+        revealTlRef.current.kill();
+        revealTlRef.current = null;
+      }
+
       isAnimating.current = true;
 
       const ctx = gsap.context(() => {
