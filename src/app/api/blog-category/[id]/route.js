@@ -12,7 +12,7 @@ import { verifyAdminAccess } from '../../../middlewares/commonAuth.js';
 export async function GET(request, context) {
   await dbConnect();
 
-  const { id } = context.params;
+  const { id } = await context.params;
   if (!id) {
     return NextResponse.json({ success: false, message: 'ID param missing' }, { status: 400 });
   }
@@ -28,7 +28,7 @@ export async function PUT(request, context) {
     const authResult = await verifyAdminAccess(request);
     if (authResult.error) return authResult.error;
 
-    const { id } = context.params;
+    const { id } = await context.params;
 
     const form = await request.formData();
     const data = {
@@ -51,7 +51,7 @@ export async function DELETE(request, context) {
     const authResult = await verifyAdminAccess(request);
     if (authResult.error) return authResult.error;
 
-    const { id } = context.params;
+    const { id } = await context.params;
     if (!id) {
       return NextResponse.json({ success: false, message: 'ID param missing' }, { status: 400 });
     }

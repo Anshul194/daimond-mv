@@ -3,8 +3,8 @@ import { getUserById } from '../../../controllers/adminController.js';
 import { getAdminFromRequest } from '../../../utils/adminAuth.js';
 
 export async function GET(request, context) {
-  const { params } = await context;
-  const { id } = params;
+  const { params } = context;
+  const { id } = await params;
   const currentAdmin = await getAdminFromRequest(request);
   if (!currentAdmin) {
     return new Response(JSON.stringify({ success: false, message: 'Unauthorized' }), {

@@ -4,6 +4,7 @@ import { getBlogsBySubCategoryId } from '../../../../../controllers/blogControll
 
 export async function GET(req, { params }) {
   await dbConnect();
-  const result = await getBlogsBySubCategoryId(params.id);
+  const { id } = await params;
+  const result = await getBlogsBySubCategoryId(id);
   return NextResponse.json(result.body, { status: result.status });
 }

@@ -5,7 +5,8 @@ export async function GET(request, { params }) {
   try {
     await dbConnect();
     const repo = new CouponRepository();
-    const coupon = await repo.findByCode(params.code);
+    const { code } = await params;
+    const coupon = await repo.findByCode(code);
     if (!coupon) {
       return Response.json({ success: false, message: "Coupon not found" }, { status: 404 });
     }

@@ -11,7 +11,8 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req, { params }) {
   await dbConnect();
-  const result = await getBlogSubCategoryById(params.id);
+  const { id } = await params;
+  const result = await getBlogSubCategoryById(id);
   return NextResponse.json(result.body, { status: result.status });
 }
 
@@ -27,7 +28,8 @@ export async function PUT(request, { params }) {
   const image = form.get('image');
   const status = form.get('status');
 
-  const result = await updateBlogSubCategory(params.id, { name, BlogCategory, image,status });
+  const { id } = await params;
+  const result = await updateBlogSubCategory(id, { name, BlogCategory, image, status });
   return NextResponse.json(result.body, { status: result.status });
 }
 
@@ -38,6 +40,7 @@ export async function DELETE(request, { params }) {
   const authResult = await verifyAdminAccess(request);
   if (authResult.error) return authResult.error;
 
-  const result = await deleteBlogSubCategory(params.id);
+  const { id } = await params;
+  const result = await deleteBlogSubCategory(id);
   return NextResponse.json(result.body, { status: result.status });
 }

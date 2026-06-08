@@ -7,14 +7,14 @@ const couponService = new CouponService();
 export async function createCoupon(request, user = null) {
   try {
     const data = await request.json();
-    
+
     // Validate input data
     const { error, value } = couponCreateValidator.validate(data);
     if (error) {
-      return Response.json({ 
-        success: false, 
-        message: 'Validation error', 
-        details: error.details 
+      return Response.json({
+        success: false,
+        message: 'Validation error',
+        details: error.details
       }, { status: 400 });
     }
 
@@ -26,9 +26,9 @@ export async function createCoupon(request, user = null) {
     // Check if coupon with same code already exists for this vendor
     const existingCoupon = await couponService.findByCode(value.code, vendorId);
     if (existingCoupon) {
-      return Response.json({ 
-        success: false, 
-        message: "Coupon with this code already exists" 
+      return Response.json({
+        success: false,
+        message: "Coupon with this code already exists"
       }, { status: 400 });
     }
 
@@ -93,7 +93,7 @@ export async function getCoupons(request, user = null) {
 
 export async function getCouponById(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const coupon = await couponService.getCouponById(id);
     if (!coupon) return Response.json({ success: false, message: "Not found" }, { status: 404 });
     return Response.json({ success: true, coupon });
@@ -104,7 +104,7 @@ export async function getCouponById(request, { params }) {
 
 export async function getCouponByCode(request, { params }) {
   try {
-    const { code } = params;
+    const { code } = await params;
     const coupon = await couponService.getCouponByCode(code);
     if (!coupon) return Response.json({ success: false, message: "Not found" }, { status: 404 });
     return Response.json({ success: true, coupon });
@@ -115,12 +115,12 @@ export async function getCouponByCode(request, { params }) {
 
 export async function updateCoupon(request, { params }, user = null) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const data = await request.json();
 
     // Remove MongoDB internal fields that shouldn't be updated
     const fieldsToExclude = ['_id', '__v', 'createdAt', 'updatedAt'];
-    
+
     // Clean empty fields and exclude internal fields
     const cleanedFields = Object.entries(data).reduce((acc, [key, value]) => {
       // Skip MongoDB internal fields
@@ -137,10 +137,10 @@ export async function updateCoupon(request, { params }, user = null) {
     // Validate input data
     const { error, value } = couponUpdateValidator.validate(cleanedFields);
     if (error) {
-      return Response.json({ 
-        success: false, 
-        message: 'Validation error', 
-        details: error.details 
+      return Response.json({
+        success: false,
+        message: 'Validation error',
+        details: error.details
       }, { status: 400 });
     }
 
@@ -160,7 +160,7 @@ export async function updateCoupon(request, { params }, user = null) {
 
     const coupon = await couponService.updateCoupon(id, value);
     if (!coupon) return Response.json({ success: false, message: "Not found" }, { status: 404 });
-    
+
     const response = successResponse(coupon, 'Coupon updated successfully');
     return Response.json(response.body, { status: response.status });
   } catch (err) {
@@ -171,7 +171,7 @@ export async function updateCoupon(request, { params }, user = null) {
 
 export async function deleteCoupon(request, { params }, user = null) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Check if coupon exists and belongs to vendor (if user is vendor)
     const existingCoupon = await couponService.getCouponById(id);
@@ -189,7 +189,7 @@ export async function deleteCoupon(request, { params }, user = null) {
 
     const coupon = await couponService.deleteCoupon(id);
     if (!coupon) return Response.json({ success: false, message: "Not found" }, { status: 404 });
-    
+
     const response = successResponse(coupon, 'Coupon deleted successfully');
     return Response.json(response.body, { status: response.status });
   } catch (err) {
@@ -201,14 +201,14 @@ export async function deleteCoupon(request, { params }, user = null) {
 export async function validateCouponAPI(request) {
   try {
     const data = await request.json();
-    
+
     // Validate input data
     const { error, value } = couponValidationValidator.validate(data);
     if (error) {
-      return Response.json({ 
-        success: false, 
-        message: 'Validation error', 
-        details: error.details 
+      return Response.json({
+        success: false,
+        message: 'Validation error',
+        details: error.details
       }, { status: 400 });
     }
 
@@ -224,24 +224,24 @@ export async function validateCouponAPI(request) {
 export async function applyCouponToOrder(request) {
   try {
     const data = await request.json();
-    
+
     // Validate input data
     const { error, value } = couponValidationValidator.validate(data);
     if (error) {
-      return Response.json({ 
-        success: false, 
-        message: 'Validation error', 
-        details: error.details 
+      return Response.json({
+        success: false,
+        message: 'Validation error',
+        details: error.details
       }, { status: 400 });
     }
 
     const { code, orderTotal } = value;
     const { discount, coupon, message } = await couponService.calculateCouponDiscount(code, orderTotal);
-    
+
     if (!coupon) {
       return Response.json({ success: false, message: message || "Invalid coupon" }, { status: 400 });
     }
-    
+
     return Response.json(successResponse({ discount, coupon }, 'Coupon applied successfully'));
   } catch (err) {
     // console.error('Apply Coupon error:', err.message);

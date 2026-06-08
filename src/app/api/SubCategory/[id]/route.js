@@ -1,12 +1,12 @@
 import dbConnect from '../../../lib/mongodb.js';
-import {getSubCategoryById,updateSubCategory,deleteSubCategory,} from '../../../controllers/subCategoryController.js';
+import { getSubCategoryById, updateSubCategory, deleteSubCategory, } from '../../../controllers/subCategoryController.js';
 import { NextResponse } from 'next/server';
 import { verifyAdminAccess } from '../../../middlewares/commonAuth.js';
 
 export async function GET(request, context) {
   await dbConnect();
   const { params } = context;
-  const { id } = params;
+  const { id } = await params;
   const result = await getSubCategoryById(id);
   return NextResponse.json(result.body, { status: result.status });
 }

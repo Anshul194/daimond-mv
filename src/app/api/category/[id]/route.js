@@ -10,7 +10,7 @@ import { verifyAdminAccess } from '../../../middlewares/commonAuth.js';
 export async function GET(request, context) {
   await dbConnect();
   const { params } = context;
-  const { id } = params;
+  const { id } = await params;
   const result = await getCategoryById(id);
   return NextResponse.json(result.body, { status: result.status });
 }
@@ -33,7 +33,7 @@ export async function PUT(request, context) {
       description: form.get('description') || '',
       image: form.get('image') || null,
       status: form.get('status') || 'active', // Default to 'active' if not provided 
-     
+
     };
 
     const result = await updateCategory(id, data);
