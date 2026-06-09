@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState, lazy, Suspense } from 'react';
+import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { ReactLenis, useLenis } from 'lenis/react';
 import { gsap } from 'gsap';
@@ -21,11 +22,25 @@ function LenisScrollTriggerBridge() {
   return null;
 }
 
+function ScrollToTop() {
+  const pathname = usePathname();
+  const lenis = useLenis();
+
+  useEffect(() => {
+    if (!lenis) return;
+    lenis.scrollTo(0, { immediate: true });
+    window.scrollTo(0, 0);
+  }, [pathname, lenis]);
+
+  return null;
+}
+
 export default function ClientLayout({ children }) {
   const [loaderDone, setLoaderDone] = useState(false);
 
   useEffect(() => {
     gsap.config({ nullTargetWarn: false });
+    history.scrollRestoration = 'manual';
     if (sessionStorage.getItem("__loader_done")) {
       setLoaderDone(true);
     }
@@ -52,6 +67,7 @@ export default function ClientLayout({ children }) {
       />
       <ReactLenis root options={{ lerp: 0.08, duration: 1.2, smoothWheel: true, wheelMultiplier: 0.8 }}>
         <LenisScrollTriggerBridge />
+        <ScrollToTop />
         <Navbar />
         <main
           style={{

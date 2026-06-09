@@ -23,11 +23,10 @@ export default function TransitionLink({ href, children, className, style, ...re
     // Dispatch transition-start so the curtain slides in
     window.dispatchEvent(new Event("__page-transition-start"));
 
-    // Navigate after curtain animation starts (sync with 550ms GSAP duration)
     setTimeout(() => {
       router.push(href);
       clicked.current = false;
-    }, 420);
+    }, 300);
   };
 
   return (

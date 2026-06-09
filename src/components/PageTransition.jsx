@@ -8,126 +8,49 @@ export default function PageTransition() {
   const curtainRef = useRef(null);
   const diamondRef = useRef(null);
   const pathname = usePathname();
-  const prevPathRef = useRef(pathname);
-  const firstMountRef = useRef(true);
-  const diamondTweenRef = useRef(null);
-  const revealTlRef = useRef(null);
-  const isAnimating = useRef(false);
+  const timeoutRef = useRef(null);
+  const animatingRef = useRef(false);
 
+  // Hide curtain on pathname change (navigation completed)
   useEffect(() => {
-    if (prevPathRef.current === pathname) return;
-    prevPathRef.current = pathname;
+    if (!animatingRef.current) return;
+    animatingRef.current = false;
 
-    // On the very first mount, just ensure curtain is hidden and skip
-    // the reveal logic — this avoids running the animation twice on load.
-    if (firstMountRef.current) {
-      firstMountRef.current = false;
-      gsap.set(curtainRef.current, { yPercent: -100 });
-      gsap.set(diamondRef.current, { opacity: 0, scale: 1, rotation: 0 });
-      return;
-    }
+    clearTimeout(timeoutRef.current);
 
-    // Reset visibility if path changes but we weren't animating
-    if (!isAnimating.current) {
-      gsap.set(curtainRef.current, { yPercent: -100 });
-      return;
-    }
-
-    let revealed = false;
-    const revealPage = () => {
-      if (revealed) return;
-      revealed = true;
-      
-      const ctx = gsap.context(() => {
-        const tl = gsap.timeline({
-          onComplete: () => {
-            isAnimating.current = false;
-            // Hide diamond after transition
-            gsap.set(diamondRef.current, { opacity: 0 });
-          },
-        });
-
-        tl.to(curtainRef.current, {
-          yPercent: 100,
-          duration: 0.75,
-          ease: "expo.inOut",
-        });
+    const ctx = gsap.context(() => {
+      gsap.to(curtainRef.current, {
+        yPercent: -100,
+        duration: 0.5,
+        ease: "expo.inOut",
+        onComplete: () => gsap.set(diamondRef.current, { opacity: 0 }),
       });
-    };
+    });
 
-    const timeoutId = setTimeout(revealPage, 400);
-    
-    const handleDataReady = () => {
-      clearTimeout(timeoutId);
-      setTimeout(revealPage, 80);
-    };
-
-    window.addEventListener("__page-data-ready", handleDataReady);
-    
-    // Add a pulsing scale to the diamond while waiting (store ref so we can kill it)
-    if (diamondRef.current) {
-      diamondTweenRef.current = gsap.to(diamondRef.current, {
-        scale: 1.2,
-        opacity: 1,
-        duration: 0.8,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut"
-      });
-    }
-    
-    return () => {
-      window.removeEventListener("__page-data-ready", handleDataReady);
-      clearTimeout(timeoutId);
-      // Clean up any diamond tween created while waiting
-      if (diamondTweenRef.current) {
-        diamondTweenRef.current.kill();
-        diamondTweenRef.current = null;
-      }
-      // Kill any reveal timeline lingering
-      if (revealTlRef.current) {
-        revealTlRef.current.kill();
-        revealTlRef.current = null;
-      }
-    };
+    return () => ctx.revert();
   }, [pathname]);
 
-  // On link click — we need to cover the page BEFORE navigation starts.
-  // We do this by listening for Next.js router events via a custom event
-  // fired from usePageTransitionTrigger (see below in the hook).
+  // Show curtain on transition start
   useEffect(() => {
     const handleStart = () => {
-      if (isAnimating.current) return;
-      // Kill any existing tweens/timelines to avoid duplicates
-      if (diamondTweenRef.current) {
-        diamondTweenRef.current.kill();
-        diamondTweenRef.current = null;
-      }
-      if (revealTlRef.current) {
-        revealTlRef.current.kill();
-        revealTlRef.current = null;
-      }
-
-      isAnimating.current = true;
+      if (animatingRef.current) return;
+      animatingRef.current = true;
 
       const ctx = gsap.context(() => {
         gsap.fromTo(
           curtainRef.current,
           { yPercent: -100 },
-          { yPercent: 0, duration: 0.55, ease: "expo.inOut" }
+          { yPercent: 0, duration: 0.4, ease: "expo.inOut" }
         );
-        
-        // Ensure diamond is visible and spinning during enter
-        gsap.fromTo(diamondRef.current, 
+        gsap.fromTo(diamondRef.current,
           { rotation: 0, scale: 0.8, opacity: 0 },
-          { rotation: 360, scale: 1, opacity: 1, duration: 0.8, ease: "power2.out" }
+          { rotation: 360, scale: 1, opacity: 1, duration: 0.6, ease: "power2.out" }
         );
       });
     };
 
     window.addEventListener("__page-transition-start", handleStart);
-    return () =>
-      window.removeEventListener("__page-transition-start", handleStart);
+    return () => window.removeEventListener("__page-transition-start", handleStart);
   }, []);
 
   return (
@@ -146,51 +69,13 @@ export default function PageTransition() {
         pointerEvents: "none",
       }}
     >
-      {/* Animated diamond spinner */}
       <div ref={diamondRef} style={{ opacity: 0 }}>
-        <svg
-          width="50"
-          height="50"
-          viewBox="0 0 64 64"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <polygon
-            points="32,4 60,24 32,60 4,24"
-            fill="none"
-            stroke="#00736C"
-            strokeWidth="1.5"
-          />
-          <polygon
-            points="32,4 60,24 32,32 4,24"
-            fill="rgba(0,115,108,0.2)"
-            stroke="#00736C"
-            strokeWidth="0.8"
-            opacity="0.8"
-          />
-          <line
-            x1="4"
-            y1="24"
-            x2="60"
-            y2="24"
-            stroke="#00736C"
-            strokeWidth="0.8"
-            opacity="0.6"
-          />
+        <svg width="50" height="50" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="32,4 60,24 32,60 4,24" fill="none" stroke="#00736C" strokeWidth="1.5" />
+          <polygon points="32,4 60,24 32,32 4,24" fill="rgba(0,115,108,0.2)" stroke="#00736C" strokeWidth="0.8" opacity="0.8" />
+          <line x1="4" y1="24" x2="60" y2="24" stroke="#00736C" strokeWidth="0.8" opacity="0.6" />
         </svg>
       </div>
-
-      {/* Thin accent line at bottom of curtain */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: "2px",
-          background: "linear-gradient(to right, transparent, #00736C, transparent)",
-        }}
-      />
     </div>
   );
 }
