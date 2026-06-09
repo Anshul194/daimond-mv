@@ -128,7 +128,7 @@ const page = () => {
               {data?.title || "Blog Title"}
             </h1>
             <p className="text-lg md:text-sm font-gintoNord font-light">
-              {data?.BlogCategory.name} {">"} {data?.BlogSubCategory.name}
+              {data?.BlogCategory?.name} {">"} {data?.BlogSubCategory?.name}
             </p>
             <p className="text-lg md:text-sm font-gintoNord font-light">
               {convertDateToReadableFormat(data?.createdAt)} — by Cullen
@@ -485,7 +485,7 @@ const page = () => {
                 otherBlogs?.map((item) => (
                   <Link
                     key={item._id}
-                    href={`/blogs/${data.BlogCategory._id}/${data.BlogSubCategory._id}/${item._id}`} // Adjust URL as needed
+                    href={`/blogs/${data?.BlogCategory?._id}/${data?.BlogSubCategory?._id}/${item._id}`} // Adjust URL as needed
                     className="flex-shrink-0 min-w-[200px] px-2"
                   >
                     <div className="group cursor-pointer">

@@ -1,17 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { ReactLenis, useLenis } from 'lenis/react';
-import Footer from "@/components/Footer";
-import Navbar from "../components/Navbar";
-import PageLoader from "../components/PageLoader";
-import PageTransition from "../components/PageTransition";
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Bridge component: runs inside ReactLenis context, feeds scroll to ScrollTrigger
+const Navbar = dynamic(() => import("@/components/Navbar"));
+const Footer = dynamic(() => import("@/components/Footer"));
+const PageLoader = dynamic(() => import("@/components/PageLoader"), { ssr: false });
+const PageTransition = dynamic(() => import("@/components/PageTransition"), { ssr: false });
+const ToastContainer = dynamic(() => import("react-toastify").then(m => m.ToastContainer), { ssr: false });
+
 function LenisScrollTriggerBridge() {
   useLenis(() => {
     ScrollTrigger.update();
@@ -24,7 +26,6 @@ export default function ClientLayout({ children }) {
 
   useEffect(() => {
     gsap.config({ nullTargetWarn: false });
-    // Already visited this session → skip loader wait
     if (sessionStorage.getItem("__loader_done")) {
       setLoaderDone(true);
     }
@@ -37,14 +38,19 @@ export default function ClientLayout({ children }) {
 
   return (
     <>
-      {/* ── Initial page loader (plays once per session) ── */}
       <PageLoader onComplete={handleLoaderComplete} />
-
-      {/* ── Route-change transition curtain ── */}
       <PageTransition />
-
-      {/* ── Main app shell ── */}
-      <ReactLenis root options={{ lerp: 0.1, duration: 1.5, smoothWheel: true }}>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+      />
+      <ReactLenis root options={{ lerp: 0.08, duration: 1.2, smoothWheel: true, wheelMultiplier: 0.8 }}>
         <LenisScrollTriggerBridge />
         <Navbar />
         <main

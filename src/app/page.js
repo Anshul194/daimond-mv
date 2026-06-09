@@ -1,48 +1,43 @@
-"use client";
-import React, { useEffect } from "react";
+import React, { Suspense, lazy } from "react";
 import HeroSection from "@/components/homepage/HeroSection";
-import GreenBoxText from "@/components/homepage/GreenBoxText";
 import SliderBox from "@/components/SliderBox";
-import StorySection from "@/components/homepage/StorySection";
-// import VideoSection from "@/components/homepage/VideoSection";
-// import {
-//   ringStyles,
-//   ringStylesTwo,
-//   sliderConfigs
-// } from "../data/sliderdata";
-import Collections from "@/components/homepage/Collections";
-import SliderBoxTwo from "@/components/homepage/CategoriesSlider";
-import Services from "@/components/homepage/Services";
-import Education from "@/components/homepage/Education";
-import Reviews from "@/components/homepage/Reviews";
-import VideoReviews from "@/components/homepage/VideoReview";
-import Faq from "@/components/Faq";
-import { useSelector } from "react-redux";
+import CategoriesSlider from "@/components/homepage/CategoriesSlider";
+
+const GreenBoxText = lazy(() => import("@/components/homepage/GreenBoxText"));
+const StorySection = lazy(() => import("@/components/homepage/StorySection"));
+const Collections = lazy(() => import("@/components/homepage/Collections"));
+const Services = lazy(() => import("@/components/homepage/Services"));
+const Education = lazy(() => import("@/components/homepage/Education"));
+const Reviews = lazy(() => import("@/components/homepage/Reviews"));
+const VideoReview = lazy(() => import("@/components/homepage/VideoReview"));
+const Faq = lazy(() => import("@/components/Faq"));
+const PageDataReady = lazy(() => import("@/components/PageDataReady"));
+
+function SectionFallback() {
+  return <div className="w-full h-48 bg-gray-50 animate-pulse" />;
+}
 
 export default function Home() {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      window.dispatchEvent(new Event("__page-data-ready"));
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <div>
+      <PageDataReady />
       <HeroSection />
 
-      {/* Ring Styles Slider */}
       <SliderBox
         type="styles"
         title="Shop Lab Diamond Engagement Rings by Style"
         subtitle="Discover our signature setting styles, including solitaire, trilogy, halo, toi et moi and bezel."
       />
-      <GreenBoxText />
-      <StorySection />
+      <Suspense fallback={<SectionFallback />}>
+        <GreenBoxText />
+      </Suspense>
+      <Suspense fallback={<SectionFallback />}>
+        <StorySection />
+      </Suspense>
 
       <SliderBox
         type="products"
-        categoryId="6965f0e64b452b08aeeb4b11"
+        categoryId="69d4c409bed5febddc4a3df9"
         title="Featured Engagement Rings"
         featured={true}
         subtitle="Shop from our range of lab diamond, coloured sapphire and moissanite engagement rings."
@@ -50,15 +45,31 @@ export default function Home() {
         style={{ marginBottom: "2rem" }}
       />
 
-      <Collections className="!flex-row" />
-      <SliderBoxTwo />
-      <Collections className="!flex-row-reverse" />
-      <Services />
-      <Collections className="!flex-row" />
-      <Education />
-      <Reviews />
-      <VideoReviews />
-      <Faq />
+      <Suspense fallback={<SectionFallback />}>
+        <Collections className="!flex-row" />
+      </Suspense>
+      <CategoriesSlider />
+      <Suspense fallback={<SectionFallback />}>
+        <Collections className="!flex-row-reverse" />
+      </Suspense>
+      <Suspense fallback={<SectionFallback />}>
+        <Services />
+      </Suspense>
+      <Suspense fallback={<SectionFallback />}>
+        <Collections className="!flex-row" />
+      </Suspense>
+      <Suspense fallback={<SectionFallback />}>
+        <Education />
+      </Suspense>
+      <Suspense fallback={<SectionFallback />}>
+        <Reviews />
+      </Suspense>
+      <Suspense fallback={<SectionFallback />}>
+        <VideoReview />
+      </Suspense>
+      <Suspense fallback={<SectionFallback />}>
+        <Faq />
+      </Suspense>
     </div>
   );
 }

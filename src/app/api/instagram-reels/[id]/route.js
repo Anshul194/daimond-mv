@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import dbConnect from '../../../lib/mongodb.js';
 import * as instagramController from '../../../controllers/instagramController.js';
 import { verifyAdminAccess } from '../../../middlewares/commonAuth.js';
+import { parseFormData } from '../../../middlewares/uploadMiddleware.js';
+import { saveFile } from '../../../lib/fileUpload.js';
 
 export async function PUT(request, { params }) {
     try {
@@ -10,7 +12,19 @@ export async function PUT(request, { params }) {
         if (authResult.error) return authResult.error;
 
         const resolvedParams = await params;
-        const result = await instagramController.updateReel(resolvedParams.id, request);
+        const ct = request.headers.get('content-type') || '';
+        let body;
+        if (ct.includes('multipart/form-data') || ct.includes('application/x-www-form-urlencoded')) {
+            const { fields, files } = await parseFormData(request);
+            body = { ...fields };
+            if (files.image) {
+                body.image = await saveFile(files.image, 'instagram-reels');
+            }
+        } else {
+            body = await request.json();
+        }
+
+        const result = await instagramController.updateReel(resolvedParams.id, body);
         return NextResponse.json(result.body, { status: result.status });
     } catch (error) {
         return NextResponse.json({ success: false, message: error.message }, { status: 500 });

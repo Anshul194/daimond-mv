@@ -288,15 +288,17 @@ const SliderBox = ({
                         <Image
                           src={itemData.image[0]}
                           alt={itemData.name}
-                          layout="fill"
-                          objectFit="cover"
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
                         />
                       ) : (
                         <Image
                           src={itemData.image}
                           alt={itemData.name}
-                          layout="fill"
-                          objectFit="cover"
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
                         />
                       )}
 

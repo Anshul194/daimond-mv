@@ -55,13 +55,11 @@ export default function PageTransition() {
       });
     };
 
-    // Wait for the page to signal it's ready, or timeout after 1.5s for static pages
-    const timeoutId = setTimeout(revealPage, 1500);
+    const timeoutId = setTimeout(revealPage, 400);
     
     const handleDataReady = () => {
       clearTimeout(timeoutId);
-      // Give a tiny buffer for the DOM to settle
-      setTimeout(revealPage, 100);
+      setTimeout(revealPage, 80);
     };
 
     window.addEventListener("__page-data-ready", handleDataReady);

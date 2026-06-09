@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import {
   Search,
   ShoppingBag,
@@ -12,8 +12,6 @@ import {
   ChevronDown,
   ChevronUp,
   User,
-  SearchIcon,
-  XIcon,
   ArrowRight,
 } from "lucide-react";
 import Image from "next/image";
@@ -137,7 +135,7 @@ const Navbar = () => {
     }
   }, [isMobileMenuOpen]);
 
-  const navItems = [
+  const navItems = useMemo(() => [
     { name: "NEW ARRIVALS", href: "/new-arrivals" },
     { name: "SHOP BY CATEGORY", href: "/shop-by-category", hasDropdown: false },
     ...(categories && categories.length > 0
@@ -147,17 +145,19 @@ const Navbar = () => {
         hasDropdown: true,
       }))
       : []),
-  ];
+  ], [categories]);
 
   const visiblePriority = ["WEDDING RINGS", "SHOP BY CATEGORY", "ENGAGEMENT RINGS", "FINE JEWELLERY"];
 
-  const visibleLeftNavItems = navItems
-    .filter((item) => visiblePriority.includes(item.name))
-    .sort((a, b) => visiblePriority.indexOf(a.name) - visiblePriority.indexOf(b.name));
-
-  const hiddenLeftNavItems = navItems.filter(
-    (item) => !visiblePriority.includes(item.name)
-  );
+  const { visibleLeftNavItems, hiddenLeftNavItems } = useMemo(() => {
+    const visible = navItems
+      .filter((item) => visiblePriority.includes(item.name))
+      .sort((a, b) => visiblePriority.indexOf(a.name) - visiblePriority.indexOf(b.name));
+    const hidden = navItems.filter(
+      (item) => !visiblePriority.includes(item.name)
+    );
+    return { visibleLeftNavItems: visible, hiddenLeftNavItems: hidden };
+  }, [navItems]);
 
   const getAttribute = async () => {
     try {
@@ -215,50 +215,17 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const rightNavItems = [
+  const rightNavItems = useMemo(() => [
     { name: "EDUCATION", href: "/education", hasDropdown: true },
     { name: "CONTACT", href: "/contact", hasDropdown: true },
     {
       name: "MEET WITH US",
       href: "/meet",
     },
-  ];
+  ], []);
 
-  const jewelleryCategories = [
-    {
-      title: "JEWELLERY",
-      items: [
-        { name: "Rings", href: "/rings" },
-        { name: "Earrings", href: "/products/earrings" },
-        { name: "Bracelets", href: "/products/bracelets" },
-        { name: "Chains", href: "/products/chains" },
-        { name: "Pendants", href: "/products/pendants" },
-      ],
-    },
-    {
-      title: "STATEMENT RINGS",
-      items: [],
-      image: "/api/placeholder/400/200",
-    },
-    {
-      title: "STACKER RINGS",
-      items: [],
-      image: "/api/placeholder/400/200",
-    },
-    {
-      title: "MINIMAL RINGS",
-      items: [],
-      image: "/api/placeholder/400/200",
-    },
-    {
-      title: "INITIAL SIGNET RING",
-      items: [],
-      image: "/api/placeholder/400/200",
-    },
-  ];
-
-  // Mobile accordion categories
-  const mobileAccordionItems = [
+  // Mobile accordion categories (static menu data)
+  const mobileAccordionItems = useMemo(() => [
     {
       title: "ENGAGEMENT RINGS",
       subcategories: [
@@ -397,22 +364,22 @@ const Navbar = () => {
         { name: "INITIAL SIGNET RING", href: "/wedding-rings/women" },
       ],
     },
-  ];
+  ], []);
 
   const [expandedSubAccordion, setExpandedSubAccordion] = useState(null);
 
-  const toggleAccordion = (index) => {
-    setExpandedAccordion(expandedAccordion === index ? null : index);
+  const toggleAccordion = useCallback((index) => {
+    setExpandedAccordion(prev => prev === index ? null : index);
     setExpandedSubAccordion(null);
-  };
+  }, []);
 
-  const toggleSubAccordion = (id) => {
-    setExpandedSubAccordion(expandedSubAccordion === id ? null : id);
-  };
+  const toggleSubAccordion = useCallback((id) => {
+    setExpandedSubAccordion(prev => prev === id ? null : id);
+  }, []);
 
-  const handelProfileClick = async () => {
+  const handelProfileClick = useCallback(() => {
     window.location.href = "/login";
-  };
+  }, []);
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -457,7 +424,7 @@ const Navbar = () => {
             } bg-white flex justify-between items-center transition-all duration-300`}
         >
           <div className="w-2/3 flex gap-4 items-center">
-            <SearchIcon className="text-gray-900" />
+            <Search className="text-gray-900" />
             <input
               type="text"
               onChange={(e) => {
@@ -468,7 +435,7 @@ const Navbar = () => {
               className="w-full outline-none h-10 pl-8 pr-4 bg-white text-gray-900 placeholder-gray-500 rounded-md transition-colors duration-200"
             />
           </div>
-          <XIcon
+          <X
             onClick={() => {
               setShowSearch(false);
               setSearchValue("");
@@ -670,6 +637,7 @@ const Navbar = () => {
                   height={50}
                   className="object-contain w-[60px] md:w-[105px] lg:w-[125px]"
                   priority
+                  sizes="(max-width: 767px) 60px, (max-width: 1023px) 105px, 125px"
                 />
               </Link>
             </div>
@@ -1292,14 +1260,14 @@ const Navbar = () => {
         <div className="w-full bg-white border-gray-100 shadow-lg z-50">
           <div className="max-w-7xl p-4 mx-auto px-4 sm:px-6 lg:px-8 pt-12">
             <div className="grid grid-cols-4 space-x-10 space-y-4">
-              {educationCategories?.map((category, index) => (
+              {educationCategories?.filter(c => c.subCategory).map((category, index) => (
                 <div className="" key={index}>
                   <Link href={"/blogs/education/" + category.subCategory._id}>
                     <h2 className="block w-full text-black hover:bg-[#00736C]/5 py-2 px-2 text-lg font-medium font-gintoNormal transition-colors duration-200">
                       {category.subCategory.name}
                     </h2>
                   </Link>
-                  {category.blogs.slice(0, 2).map((blog) => (
+                  {(category.blogs || []).slice(0, 2).map((blog) => (
                     <Link
                       href={"/blogs/education/" + category.subCategory._id + "/" + blog._id}
                       key={blog._id}
@@ -1500,7 +1468,7 @@ const Navbar = () => {
                         {/* EDUCATION SUBMENU */}
                         {cat.name === "EDUCATION" && (
                           <div className="space-y-6 pt-2 pb-4">
-                            {educationCategories?.map((category, idx) => (
+                            {educationCategories?.filter(c => c.subCategory).map((category, idx) => (
                               <div key={idx} className="space-y-3">
                                 <Link
                                   href={`/blogs/education/${category.subCategory._id}`}
@@ -1510,7 +1478,7 @@ const Navbar = () => {
                                   {category.subCategory.name}
                                 </Link>
                                 <div className="ml-2 space-y-2 flex flex-col">
-                                  {category.blogs?.slice(0, 3).map((blog) => (
+                                  {(category.blogs || []).slice(0, 3).map((blog) => (
                                     <Link key={blog._id} href={`/blogs/education/${category.subCategory._id}/${blog._id}`} className="text-black/60 hover:text-black text-[13px] font-light" onClick={() => setIsMobileMenuOpen(false)}>
                                       {blog.title}
                                     </Link>

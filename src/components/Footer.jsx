@@ -20,8 +20,6 @@ import Image from "next/image";
 import ArdorLogo from "@/public/image/cropped-website-logo-1.png";
 import TransitionLink from "./TransitionLink";
 
-gsap.registerPlugin(ScrollTrigger);
-
 /* ─── Custom SVG Icons ─────────────────────────────────────────── */
 const TikTokIcon = () => (
   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -129,6 +127,7 @@ export default function Footer() {
                 width={200}
                 height={80}
                 className="object-contain brightness-0 invert"
+                sizes="(max-width: 767px) 140px, 200px"
               />
             </TransitionLink>
             <p className="!text-white max-w-sm leading-relaxed text-lg italic font-arizona">

@@ -6,28 +6,25 @@ const __dirname = dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Explicit empty turbopack config to avoid "Call retries were exceeded" build warnings
   turbopack: {},
   transpilePackages: ["gsap"],
   serverExternalPackages: ["nodemailer"],
-  middlewareClientMaxBodySize: '100mb',
   experimental: {
     serverActions: {
       bodySizeLimit: '100mb',
     },
   },
-  // Although technically for Pages router, some Next.js environments use this for shared limits
-  api: {
-    bodyParser: {
-      sizeLimit: '100mb',
-    },
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [480, 768, 1024, 1280, 1536],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256],
+    minimumCacheTTL: 31536000,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  compress: true,
+  poweredByHeader: false,
+  reactStrictMode: true,
   webpack: (config, { isServer, webpack }) => {
     if (!isServer) {
-      // Comprehensive fallbacks for Node.js modules
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
@@ -44,26 +41,19 @@ const nextConfig = {
         events: false,
       };
 
-      // Specifically handle the Tailwind CSS -> fast-glob -> @nodelib/fs chain
       config.plugins.push(
-        // Ignore the entire fast-glob module on client-side
         new webpack.IgnorePlugin({
           resourceRegExp: /^fast-glob$/,
         }),
-
-        // Ignore @nodelib/fs modules specifically
         new webpack.IgnorePlugin({
           resourceRegExp: /^@nodelib\/fs/,
         }),
-
-        // Ignore context-specific @nodelib imports
         new webpack.IgnorePlugin({
           resourceRegExp: /@nodelib\/fs/,
           contextRegExp: /node_modules/,
         })
       );
 
-      // Replace problematic modules with empty implementations
       config.resolve.alias = {
         ...config.resolve.alias,
         '@nodelib/fs.scandir': resolve(__dirname, './lib/empty-fs-module.js'),

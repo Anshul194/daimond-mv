@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useRef } from "react";
 import Image from "next/image";
 import { Star } from "lucide-react";
@@ -180,6 +181,7 @@ const HeroSection = () => {
             fill
             className="object-cover scale-105"
             priority
+            sizes="(max-width: 1023px) 100vw, 50vw"
           />
         </div>
 
@@ -292,6 +294,7 @@ const HeroSection = () => {
             alt="Ring Collection"
             fill
             className="object-cover"
+            sizes="(min-width: 1024px) 50vw, 0vw"
           />
           {/* Subtle overlay to blend */}
           <div className="absolute inset-0 bg-gradient-to-l from-black/10 to-transparent"></div>

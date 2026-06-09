@@ -14,9 +14,8 @@ export const getReels = async (request) => {
     }
 };
 
-export const createReel = async (request) => {
+export const createReel = async (data) => {
     try {
-        const data = await request.json();
         const reel = await instagramService.createReel(data);
         return { status: 201, body: { success: true, data: reel } };
     } catch (error) {
@@ -24,9 +23,8 @@ export const createReel = async (request) => {
     }
 };
 
-export const updateReel = async (id, request) => {
+export const updateReel = async (id, data) => {
     try {
-        const data = await request.json();
         const reel = await instagramService.updateReel(id, data);
         if (!reel) return { status: 404, body: { success: false, message: 'Reel not found' } };
         return { status: 200, body: { success: true, data: reel } };

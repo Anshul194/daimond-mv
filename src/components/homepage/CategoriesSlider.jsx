@@ -142,28 +142,6 @@ const SliderBoxTwo = () => {
     setIsDragging(false);
   }, []);
 
-  // Render loading or error state
-  if (status === "loading") {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600">Loading categories...</p>
-      </div>
-    );
-  }
-
-  if (status === "failed") {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-        <p className="text-red-600">
-          Error:{" "}
-          {typeof error === "string"
-            ? error
-            : error?.message || "An unknown error occurred"}
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-7xl mx-auto px-4 py-16">
       {/* Header */}
@@ -172,8 +150,11 @@ const SliderBoxTwo = () => {
           Shop By Category
         </h1>
         <p className="text-gray-600 text-[10px]">
-          Explore engagement rings, women's wedding rings, men's wedding rings,
-          and fine jewellery.
+          {status === "failed"
+            ? typeof error === "string"
+              ? error
+              : error?.message || "An unknown error occurred"
+            : "Explore engagement rings, women's wedding rings, men's wedding rings, and fine jewellery."}
         </p>
       </div>
 
@@ -188,65 +169,89 @@ const SliderBoxTwo = () => {
           }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp} // Fixed typo from handleMouseUap
+          onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseLeave}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          {categories.map((style) => (
-            <Link
-              key={style.name}
-              href={`/${style.slug}`}
-              className="flex-shrink-0 px-4"
-              style={{ width: `${slideWidth}%` }}
-            >
-              <div className="group cursor-pointer">
-                {/* Ring Image Container */}
-                <div className="aspect-[4/5] bg-gray-50 overflow-hidden mb-6 relative transition-transform duration-300 ease-in-out hover:scale-105">
-                  <div
-                    className="w-full h-full bg-cover bg-center"
-                    style={{
-                      backgroundImage: `url(${style.image})`,
-                      backgroundPosition: "center center",
-                    }}
-                  />
+          {status === "loading"
+            ? Array.from({ length: itemsPerView }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex-shrink-0 px-4"
+                  style={{ width: `${slideWidth}%` }}
+                >
+                  <div className="group cursor-pointer">
+                    <div className="aspect-[4/5] bg-gray-100 overflow-hidden mb-6 animate-pulse" />
+                    <div className="h-3 bg-gray-100 rounded animate-pulse w-2/3" />
+                  </div>
                 </div>
-
-                {/* Style Name */}
-                <div className="flex items-center justify-start gap-4">
-                  <h3 className="text-[10px] font-semibold text-gray-900 font-gintoNord tracking-wide uppercase">
-                    {style.name}
-                  </h3>
-                  <svg
-                    className="w-5 h-4 text-gray-600 group-hover:translate-x-1 transition-transform duration-300"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+              ))
+            : categories.length > 0
+              ? categories.map((style) => (
+                  <Link
+                    key={style.name}
+                    href={`/${style.slug}`}
+                    className="flex-shrink-0 px-4"
+                    style={{ width: `${slideWidth}%` }}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                    <line
-                      x1="0"
-                      y1="12"
-                      x2="15"
-                      y2="12"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </Link>
-          ))}
+                    <div className="group cursor-pointer">
+                      <div className="aspect-[4/5] bg-gray-50 overflow-hidden mb-6 relative transition-transform duration-300 ease-in-out hover:scale-105">
+                        <div
+                          className="w-full h-full bg-cover bg-center"
+                          style={{
+                            backgroundImage: `url(${style.image})`,
+                            backgroundPosition: "center center",
+                          }}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-start gap-4">
+                        <h3 className="text-[10px] font-semibold text-gray-900 font-gintoNord tracking-wide uppercase">
+                          {style.name}
+                        </h3>
+                        <svg
+                          className="w-5 h-4 text-gray-600 group-hover:translate-x-1 transition-transform duration-300"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                          <line
+                            x1="0"
+                            y1="12"
+                            x2="15"
+                            y2="12"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              : Array.from({ length: itemsPerView }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex-shrink-0 px-4"
+                    style={{ width: `${slideWidth}%` }}
+                  >
+                    <div className="group cursor-pointer">
+                      <div className="aspect-[4/5] bg-gray-50 overflow-hidden mb-6 relative" />
+                      <div className="h-3 bg-gray-200 rounded w-2/3" />
+                    </div>
+                  </div>
+                ))}
         </div>
-        {/* Navigation Arrows */}
-        {currentSlide < maxSlides && (
+
+        {!(status === "loading" || status === "failed") && categories.length > 0 && currentSlide < maxSlides && (
           <button
             onClick={nextSlide}
             className="absolute right-5 top-2/4 transform -translate-y-2/3 translate-x-4 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200 z-10"
@@ -268,7 +273,7 @@ const SliderBoxTwo = () => {
           </button>
         )}
 
-        {currentSlide > 0 && (
+        {!(status === "loading" || status === "failed") && categories.length > 0 && currentSlide > 0 && (
           <button
             onClick={prevSlide}
             className="absolute left-5 top-2/4 transform -translate-y-2/3 -translate-x-4 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200 z-10"
