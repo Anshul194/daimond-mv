@@ -94,7 +94,7 @@ const Features = () => {
         <div className="text-left flex flex-col h-full p-4 bg-[#f4efe9]">
           <div className="mb-6">
             <img 
-              src="/images/featOne.webp" 
+              src="/images/featOne.png" 
               alt="Philanthropic Initiatives" 
               className="w-full h-40 object-cover"
             />
