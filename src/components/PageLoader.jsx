@@ -161,7 +161,7 @@ export default function PageLoader({ onComplete }) {
       <div
         ref={logoRef}
         style={{
-          fontFamily: "'CullenGinto-Nord', serif",
+          fontFamily: "'ArdorGinto-Nord', serif",
           fontSize: "13px",
           letterSpacing: "0.4em",
           color: "#00736C",

@@ -507,7 +507,7 @@ const Navbar = () => {
               {visibleLeftNavItems.map((item) => (
                 <div
                   key={item.name}
-                  className="relative font-cullen h-full flex items-center"
+                  className="relative font-ardor h-full flex items-center"
                   onMouseEnter={() => {
                     if (item.hasDropdown) {
                       if (item.name === "FINE JEWELLERY") {
@@ -649,7 +649,7 @@ const Navbar = () => {
                 {rightNavItems.map((item) => (
                   <div
                     key={item.name}
-                    className="relative font-cullen h-full flex items-center"
+                    className="relative font-ardor h-full flex items-center"
                     onMouseEnter={() => {
                       if (item.hasDropdown && item.name === "CONTACT") {
                         setShowContactDropdown(true);

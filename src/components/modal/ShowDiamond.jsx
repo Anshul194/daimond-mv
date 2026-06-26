@@ -224,7 +224,7 @@ function ShowDiamond({
                   100% Carbon Neutral Lab Grown Diamonds
                 </h2>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  At Cullen Jewellery, we push the boundaries of what is
+                  At Ardor Diamonds, we push the boundaries of what is
                   possible. That's why we are proud to partner with Clear
                   Neutral, a leading carbon neutral certification company. This
                   trailblazing collaboration allows us to offer you lab grown

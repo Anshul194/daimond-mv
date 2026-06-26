@@ -427,7 +427,7 @@ const ShowDiamondFilter = ({ isVisible, onClose, onApplyFilters }) => {
                   {/* Light skin tone layer */}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <img
-                      src="https://cullenjewellery.com/_app/immutable/assets/hand_light.R2T1drhK.webp"
+                      src="/images/hand_light.webp"
                       alt="Light Hand"
                       className="w-full h-full object-contain"
                       style={{ opacity: 1 - (skinTone / 100) }}
@@ -437,7 +437,7 @@ const ShowDiamondFilter = ({ isVisible, onClose, onApplyFilters }) => {
                   {/* Dark skin tone layer */}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <img
-                      src="https://cullenjewellery.com/_app/immutable/assets/hand_dark.BZClr1PQ.webp"
+                      src="/images/hand_dark.webp"
                       alt="Dark Hand"
                       className="w-full h-full object-contain"
                       style={{ opacity: skinTone / 100 }}
@@ -455,7 +455,7 @@ const ShowDiamondFilter = ({ isVisible, onClose, onApplyFilters }) => {
                       }}
                     >
                       <img
-                        src="https://cullenjewellery.com/_app/immutable/assets/hand_stone_round.DNPAivQg.webp"
+                        src="/images/hand_stone_round.webp"
                         alt="Diamond"
                         className="w-6 h-6 object-contain"
                       />

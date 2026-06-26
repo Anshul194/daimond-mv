@@ -5,7 +5,7 @@ const Difference = () => {
     <div className="btn text-white py-8 px-6">
       {/* Header */}
       <h2 className="text-center text-2xl font-arizona mb-8">
-        The Cullen Difference
+        The Ardor Difference
       </h2>
 
       {/* Features Grid */}

@@ -20,7 +20,7 @@ const ModalCertified = () => {
           </h2>
           
           <p className="text-sm text-gray-600 leading-relaxed mb-8 font-gintoNormal">
-            Cullen Jewellery's selection of lab grown diamonds is certified 100% 
+            Ardor Diamonds' selection of lab grown diamonds is certified 100% 
             Carbon Neutral by Clear Neutral, an authority in carbon neutral 
             certification. Embrace a brilliant, sustainable tomorrow by choosing 
             our lab grown diamonds today.

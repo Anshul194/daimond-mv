@@ -7,7 +7,7 @@ export const contactUsEmailTemplate = (data) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Contact Form Submission - CULLEN Jewelry</title>
+    <title>New Contact Form Submission - Ardor Jewelry</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -132,7 +132,7 @@ export const contactUsEmailTemplate = (data) => {
 <body>
     <div class="email-container">
         <div class="header">
-            <h1>CULLEN</h1>
+            <h1>ARDOR</h1>
             <p>Fine Jewelry & Luxury Craftsmanship</p>
         </div>
         
@@ -173,7 +173,7 @@ export const contactUsEmailTemplate = (data) => {
         </div>
         
         <div class="footer">
-            <p>This message was sent through the contact form on the CULLEN Jewelry website.</p>
+            <p>This message was sent through the contact form on the Ardor Jewelry website.</p>
             <p>Please respond promptly to maintain our excellent customer service standards.</p>
             <p><a href="mailto:${email}">Reply to Customer</a> | <a href="tel:${phone}">Call Customer</a></p>
         </div>
@@ -191,7 +191,7 @@ export const customJewelryEmailTemplate = (data) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom Jewelry Inquiry - CULLEN</title>
+    <title>Custom Jewelry Inquiry - ARDOR</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -412,7 +412,7 @@ export const customJewelryEmailTemplate = (data) => {
 <body>
     <div class="email-container">
         <div class="header">
-            <h1>CULLEN</h1>
+            <h1>ARDOR</h1>
             <p>Bespoke Jewelry & Custom Craftsmanship</p>
             <div class="custom-badge">Custom Jewelry Inquiry</div>
         </div>
@@ -472,7 +472,7 @@ export const customJewelryEmailTemplate = (data) => {
         </div>
         
         <div class="footer">
-            <p>🎨 Custom Jewelry Inquiry - CULLEN Bespoke Services</p>
+            <p>🎨 Custom Jewelry Inquiry - Ardor Bespoke Services</p>
             <p>Transform dreams into diamonds. Every piece tells a story.</p>
             <p><a href="mailto:${email}">Contact Customer</a> | <a href="#">View Design Gallery</a></p>
         </div>

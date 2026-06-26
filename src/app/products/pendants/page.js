@@ -31,7 +31,7 @@ const Pendants = () => {
         {/* Background image */}
         <div className="absolute inset-0">
           <img 
-            src="https://cdn.shopify.com/s/files/1/0644/3067/0060/files/Cullen_StudioSession_Fullres_Landscape_1400x1400.jpg?v=1701219211"
+            src="/images/Ardor_StudioSession_Fullres_Landscape.jpg"
             alt="Woman showing rings"
             className="w-full h-full object-cover"
           />

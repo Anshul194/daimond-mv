@@ -7,15 +7,15 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 gsap.registerPlugin(ScrollTrigger)
 
 const FALLBACK_REELS = [
-  { image: "/images/home-slide-one/one.webp", reelUrl: "https://www.instagram.com/cullenjewellery/reel/DIxxgBsRSNc/" },
-  { image: "/images/home-slide-one/two.webp", reelUrl: "https://www.instagram.com/cullenjewellery/reel/DI2bo4CSDft/" },
-  { image: "/images/home-slide-one/three.jpg", reelUrl: "https://www.instagram.com/cullenjewellery/reel/DIxxgBsRSNc/" },
-  { image: "/images/home-slide-one/four.webp", reelUrl: "https://www.instagram.com/cullenjewellery/reel/DI2bo4CSDft/" },
+  { image: "/images/home-slide-one/one.webp", reelUrl: "https://www.instagram.com/ardordiamonds/reel/DIxxgBsRSNc/" },
+  { image: "/images/home-slide-one/two.webp", reelUrl: "https://www.instagram.com/ardordiamonds/reel/DI2bo4CSDft/" },
+  { image: "/images/home-slide-one/three.jpg", reelUrl: "https://www.instagram.com/ardordiamonds/reel/DIxxgBsRSNc/" },
+  { image: "/images/home-slide-one/four.webp", reelUrl: "https://www.instagram.com/ardordiamonds/reel/DI2bo4CSDft/" },
 ]
 
 const FALLBACK_HEADER = {
   title: 'Instagram',
-  description: 'Learn, engage and grow. Connect with Cullen for all things engagement, wedding and fine jewellery.'
+  description: 'Learn, engage and grow. Connect with Ardor for all things engagement, wedding and fine jewellery.'
 }
 
 const VideoReviews = () => {
@@ -39,10 +39,10 @@ const VideoReviews = () => {
   /* 
   // STATIC CONTENT (KEEPING AS COMMENT PER USER REQUEST)
   const reelData = [
-    { image: "/images/home-slide-one/one.webp",   reelUrl: "https://www.instagram.com/cullenjewellery/reel/DIxxgBsRSNc/" },
-    { image: "/images/home-slide-one/two.webp",   reelUrl: "https://www.instagram.com/cullenjewellery/reel/DI2bo4CSDft/" },
-    { image: "/images/home-slide-one/three.jpg",  reelUrl: "https://www.instagram.com/cullenjewellery/reel/DIxxgBsRSNc/" },
-    { image: "/images/home-slide-one/four.webp",  reelUrl: "https://www.instagram.com/cullenjewellery/reel/DI2bo4CSDft/" },
+    { image: "/images/home-slide-one/one.webp",   reelUrl: "https://www.instagram.com/ardordiamonds/reel/DIxxgBsRSNc/" },
+    { image: "/images/home-slide-one/two.webp",   reelUrl: "https://www.instagram.com/ardordiamonds/reel/DI2bo4CSDft/" },
+    { image: "/images/home-slide-one/three.jpg",  reelUrl: "https://www.instagram.com/ardordiamonds/reel/DIxxgBsRSNc/" },
+    { image: "/images/home-slide-one/four.webp",  reelUrl: "https://www.instagram.com/ardordiamonds/reel/DI2bo4CSDft/" },
   ]
   */
 

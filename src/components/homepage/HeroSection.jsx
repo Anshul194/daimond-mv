@@ -229,8 +229,8 @@ const HeroSection = () => {
             <div className="hidden sm:flex gap-4">
               {desktopButtons.length ? desktopButtons.map((b, idx) => {
                 const base = b.primary
-                  ? 'bg-[#00736C] w-full !h-[65px] sm:w-[200px] hover:bg-[#005F5B] text-white py-4 px-8 hover:shadow-xl uppercase'
-                  : 'border !h-[65px] border-white/50 backdrop-blur-sm w-full sm:w-[150px] hover:bg-white/10 text-white py-4 px-8 uppercase';
+                  ? 'bg-[#00736C] w-full !h-[65px] sm:w-[200px] hover:bg-[#005F5B] md:w-fit flex justify-center items-center text-white py-4 px-8 hover:shadow-xl uppercase'
+                  : 'border !h-[65px] border-white/50 backdrop-blur-sm w-full sm:w-[150px] md:w-fit flex justify-center items-center hover:bg-white/10 text-white py-4 px-8 uppercase';
                 const cls = `${base} text-xs font-semibold tracking-widest transition-all duration-300 transform hover:translate-y-[-2px]`;
                 return (
                   <Link key={idx} href={b.href || '#'} className={cls}>
@@ -275,7 +275,7 @@ const HeroSection = () => {
               </div>
               <button
                 onClick={() => setCurrentIndex((p) => (p + 1) % banners.length)}
-                className="w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20"
+                className="w-10 h-10 rounded-full bg-white/10 text-white flex items-center  justify-center hover:bg-white/20"
                 aria-label="Next"
               >
                 ›

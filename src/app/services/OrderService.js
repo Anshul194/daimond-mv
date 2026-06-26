@@ -411,7 +411,7 @@ class OrderService {
             <p>Hi ${user.name || "Customer"},</p>
             <p>Thank you for your order. Your order number is <strong>${order.order_number || order._id}</strong>.</p>
             ${invoiceLink ? `<p>You can download your invoice <a href="${invoiceLink}">here</a>.</p>` : ""}
-            <p>Regards,<br/>CULLEN</p>
+            <p>Regards,<br/>ARDOR</p>
           `;
 
           const attachments = [];

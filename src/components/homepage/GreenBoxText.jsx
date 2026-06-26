@@ -47,7 +47,7 @@ const FALLBACK_CONTENT = {
   eyebrow: 'Est. Since',
   headlineLine1: 'Fine jewellery to feel good about,',
   headlineLine2: 'made to love for a lifetime.',
-  description: 'Cullen sets the standard in fine jewellery with a commitment to premium craftsmanship. From our Australian workshop, our jewellers blend tradition and innovation, creating lasting pieces, responsibly.',
+  description: 'Ardor sets the standard in fine jewellery with a commitment to premium craftsmanship. From our Australian workshop, our jewellers blend tradition and innovation, creating lasting pieces, responsibly.',
 };
 
 /* ── Component ────────────────────────────────────────────────────────────── */

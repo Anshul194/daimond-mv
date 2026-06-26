@@ -52,24 +52,24 @@ const page = () => {
     () => [
       {
         id: 1,
-        title: "The Cullen Guide to Styling Stacker Rings",
+        title: "The Ardor Guide to Styling Stacker Rings",
         date: "Mar 14, 2025",
         image:
-          "https://media.cullenjewellery.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/soroya_on_hand.jpg",
+          "https://media.ardordiamonds.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/soroya_on_hand.jpg",
       },
       {
         id: 2,
         title: "The Best Wedding Band and Engagement Ring Combinations",
         date: "Oct 11, 2024",
         image:
-          "https://media.cullenjewellery.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/03_Pia_Still_Life_4x5.jpg",
+          "https://media.ardordiamonds.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/03_Pia_Still_Life_4x5.jpg",
       },
       {
         id: 3,
         title: "The Ban",
         date: "Jul 16, 2025",
         image:
-          "https://media.cullenjewellery.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/soroya_on_hand.jpg",
+          "https://media.ardordiamonds.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/soroya_on_hand.jpg",
       },
     ],
     []
@@ -131,7 +131,7 @@ const page = () => {
               {data?.BlogCategory?.name} {">"} {data?.BlogSubCategory?.name}
             </p>
             <p className="text-lg md:text-sm font-gintoNord font-light">
-              {convertDateToReadableFormat(data?.createdAt)} — by Cullen
+              {convertDateToReadableFormat(data?.createdAt)} — by Ardor
               Jewellery
             </p>
           </div>
@@ -239,7 +239,7 @@ const page = () => {
          
             <div className="bg-gray-100 overflow-hidden">
               <img
-                src="https://media.cullenjewellery.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/soroya_on_hand.jpg"
+                src="https://media.ardordiamonds.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/soroya_on_hand.jpg"
                 alt="Soraya - East West Oval With Cigar Band"
                 width={600}
                 height={350}
@@ -254,7 +254,7 @@ const page = () => {
 
             <div className="bg-gray-100 overflow-hidden">
               <img
-                src="https://media.cullenjewellery.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/03_Pia_Still_Life_4x5.jpg"
+                src="https://media.ardordiamonds.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/03_Pia_Still_Life_4x5.jpg"
                 alt="Pia - Marquise Solitaire with Twist Band in Platinum"
                 width={600}
                 height={350}
@@ -285,7 +285,7 @@ const page = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="bg-gray-100 overflow-hidden">
               <img
-                src="https://media.cullenjewellery.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/soroya_on_hand.jpg"
+                src="https://media.ardordiamonds.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/soroya_on_hand.jpg"
                 alt="Gigi - Marquise Solitaire with Hidden Halo and Cigar Band"
                 width={600}
                 height={350}
@@ -300,7 +300,7 @@ const page = () => {
 
             <div className="bg-gray-100 overflow-hidden">
               <img
-                src="https://media.cullenjewellery.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/03_Pia_Still_Life_4x5.jpg"
+                src="https://media.ardordiamonds.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/03_Pia_Still_Life_4x5.jpg"
                 alt="Our Collection of Statement Rings with thicker bands"
                 width={600}
                 height={350}
@@ -329,7 +329,7 @@ const page = () => {
             with a smaller ring size may benefit from a slightly thinner band
             width to keep things proportional. The best way to determine what
             thickness you prefer is to try on different band widths in person,
-            as it can be harder to gauge just looking at photos. Here at Cullen,
+            as it can be harder to gauge just looking at photos. Here at Ardor,
             we have a wide variety of different bandwidth options for you to try
             on in one of our showrooms where you can book an appointment here .
           </p>
@@ -349,7 +349,7 @@ const page = () => {
             with a smaller ring size may benefit from a slightly thinner band
             width to keep things proportional. The best way to determine what
             thickness you prefer is to try on different band widths in person,
-            as it can be harder to gauge just looking at photos. Here at Cullen,
+            as it can be harder to gauge just looking at photos. Here at Ardor,
             we have a wide variety of different bandwidth options for you to try
             on in one of our showrooms where you can book an appointment here .
           </p>
@@ -365,7 +365,7 @@ const page = () => {
             <div className="text-center">
               <div className="bg-gray-100 overflow-hidden mb-4">
                 <img
-                  src="https://media.cullenjewellery.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/soroya_on_hand.jpg"
+                  src="https://media.ardordiamonds.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/soroya_on_hand.jpg"
                   alt="Bronte - Cigar Band Oval Solitaire & Clara - Pavé Edge Cigar Band"
                   width={600}
                   height={176}
@@ -392,7 +392,7 @@ const page = () => {
             <div className="text-center">
               <div className="bg-gray-100 overflow-hidden mb-4">
                 <img
-                  src="https://media.cullenjewellery.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/03_Pia_Still_Life_4x5.jpg"
+                  src="https://media.ardordiamonds.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/03_Pia_Still_Life_4x5.jpg"
                   alt="Angie - Marquise East West Bezel Solitaire in Platinum"
                   width={600}
                   height={176}
@@ -418,7 +418,7 @@ const page = () => {
             <div className="text-center">
               <div className="bg-gray-100 overflow-hidden mb-4">
                 <img
-                  src="https://media.cullenjewellery.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/soroya_on_hand.jpg"
+                  src="https://media.ardordiamonds.com/cdn-cgi/image/width=600,height=600/content/pages/education/engagement-ring-guidance/engagement-ring-setting-styles-the-ultimate-guide/your-guide-to-thicker-band-engagement-rings/soroya_on_hand.jpg"
                   alt="Hayley - Oval Twist Band Solitaire & Moana - Pavé Curved Wedding Band"
                   width={600}
                   height={176}

@@ -83,7 +83,7 @@ const Features = () => {
             SUSTAINABLE PRACTICES
           </h3>
           <p className="text-[10px] text-gray-600 mb-6 leading-4 font-gintoNormal flex-grow">
-            While not affiliated with the numerous harms of mining, Cullen Jewellery recognises that energy is required to create lab-grown gemstones. We actively offset our emissions and neutral in environmental responsibility through diverse initiatives, building a better planet for all.
+            While not affiliated with the numerous harms of mining, Ardor Diamonds recognises that energy is required to create lab-grown gemstones. We actively offset our emissions and neutral in environmental responsibility through diverse initiatives, building a better planet for all.
           </p>
           <button className="text-sm font-medium text-gray-800 uppercase tracking-wider hover:text-gray-600 transition-colors text-start font-gintoNord mt-auto">
             LEARN MORE →
@@ -103,7 +103,7 @@ const Features = () => {
             PHILANTHROPIC INITIATIVES
           </h3>
           <p className="text-[10px] text-gray-600 mb-6 leading-4 font-gintoNormal flex-grow">
-            As a family business, Cullen Jewellery deeply empathises with the communities impacted by traditional mining practices. Our philanthropic initiatives reimagine industry norms and create brighter futures for those living within them.
+            As a family business, Ardor Diamonds deeply empathises with the communities impacted by traditional mining practices. Our philanthropic initiatives reimagine industry norms and create brighter futures for those living within them.
           </p>
           <button className="text-sm font-medium text-gray-800 uppercase tracking-wider hover:text-gray-600 transition-colors text-start font-gintoNord mt-auto">
             LEARN MORE →

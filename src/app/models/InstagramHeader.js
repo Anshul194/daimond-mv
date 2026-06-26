@@ -11,7 +11,7 @@ const InstagramHeaderSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
-        default: 'Learn, engage and grow. Connect with Cullen for all things engagement, wedding and fine jewellery.'
+        default: 'Learn, engage and grow. Connect with Ardor for all things engagement, wedding and fine jewellery.'
     }
 }, {
     timestamps: true

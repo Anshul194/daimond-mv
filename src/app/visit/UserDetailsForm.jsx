@@ -239,7 +239,7 @@ const UserDetailsForm = ({ selectedDateTime, onBack, onSubmit }) => {
               required
             />
             <span className="text-sm text-gray-700">
-              I agree with the <a href="#" className="text-blue-600 underline">Cullen Jewellery Privacy Policy</a> *
+              I agree with the <a href="#" className="text-blue-600 underline">Ardor Privacy Policy</a> *
             </span>
           </label>
 

@@ -5,8 +5,8 @@ export default {
     extend: {
       fontFamily: {
         arizona: ["ABCArizonaMix", "sans-serif"],
-        gintoNord: ["CullenGinto-Nord", "sans-serif"],
-        gintoNormal: ["CullenGintoNormal", "sans-serif"],
+        gintoNord: ["ArdorGinto-Nord", "sans-serif"],
+        gintoNormal: ["ArdorGintoNormal", "sans-serif"],
       },
     },
   },

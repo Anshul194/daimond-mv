@@ -19,7 +19,7 @@ const AllReviewsPage = () => {
                         Our Client Stories
                     </h1>
                     <p className="text-lg text-gray-700 font-gintoNormal max-w-2xl mx-auto leading-relaxed">
-                        Discover the experiences of our clients who found their perfect piece at Cullen Jewelry.
+                        Discover the experiences of our clients who found their perfect piece at Ardor.
                         We take pride in our craftsmanship and dedicated service.
                     </p>
                 </div>

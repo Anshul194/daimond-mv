@@ -197,7 +197,7 @@ const RingsGrid = ({
         <div className="max-w-2xl text-black opacity-75 mx-auto pt-16">
           <div className="w-[120px] border-t-3 border-gray-900 mx-auto"></div>
           <p className="text-[10px] font-semibold text-center mb-3 pt-3">
-            Cullen Jewellery offers the perfect range of engagement rings to
+            Ardor Diamonds offers the perfect range of engagement rings to
             complement your style. Our team can guide you through choosing the
             perfect platinum engagement ring with lab grown diamonds, moissanite
             or lab grown sapphires, along with classic options like sleek

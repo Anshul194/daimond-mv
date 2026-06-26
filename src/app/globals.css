@@ -2,7 +2,7 @@
 
 @theme inline {
   --font-sans: "ABCArizonaMix", serif;
-  --font-mono: "CullenGintoNormal", monospace;
+  --font-mono: "ArdorGintoNormal", monospace;
 }
 
 /* Font faces */
@@ -23,24 +23,24 @@
 }
 
 @font-face {
-  font-family: "CullenGinto-Nord";
-  src: url("/fonts/CullenGinto-NordRegular.woff2") format("woff2");
+  font-family: "ArdorGinto-Nord";
+  src: url("/fonts/ArdorGinto-NordRegular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: "CullenGintoNormal";
-  src: url("/fonts/CullenGintoNormal-Regular.woff2") format("woff2");
+  font-family: "ArdorGintoNormal";
+  src: url("/fonts/ArdorGintoNormal-Regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: "CullenGintoNormal";
-  src: url("/fonts/CullenGintoNormal-Light.woff2") format("woff2");
+  font-family: "ArdorGintoNormal";
+  src: url("/fonts/ArdorGintoNormal-Light.woff2") format("woff2");
   font-weight: 300;
   font-style: normal;
   font-display: swap;

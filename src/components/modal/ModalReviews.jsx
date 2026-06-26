@@ -40,7 +40,7 @@ const ModalReviews = () => {
       name: 'DAVID TRAN',
       rating: 5,
       timeAgo: '13 hours ago',
-      review: 'A fantastic experience with this Jeweller. We got engaged without a ring, and so my partner was able to design the ring she always wanted with Cullen. And what a result. Mock ups, photoshop and email communication led to the creation of a cad drawing by Cullen\'s designers. Then we chose a diamond — from their incredible collection of high-quality stones. The entire process was seamless and professional, with excellent customer service throughout. I would highly recommend Cullen to anyone looking for custom jewelry work.',
+      review: 'A fantastic experience with this Jeweller. We got engaged without a ring, and so my partner was able to design the ring she always wanted with Ardor. And what a result. Mock ups, photoshop and email communication led to the creation of a cad drawing by Ardor\'s designers. Then we chose a diamond — from their incredible collection of high-quality stones. The entire process was seamless and professional, with excellent customer service throughout. I would highly recommend Ardor to anyone looking for custom jewelry work.',
       readMore: true,
       avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'
     },
@@ -60,7 +60,7 @@ const ModalReviews = () => {
       name: 'SARAH JOHNSON',
       rating: 5,
       timeAgo: '2 days ago',
-      review: 'Absolutely stunning work! The team at Cullen created the perfect engagement ring. Professional service from start to finish.',
+      review: 'Absolutely stunning work! The team at Ardor created the perfect engagement ring. Professional service from start to finish.',
       avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b632?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'
     },
     {
@@ -78,7 +78,7 @@ const ModalReviews = () => {
       name: 'EMMA WILSON',
       rating: 5,
       timeAgo: '4 days ago',
-      review: 'Beautiful rings and outstanding customer service. The staff were knowledgeable and helped us find exactly what we were looking for. The entire experience was wonderful from consultation to final purchase. I couldn\'t be happier with the quality and service provided by the Cullen team.',
+      review: 'Beautiful rings and outstanding customer service. The staff were knowledgeable and helped us find exactly what we were looking for. The entire experience was wonderful from consultation to final purchase. I couldn\'t be happier with the quality and service provided by the Ardor team.',
       readMore: true,
       avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'
     },
@@ -88,7 +88,7 @@ const ModalReviews = () => {
       name: 'JAMES MILLER',
       rating: 5,
       timeAgo: '5 days ago',
-      review: 'Incredible attention to detail and superb quality. Highly recommend Cullen for anyone looking for exceptional jewelry.',
+      review: 'Incredible attention to detail and superb quality. Highly recommend Ardor for anyone looking for exceptional jewelry.',
       avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'
     },
     {
@@ -350,7 +350,7 @@ const ModalReviews = () => {
             What Our Clients Say
           </h2>
           <p className="text-black font-gintoNormal text-sm font-light">
-            Here's what our clients have to say about their Cullen experience.
+            Here's what our clients have to say about their Ardor experience.
           </p>
         </div>
 

@@ -325,7 +325,7 @@ const Page = () => {
               </div>
               <div>
                 <p className="font-medium text-[10px] font-gintoNord">
-                  SALES@CULLENJEWELLERY.COM
+                  SALES@ARDORJEWELLERY.COM
                 </p>
               </div>
             </div>

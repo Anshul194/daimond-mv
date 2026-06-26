@@ -207,7 +207,7 @@ export default async function generateInvoicePdf(data) {
     <div class="invoice-container">
         <!-- Header -->
         <div class="header">
-            <div class="company-name">CULLEN</div>
+            <div class="company-name">ARDOR</div>
             <div class="company-details">
                 123 Business Street, Suite 100<br>
                 City, State 12345<br>
