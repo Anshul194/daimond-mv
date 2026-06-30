@@ -89,10 +89,10 @@ const ImageSlider = ({ images, currentIndex, onIndexChange }) => {
   const getNextIndex = () => (currentIndex + 1) % images.length;
 
   return (
-    <div className="relative w-full h-full  select-none">
+    <div className="relative w-full h-fit select-none">
       <div
         ref={containerRef}
-        className="relative h-full flex items-center justify-center "
+        className="relative flex items-center justify-center"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -250,7 +250,7 @@ const ImageSlider = ({ images, currentIndex, onIndexChange }) => {
 // Thumbnail Navigation Component
 const ThumbnailNavigation = ({ images, currentIndex, onIndexChange }) => {
   return (
-    <div className="absolute w-2/3 max-sm:w-full max-sm:-bottom-32 -bottom-28 pt-6  left-1/2 transform -translate-x-1/2 flex flex-wrap justify-center  gap-2  p-2 rounded-lg">
+    <div className="w-2/3 max-sm:w-full mt-4 flex flex-wrap justify-center gap-2 p-2 rounded-lg">
       {images.map((image, index) => (
         <button
           key={index}
@@ -296,6 +296,15 @@ const ProductOptions = ({
 }) => {
   const { sizes: globalSizes } = useSelector((state) => state.size);
   const dispatch = useDispatch();
+  const params = useParams();
+  const { category } = params;
+
+  const displayCategoryName = React.useMemo(() => {
+    let name = productData?.category_id?.name || (typeof category === 'string' ? category : "");
+    if (!name) return "Jewellery";
+    name = name.replace(/-/g, ' ');
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  }, [productData, category]);
 
   useEffect(() => {
     if (!globalSizes || globalSizes.length === 0) {
@@ -358,7 +367,7 @@ const ProductOptions = ({
           STEP ONE
         </div>
         <h2 className="text-2xl text-gray-800 mb-1">
-          Earrings.{" "}
+          {displayCategoryName}.{" "}
           <span className="text-gray-400 font-arizona">Make It Yours.</span>
         </h2>
         <p className="text-gray-600 text-sm">Select a precious metal.</p>
@@ -1088,10 +1097,10 @@ const ProductModal = ({ onClose, loading }) => {
           <ModalHeader onClose={onClose} />
 
           <div
-            className="flex flex-col md:flex-row overflow-hidden h-fit"
+            className="flex flex-col md:flex-row overflow-visible h-fit"
             style={{ height: "calc(100% - 64px)" }}
           >
-            <div className="w-full mt-2 md:w-1/2 h-full max-sm:mb-40 relative md:sticky md:top-0 md:h-[calc(100vh-100px)] flex flex-col items-center justify-center">
+            <div className="w-full mt-2 md:w-1/2 h-full max-sm:mb-20 relative md:sticky md:top-16 md:h-[calc(100vh-120px)] flex flex-col items-center justify-center">
               {(() => {
                 // Find a variant that matches ALL currently selected options
                 const selectedVariant = productData?.inventory?.inventory_details?.find(v => {

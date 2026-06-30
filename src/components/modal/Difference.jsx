@@ -2,18 +2,18 @@ import React from 'react';
 
 const Difference = () => {
   return (
-    <div className="btn text-white py-8 px-6">
+    <div className="btn text-gray-800 py-8 px-6">
       {/* Header */}
       <h2 className="text-center text-2xl font-arizona mb-8">
         The Ardor Difference
       </h2>
 
       {/* Features Grid */}
-      <div className="grid grid-cols-5 max-sm:grid-cols-3 gap-6 mb-8 max-w-6xl mx-auto">
+      <div className="flex flex-wrap justify-center md:grid md:grid-cols-5 gap-4 md:gap-6 mb-8 max-w-6xl mx-auto">
         {/* Quality Craftsmanship */}
-        <div className="text-center">
+        <div className="text-center w-[28%] min-w-[85px] md:w-auto">
           <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-            <svg className="w-12 h-12 text-white" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1">
+            <svg className="w-12 h-12 text-[#00736C]" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1">
               {/* Diamond outline */}
               <path d="M50 10 L30 25 L15 45 L50 85 L85 45 L70 25 Z" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
               {/* Diamond facets */}
@@ -33,9 +33,9 @@ const Difference = () => {
         </div>
 
         {/* Premium Materials */}
-        <div className="text-center">
+        <div className="text-center w-[28%] min-w-[85px] md:w-auto">
           <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-            <svg className="w-12 h-12 text-white" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <svg className="w-12 h-12 text-[#00736C]" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
               {/* Microscope base */}
               <path d="M20 85 L80 85" stroke="currentColor" strokeLinecap="round"/>
               <path d="M40 85 L40 75" stroke="currentColor" strokeLinecap="round"/>
@@ -60,9 +60,9 @@ const Difference = () => {
         </div>
 
         {/* Customisable Design */}
-        <div className="text-center">
+        <div className="text-center w-[28%] min-w-[85px] md:w-auto">
           <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-            <svg className="w-12 h-12 text-white" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <svg className="w-12 h-12 text-[#00736C]" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
               {/* Ring band */}
               <ellipse cx="50" cy="50" rx="35" ry="25" fill="none" stroke="currentColor" strokeWidth="2"/>
               <ellipse cx="50" cy="50" rx="25" ry="15" fill="none" stroke="currentColor" strokeWidth="1"/>
@@ -83,10 +83,13 @@ const Difference = () => {
           </h3>
         </div>
 
-        {/* Sustainable Practices */}
-        <div className="text-center">
+        {/* Break element to force 3 and 2 layout on mobile */}
+        <div className="w-full md:hidden" />
+
+        {/* Responsible Sourcing */}
+        <div className="text-center w-[28%] min-w-[85px] md:w-auto">
           <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-            <svg className="w-12 h-12 text-white" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <svg className="w-12 h-12 text-[#00736C]" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
               {/* Leaf shape */}
               <path d="M50 15 C35 25, 25 40, 30 60 C35 75, 50 85, 50 85 C50 85, 65 75, 70 60 C75 40, 65 25, 50 15 Z" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
               {/* Leaf veins */}
@@ -100,17 +103,17 @@ const Difference = () => {
             </svg>
           </div>
           <h3 className="text-[10px] font-gintoNord font-bold uppercase tracking-wider mb-1">
-            SUSTAINABLE
+            RESPONSIBLE
           </h3>
           <h3 className="text-[10px] font-gintoNord font-bold uppercase tracking-wider">
-            PRACTICES
+            SOURCING
           </h3>
         </div>
 
-        {/* Philanthropic Initiatives */}
-        <div className="text-center">
+        {/* Lifetime Care */}
+        <div className="text-center w-[28%] min-w-[85px] md:w-auto">
           <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-            <svg className="w-12 h-12 text-white" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <svg className="w-12 h-12 text-[#00736C]" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
               {/* House outline */}
               <path d="M20 80 L20 50 L50 20 L80 50 L80 80 Z" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
               {/* Roof */}
@@ -125,10 +128,10 @@ const Difference = () => {
             </svg>
           </div>
           <h3 className="text-[10px] font-gintoNord font-bold uppercase tracking-wider mb-1">
-            PHILANTHROPIC
+            LIFETIME
           </h3>
           <h3 className="text-[10px] font-gintoNord font-bold uppercase tracking-wider">
-            INITIATIVES
+            CARE
           </h3>
         </div>
       </div>
@@ -136,10 +139,7 @@ const Difference = () => {
       {/* Description Paragraph */}
       <div className="max-w-4xl mx-auto text-center">
         <p className="font-gintoNormal leading-relaxed" style={{ fontSize: '10px' }}>
-          We celebrate life's cherished moments, conscientiously. We craft premium engagement rings and fine jewellery exclusively with carbon 
-          neutral lab grown diamonds and moissanite. Headquartered in the heart of Melbourne, Australia, our legacy of superior craftsmanship 
-          lies in the hands of jewellers with generational experience. By pairing accessible elegance with a commitment to sustainability, every 
-          piece is more than a symbol — it's a promise of love, ethically made and family kept.
+          At Ardor, every piece begins with passion and ends with perfection. Our engagement rings and fine jewellery are thoughtfully crafted by experienced artisans using premium materials and refined techniques. Blending contemporary design with timeless beauty, we create jewellery that honours love, commitment, and the memories you'll cherish forever.
         </p>
       </div>
     </div>
